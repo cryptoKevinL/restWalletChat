@@ -35,18 +35,18 @@ func initaliseHandlers(router *mux.Router) {
 
 func initDB() {
 	config :=
-		// database.Config{
-		// 	User:       "doadmin",
-		// 	Password:   "AVNS_7q8_Jqll_0sA9Fi",
-		// 	ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
-		// 	DB:         "walletchat",
-		// }
 		database.Config{
-			ServerName: "localhost:3306",
-			User:       "root",
-			Password:   "",
+			User:       "doadmin",
+			Password:   "AVNS_7q8_Jqll_0sA9Fi",
+			ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
 			DB:         "walletchat",
 		}
+		// database.Config{
+		// 	ServerName: "localhost:3306",
+		// 	User:       "root",
+		// 	Password:   "",
+		// 	DB:         "walletchat",
+		// }
 
 	connectionString := database.GetConnectionString(config)
 	err := database.Connect(connectionString)
