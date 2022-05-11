@@ -13,11 +13,11 @@ import (
 
 func main() {
 	initDB()
-	log.Println("Starting the HTTP server on port 8090")
+	log.Println("Starting the HTTP server on port 8080")
 
 	router := mux.NewRouter().StrictSlash(true)
 	initaliseHandlers(router)
-	log.Fatal(http.ListenAndServe(":8090", router))
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 func initaliseHandlers(router *mux.Router) {
