@@ -21,20 +21,31 @@ func main() {
 }
 
 func initaliseHandlers(router *mux.Router) {
-	router.HandleFunc("/create", controllers.CreatePerson).Methods("POST")
-	router.HandleFunc("/get", controllers.GetAllPerson).Methods("GET")
-	router.HandleFunc("/get/{id}", controllers.GetPersonByID).Methods("GET")
-	router.HandleFunc("/update/{id}", controllers.UpdatePersonByID).Methods("PUT")
-	router.HandleFunc("/delete/{id}", controllers.DeletPersonByID).Methods("DELETE")
+	router.HandleFunc("/create_inbox", controllers.CreateInbox).Methods("POST")
+	router.HandleFunc("/get_inbox", controllers.GetAllInbox).Methods("GET")
+	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
+	router.HandleFunc("/update_inbox/{address}", controllers.UpdateInboxByOwner).Methods("PUT")
+	router.HandleFunc("/delete_inbox/{address}", controllers.DeleteInboxByOwner).Methods("DELETE")
+	router.HandleFunc("/create_chatitem", controllers.CreateChatItem).Methods("POST")
+	router.HandleFunc("/getall_chatitems", controllers.GetAllChatItems).Methods("GET")
+	router.HandleFunc("/getall_chatitems/{address}/{fromaddr}", controllers.GetChatFromAddressToOwner).Methods("GET")
+	router.HandleFunc("/update_chatitem/{toaddr}&{fromaddr}", controllers.UpdateChatItemByOwner).Methods("PUT")
+	router.HandleFunc("/deleteall_chatitems/{toaddr}&{fromaddr}", controllers.DeleteAllChatItemsToAddressByOwner).Methods("DELETE")
 }
 
 func initDB() {
 	config :=
+		// database.Config{
+		// 	User:       "doadmin",
+		// 	Password:   "AVNS_7q8_Jqll_0sA9Fi",
+		// 	ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
+		// 	DB:         "walletchat",
+		// }
 		database.Config{
-                        User: "doadmin",
-                        Password: "AVNS_7q8_Jqll_0sA9Fi",
-                        ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
-                        DB: "learning",
+			ServerName: "localhost:3306",
+			User:       "root",
+			Password:   "",
+			DB:         "walletchat",
 		}
 
 	connectionString := database.GetConnectionString(config)
@@ -42,5 +53,6 @@ func initDB() {
 	if err != nil {
 		panic(err.Error())
 	}
-	database.Migrate(&entity.Person{})
+	database.Migrate(&entity.Inbox{})
+	database.MigrateChatItem(&entity.ChatItem{})
 }
