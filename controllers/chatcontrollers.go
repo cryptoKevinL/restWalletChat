@@ -3,6 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"io/ioutil"
+
+	//"log"
 	"net/http"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
@@ -22,7 +24,7 @@ func GetAllInbox(w http.ResponseWriter, r *http.Request) {
 //GetInboxByID returns person with specific ID
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["address"]
+	key := vars["id"]
 
 	var userInbox entity.Inbox
 	database.Connector.First(&userInbox, key)
@@ -66,13 +68,14 @@ func DeleteInboxByOwner(w http.ResponseWriter, r *http.Request) {
 }
 
 //*********chat info*********************
-//GetAllChatItems get all chat data
-func GetAllChatItems(w http.ResponseWriter, r *http.Request) {
-	var chatItem []entity.ChatItem
-	database.Connector.Find(&chatItem)
+//GetAllChatitems get all chat data
+func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
+	//log.Println("get all chats")
+	var chat []entity.Chatitem
+	database.Connector.Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(chatItem)
+	json.NewEncoder(w).Encode(chat)
 }
 
 //GetChatFromAddressToOwner returns all chat items from user to owner
@@ -81,43 +84,45 @@ func GetChatFromAddressToOwner(w http.ResponseWriter, r *http.Request) {
 	to := vars["toaddr"]
 	owner := vars["fromaddr"]
 
-	var chatItem []entity.ChatItem
-	database.Connector.Where("toAddr = ?", to).Where("fromAddr = ?", owner).Find(&chatItem)
+	//log.Println("address to owner")
+
+	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", owner).Where("toaddr = ?", to).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chatItem)
+	json.NewEncoder(w).Encode(chat)
 }
 
-//CreateChatItem creates ChatItem
-func CreateChatItem(w http.ResponseWriter, r *http.Request) {
+//CreateChatitem creates Chatitem
+func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var chatItem entity.ChatItem
-	json.Unmarshal(requestBody, &chatItem)
+	var chat entity.Chatitem
+	json.Unmarshal(requestBody, &chat)
 
-	database.Connector.Create(chatItem)
+	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(chatItem)
+	json.NewEncoder(w).Encode(chat)
 }
 
 //UpdateInboxByOwner updates person with respective owner address
-func UpdateChatItemByOwner(w http.ResponseWriter, r *http.Request) {
+func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var chatItem entity.ChatItem
-	json.Unmarshal(requestBody, &chatItem)
-	database.Connector.Save(&chatItem)
+	var chat entity.Chatitem
+	json.Unmarshal(requestBody, &chat)
+	database.Connector.Save(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(chatItem)
+	json.NewEncoder(w).Encode(chat)
 }
 
-func DeleteAllChatItemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
+func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	to := vars["toAddr"]
 	owner := vars["fromAddr"]
 
-	var chatItem entity.ChatItem
+	var chat entity.Chatitem
 	//id, _ := strconv.ParseString(key, 10, 64)
-	database.Connector.Where("toAddr = ?", to).Where("fromAddr = ?", owner).Delete(&chatItem)
+	database.Connector.Where("toAddr = ?", to).Where("fromAddr = ?", owner).Delete(&chat)
 	w.WriteHeader(http.StatusNoContent)
 }

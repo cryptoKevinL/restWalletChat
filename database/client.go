@@ -26,7 +26,12 @@ func Migrate(table *entity.Inbox) {
 	Connector.AutoMigrate(&table)
 	log.Println("Inboxes migrated")
 }
-func MigrateChatItem(table *entity.ChatItem) {
+func MigrateChatitem(table *entity.Chatitem) {
 	Connector.AutoMigrate(&table)
-	log.Println("ChatItems migrated")
+	log.Println("Chatitems migrated")
 }
+
+// func SetPrimaryKeyReq(result bool) {
+// 	Connector.Raw("SET SESSION sql_require_primary_key = 0").Scan(&result)
+// 	log.Println("Chatitems migrated")
+// }

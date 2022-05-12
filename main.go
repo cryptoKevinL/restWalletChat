@@ -23,14 +23,14 @@ func main() {
 func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/create_inbox", controllers.CreateInbox).Methods("POST")
 	router.HandleFunc("/get_inbox", controllers.GetAllInbox).Methods("GET")
-	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
+	router.HandleFunc("/get_inbox/{id}", controllers.GetInboxByOwner).Methods("GET")
 	router.HandleFunc("/update_inbox/{address}", controllers.UpdateInboxByOwner).Methods("PUT")
 	router.HandleFunc("/delete_inbox/{address}", controllers.DeleteInboxByOwner).Methods("DELETE")
-	router.HandleFunc("/create_chatitem", controllers.CreateChatItem).Methods("POST")
-	router.HandleFunc("/getall_chatitems", controllers.GetAllChatItems).Methods("GET")
-	router.HandleFunc("/getall_chatitems/{address}/{fromaddr}", controllers.GetChatFromAddressToOwner).Methods("GET")
-	router.HandleFunc("/update_chatitem/{toaddr}&{fromaddr}", controllers.UpdateChatItemByOwner).Methods("PUT")
-	router.HandleFunc("/deleteall_chatitems/{toaddr}&{fromaddr}", controllers.DeleteAllChatItemsToAddressByOwner).Methods("DELETE")
+	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
+	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
+	router.HandleFunc("/getall_chatitems/{fromaddr}/{toaddr}", controllers.GetChatFromAddressToOwner).Methods("GET")
+	router.HandleFunc("/update_chatitem/{fromaddr}/{toaddr}", controllers.UpdateChatitemByOwner).Methods("PUT")
+	router.HandleFunc("/deleteall_chatitems/{fromaddr}/{toaddr}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
 }
 
 func initDB() {
@@ -42,9 +42,9 @@ func initDB() {
 			DB:         "walletchat",
 		}
 		// database.Config{
-		// 	ServerName: "localhost:3306",
 		// 	User:       "root",
 		// 	Password:   "",
+		// 	ServerName: "localhost:3306",
 		// 	DB:         "walletchat",
 		// }
 
@@ -54,5 +54,5 @@ func initDB() {
 		panic(err.Error())
 	}
 	database.Migrate(&entity.Inbox{})
-	database.MigrateChatItem(&entity.ChatItem{})
+	database.MigrateChatitem(&entity.Chatitem{})
 }
