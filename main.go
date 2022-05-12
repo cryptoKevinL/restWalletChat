@@ -23,7 +23,7 @@ func main() {
 func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/create_inbox", controllers.CreateInbox).Methods("POST")
 	router.HandleFunc("/get_inbox", controllers.GetAllInbox).Methods("GET")
-	router.HandleFunc("/get_inbox/{id}", controllers.GetInboxByOwner).Methods("GET")
+	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
 	router.HandleFunc("/update_inbox/{address}", controllers.UpdateInboxByOwner).Methods("PUT")
 	router.HandleFunc("/delete_inbox/{address}", controllers.DeleteInboxByOwner).Methods("DELETE")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
