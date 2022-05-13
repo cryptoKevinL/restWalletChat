@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	//"log"
+	"fmt"
+
 	"net/http"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -21,13 +23,82 @@ import (
 // 	json.NewEncoder(w).Encode(inbox)
 // }
 
-//GetInboxByID returns person with specific ID
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+//GetInboxByID returns the latest message for each unique conversation
+//TODO: properly design the relational DB structs to optimize this search/retrieve
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["id"]
+	key := vars["address"]
 
-	var userInbox entity.Chatitem
-	database.Connector.First(&userInbox, key)
+	//fmt.Printf("GetInboxByOwner: %#v\n", key)
+
+	//get all items that relate to passed in owner/address
+	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
+
+	//get unique conversation addresses
+	var uniqueChatMembers []string
+	for _, chatitem := range chat {
+		//fmt.Printf("search for unique addrs")
+		if chatitem.Fromaddr != key {
+			if !stringInSlice(chatitem.Fromaddr, uniqueChatMembers) {
+				//fmt.Printf("Unique Addr Found: %#v\n", chatitem.Fromaddr)
+				uniqueChatMembers = append(uniqueChatMembers, chatitem.Fromaddr)
+			}
+		}
+		if chatitem.Toaddr != key {
+			if !stringInSlice(chatitem.Toaddr, uniqueChatMembers) {
+				//fmt.Printf("Unique Addr Found: %#v\n", chatitem.Toaddr)
+				uniqueChatMembers = append(uniqueChatMembers, chatitem.Toaddr)
+			}
+		}
+	}
+
+	//fmt.Printf("find first message now")
+	//for each unique chat member that is not the owner addr, get the latest message
+	var firstItem entity.Chatitem
+	var secondItem entity.Chatitem
+	var userInbox []entity.Chatitem
+	for _, chatmember := range uniqueChatMembers {
+		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).First(&firstItem)
+		database.Connector.Where("fromaddr = ?", key).Where("toaddr = ?", chatmember).First(&secondItem)
+
+		//pick the most recent message
+		if firstItem.Fromaddr != "" {
+			if secondItem.Fromaddr == "" {
+				userInbox = append(userInbox, firstItem)
+			} else {
+				layout := "2006-01-02T15:04:05.000Z"
+				firstTime, error := time.Parse(layout, firstItem.Timestamp)
+				if error != nil {
+					fmt.Println(error)
+					return
+				}
+				secondTime, error := time.Parse(layout, secondItem.Timestamp)
+				if error != nil {
+					fmt.Println(error)
+					return
+				}
+
+				if firstTime.Before(secondTime) {
+					userInbox = append(userInbox, firstItem)
+				} else {
+					userInbox = append(userInbox, secondItem)
+				}
+			}
+		} else if secondItem.Fromaddr != "" {
+			userInbox = append(userInbox, secondItem)
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
 }
