@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
-	"fmt"
+	//"fmt"
 
 	"net/http"
 	"rest-go-demo/database"
@@ -64,12 +64,15 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Printf("find first message now")
 	//for each unique chat member that is not the owner addr, get the latest message
-	var firstItem entity.Chatitem
-	var secondItem entity.Chatitem
 	var userInbox []entity.Chatitem
 	for _, chatmember := range uniqueChatMembers {
-		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).First(&firstItem)
-		database.Connector.Where("fromaddr = ?", key).Where("toaddr = ?", chatmember).First(&secondItem)
+		var firstItem entity.Chatitem
+		var secondItem entity.Chatitem
+		//fmt.Printf("Unique Chat Addr Check for : %#v\n", chatmember)
+		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Last(&firstItem)
+		//fmt.Printf("FirstItem : %#v\n", firstItem)
+		database.Connector.Where("fromaddr = ?", key).Where("toaddr = ?", chatmember).Last(&secondItem)
+		//fmt.Printf("SecondItem : %#v\n", secondItem)
 
 		//pick the most recent message
 		if firstItem.Fromaddr != "" {
@@ -79,16 +82,16 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 				layout := "2006-01-02T15:04:05.000Z"
 				firstTime, error := time.Parse(layout, firstItem.Timestamp)
 				if error != nil {
-					fmt.Println(error)
+					//fmt.Println(error)
 					return
 				}
 				secondTime, error := time.Parse(layout, secondItem.Timestamp)
 				if error != nil {
-					fmt.Println(error)
+					//fmt.Println(error)
 					return
 				}
 
-				if firstTime.Before(secondTime) {
+				if firstTime.After(secondTime) {
 					userInbox = append(userInbox, firstItem)
 				} else {
 					userInbox = append(userInbox, secondItem)

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"rest-go-demo/controllers"
 	"rest-go-demo/database"
-	"rest-go-demo/entity"
 
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //Required for MySQL dialect
@@ -54,5 +53,5 @@ func initDB() {
 		panic(err.Error())
 	}
 	//database.Migrate(&entity.Inbox{})
-	database.MigrateChatitem(&entity.Chatitem{})
+	//database.MigrateChatitem(&entity.Chatitem{})
 }
