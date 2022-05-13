@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 
 	//"fmt"
@@ -68,11 +69,34 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	for _, chatmember := range uniqueChatMembers {
 		var firstItem entity.Chatitem
 		var secondItem entity.Chatitem
-		//fmt.Printf("Unique Chat Addr Check for : %#v\n", chatmember)
-		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Last(&firstItem)
-		//fmt.Printf("FirstItem : %#v\n", firstItem)
-		database.Connector.Where("fromaddr = ?", key).Where("toaddr = ?", chatmember).Last(&secondItem)
-		//fmt.Printf("SecondItem : %#v\n", secondItem)
+		var firstItems []entity.Chatitem
+		var secondItems []entity.Chatitem
+		fmt.Printf("Unique Chat Addr Check for : %#v\n", chatmember)
+		// rowsto, err := database.Connector.DB().Query("SELECT * FROM chatitems WHERE fromaddr = ? AND toaddr = ? ORDER BY id DESC", chatmember, key)
+		// if err != nil {
+		// 	fmt.Printf("error 1")
+		// }
+		// for rowsto.Next() {
+		// 	rowsto.Scan(&firstItem)
+		// }
+		// rowsfrom, err := database.Connector.DB().Query("SELECT * FROM chatitems WHERE fromaddr = ? AND toaddr = ? ORDER BY id DESC", key, chatmember)
+		// if err != nil {
+		// 	fmt.Printf("error 2")
+		// }
+		// for rowsfrom.Next() {
+		// 	rowsfrom.Scan(&secondItem)
+		// }
+
+		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Order("id desc").Find(&firstItems)
+		if len(firstItems) > 0 {
+			firstItem = firstItems[0]
+		}
+		fmt.Printf("FirstItem : %#v\n", firstItem)
+		database.Connector.Where("fromaddr = ?", key).Where("toaddr = ?", chatmember).Order("id desc").Find(&secondItems)
+		if len(secondItems) > 0 {
+			secondItem = secondItems[0]
+		}
+		fmt.Printf("SecondItem : %#v\n", secondItem)
 
 		//pick the most recent message
 		if firstItem.Fromaddr != "" {
