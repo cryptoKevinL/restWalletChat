@@ -21,16 +21,16 @@ func main() {
 }
 
 func initaliseHandlers(router *mux.Router) {
-	router.HandleFunc("/create_inbox", controllers.CreateInbox).Methods("POST")
-	router.HandleFunc("/get_inbox", controllers.GetAllInbox).Methods("GET")
+	//router.HandleFunc("/create_inbox", controllers.CreateInbox).Methods("POST")
+	//router.HandleFunc("/get_inbox", controllers.GetAllInbox).Methods("GET")
 	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
-	router.HandleFunc("/update_inbox/{address}", controllers.UpdateInboxByOwner).Methods("PUT")
-	router.HandleFunc("/delete_inbox/{address}", controllers.DeleteInboxByOwner).Methods("DELETE")
+	//router.HandleFunc("/update_inbox/{address}", controllers.UpdateInboxByOwner).Methods("PUT")
+	//router.HandleFunc("/delete_inbox/{address}", controllers.DeleteInboxByOwner).Methods("DELETE")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
 	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
-	router.HandleFunc("/getall_chatitems/{fromaddr}/{toaddr}", controllers.GetChatFromAddressToOwner).Methods("GET")
+	router.HandleFunc("/getall_chatitems/{address}", controllers.GetChatFromAddress).Methods("GET")
 	router.HandleFunc("/update_chatitem/{fromaddr}/{toaddr}", controllers.UpdateChatitemByOwner).Methods("PUT")
-	router.HandleFunc("/deleteall_chatitems/{fromaddr}/{toaddr}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
+	router.HandleFunc("/deleteall_chatitems/{fromaddr}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
 }
 
 func initDB() {
@@ -53,6 +53,6 @@ func initDB() {
 	if err != nil {
 		panic(err.Error())
 	}
-	database.Migrate(&entity.Inbox{})
+	//database.Migrate(&entity.Inbox{})
 	database.MigrateChatitem(&entity.Chatitem{})
 }
