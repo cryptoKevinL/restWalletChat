@@ -24,7 +24,7 @@ func GetAllInbox(w http.ResponseWriter, r *http.Request) {
 //GetInboxByID returns person with specific ID
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["address"]
+	key := vars["id"]
 
 	var userInbox entity.Inbox
 	database.Connector.First(&userInbox, key)
