@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"rest-go-demo/controllers"
 	"rest-go-demo/database"
+	"rest-go-demo/entity"
 
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //Required for MySQL dialect
@@ -20,38 +21,38 @@ func main() {
 }
 
 func initaliseHandlers(router *mux.Router) {
-	//router.HandleFunc("/create_inbox", controllers.CreateInbox).Methods("POST")
-	//router.HandleFunc("/get_inbox", controllers.GetAllInbox).Methods("GET")
 	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
-	//router.HandleFunc("/update_inbox/{address}", controllers.UpdateInboxByOwner).Methods("PUT")
-	//router.HandleFunc("/delete_inbox/{address}", controllers.DeleteInboxByOwner).Methods("DELETE")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
 	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{address}", controllers.GetChatFromAddress).Methods("GET")
 	router.HandleFunc("/update_chatitem/{fromaddr}/{toaddr}", controllers.UpdateChatitemByOwner).Methods("PUT")
-	router.HandleFunc("/deleteall_chatitems/{fromaddr}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
+	router.HandleFunc("/deleteall_chatitems/{address}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
+	router.HandleFunc("/create_settings", controllers.CreateSettings).Methods("POST")
+	router.HandleFunc("/update_settings", controllers.UpdateSettings).Methods("PUT")
+	router.HandleFunc("/get_settings/{address}", controllers.GetSettings).Methods("GET")
+	router.HandleFunc("/delete_settings/{address}", controllers.DeleteSettings).Methods("DELETE")
 }
 
 func initDB() {
 	config :=
-		database.Config{
-			User:       "doadmin",
-			Password:   "AVNS_7q8_Jqll_0sA9Fi",
-			ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
-			DB:         "walletchat",
-		}
 		// database.Config{
-		// 	User:       "root",
-		// 	Password:   "",
-		// 	ServerName: "localhost:3306",
+		// 	User:       "doadmin",
+		// 	Password:   "AVNS_7q8_Jqll_0sA9Fi",
+		// 	ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
 		// 	DB:         "walletchat",
 		// }
+		database.Config{
+			User:       "root",
+			Password:   "",
+			ServerName: "localhost:3306",
+			DB:         "walletchat",
+		}
 
 	connectionString := database.GetConnectionString(config)
 	err := database.Connect(connectionString)
 	if err != nil {
 		panic(err.Error())
 	}
-	//database.Migrate(&entity.Inbox{})
+	database.Migrate(&entity.Settings{})
 	//database.MigrateChatitem(&entity.Chatitem{})
 }

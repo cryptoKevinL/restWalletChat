@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
-	//"fmt"
-
 	"net/http"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
@@ -130,41 +127,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userInbox)
 }
 
-//CreateInbox creates inbox
-// func CreateInbox(w http.ResponseWriter, r *http.Request) {
-// 	requestBody, _ := ioutil.ReadAll(r.Body)
-// 	var inbox entity.Chatitem
-// 	json.Unmarshal(requestBody, &inbox)
-
-// 	database.Connector.Create(inbox)
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusCreated)
-// 	json.NewEncoder(w).Encode(inbox)
-// }
-
-//UpdateInboxByOwner updates inbox with respective owner address
-// func UpdateInboxByOwner(w http.ResponseWriter, r *http.Request) {
-// 	requestBody, _ := ioutil.ReadAll(r.Body)
-// 	var inbox entity.Chatitem
-// 	json.Unmarshal(requestBody, &inbox)
-// 	database.Connector.Save(&inbox)
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusOK)
-// 	json.NewEncoder(w).Encode(inbox)
-// }
-
-//DeletePersonByID delete's person with specific ID
-// func DeleteInboxByOwner(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	key := vars["address"]
-
-// 	var inbox entity.Inbox
-// 	//id, _ := strconv.ParseString(key, 10, 64)
-// 	database.Connector.Where("address = ?", key).Delete(&inbox)
-// 	w.WriteHeader(http.StatusNoContent)
-// }
-
 //*********chat info*********************
 //GetAllChatitems get all chat data
 func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
@@ -203,9 +165,20 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
-	//database.Connector.Where("fromaddr = ?", owner).Where("toaddr = ?", to).Find(&chat)
+
 	json.Unmarshal(requestBody, &chat)
-	database.Connector.Save(&chat)
+
+	//for now only support updating the message and read status
+	database.Connector.Model(&entity.Chatitem{}).
+		Where("fromaddr = ?", chat.Fromaddr).
+		Where("toaddr = ?", chat.Toaddr).
+		Where("timestamp = ?", chat.Timestamp).
+		Update("message", chat.Message)
+	database.Connector.Model(&entity.Chatitem{}).
+		Where("fromaddr = ?", chat.Fromaddr).
+		Where("toaddr = ?", chat.Toaddr).
+		Where("timestamp = ?", chat.Timestamp).
+		Update("unread", chat.Unread)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -218,7 +191,50 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 	owner := vars["fromAddr"]
 
 	var chat entity.Chatitem
-	//id, _ := strconv.ParseString(key, 10, 64)
+
 	database.Connector.Where("toAddr = ?", to).Where("fromAddr = ?", owner).Delete(&chat)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func CreateSettings(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var settings entity.Settings
+	json.Unmarshal(requestBody, &settings)
+
+	database.Connector.Create(settings)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(settings)
+}
+
+func UpdateSettings(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var settings entity.Settings
+
+	json.Unmarshal(requestBody, &settings)
+	database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("publickey", settings.Publickey)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(settings)
+}
+
+func DeleteSettings(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var settings entity.Settings
+
+	database.Connector.Where("walletaddr = ?", key).Delete(&settings)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func GetSettings(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var settings []entity.Settings
+	database.Connector.Where("walletaddr = ?", key).Find(&settings)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(settings)
 }

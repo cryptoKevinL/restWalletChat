@@ -22,9 +22,9 @@ func Connect(connectionString string) error {
 }
 
 //Migrate create/updates database table
-func Migrate(table *entity.Inbox) {
+func Migrate(table *entity.Settings) {
 	Connector.AutoMigrate(&table)
-	log.Println("Inboxes migrated")
+	log.Println("Settings migrated")
 }
 func MigrateChatitem(table *entity.Chatitem) {
 	Connector.AutoMigrate(&table)
