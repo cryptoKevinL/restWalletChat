@@ -130,12 +130,38 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 //*********chat info*********************
 //GetAllChatitems get all chat data
 func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
-	//log.Println("get all chats")
 	var chat []entity.Chatitem
 	database.Connector.Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(chat)
+}
+
+//Get all unread messages TO a specific user, used for total count notification at top notification bar
+func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("toaddr = ?", key).Where("msgread != ?", "true").Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(len(chat))
+}
+
+//unread count per conversation
+func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	to := vars["toaddr"]
+	owner := vars["fromaddr"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Where("msgread != ?", "true").Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(len(chat))
 }
 
 //GetChatFromAddressToOwner returns all chat items from user to owner
@@ -187,12 +213,12 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 
 func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	to := vars["toAddr"]
-	owner := vars["fromAddr"]
+	to := vars["toaddr"]
+	owner := vars["fromaddr"]
 
 	var chat entity.Chatitem
 
-	database.Connector.Where("toAddr = ?", to).Where("fromAddr = ?", owner).Delete(&chat)
+	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Delete(&chat)
 	w.WriteHeader(http.StatusNoContent)
 }
 
