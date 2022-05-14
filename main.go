@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"rest-go-demo/controllers"
 	"rest-go-demo/database"
-	"rest-go-demo/entity"
 
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //Required for MySQL dialect
@@ -35,24 +34,24 @@ func initaliseHandlers(router *mux.Router) {
 
 func initDB() {
 	config :=
-		// database.Config{
-		// 	User:       "doadmin",
-		// 	Password:   "AVNS_7q8_Jqll_0sA9Fi",
-		// 	ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
-		// 	DB:         "walletchat",
-		// }
 		database.Config{
-			User:       "root",
-			Password:   "",
-			ServerName: "localhost:3306",
+			User:       "doadmin",
+			Password:   "AVNS_7q8_Jqll_0sA9Fi",
+			ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
 			DB:         "walletchat",
 		}
+		// database.Config{
+		// 	User:       "root",
+		// 	Password:   "",
+		// 	ServerName: "localhost:3306",
+		// 	DB:         "walletchat",
+		// }
 
 	connectionString := database.GetConnectionString(config)
 	err := database.Connect(connectionString)
 	if err != nil {
 		panic(err.Error())
 	}
-	database.Migrate(&entity.Settings{})
+	//database.Migrate(&entity.Settings{})
 	//database.MigrateChatitem(&entity.Chatitem{})
 }
