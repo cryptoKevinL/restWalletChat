@@ -4,7 +4,7 @@ type Chatitem struct {
 	Fromaddr  string `json:"fromaddr"`
 	Toaddr    string `json:"toaddr"`
 	Timestamp string `json:"timestamp"`
-	Msgread   string `json:"msgread"`
+	Msgread   string `json:"read"`
 	Message   string `json:"message"`
 }
 
