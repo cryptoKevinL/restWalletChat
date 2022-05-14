@@ -4,7 +4,7 @@ type Chatitem struct {
 	Fromaddr  string `json:"fromaddr"`
 	Toaddr    string `json:"toaddr"`
 	Timestamp string `json:"timestamp"`
-	Unread    string `json:"unread"`
+	Msgread   string `json:"msgread"`
 	Message   string `json:"message"`
 }
 
@@ -13,6 +13,6 @@ type Chatitem struct {
 // 	Fromaddr  string `json:"fromaddr"`
 // 	Toaddr    string `json:"toaddr"`
 // 	Timestamp string `json:"timestamp"`
-// 	Unread    string `json:"unread"`
+// 	Read    string `json:"read"`
 // 	Message   string `json:"message"`
 // }

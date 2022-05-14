@@ -178,7 +178,7 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 		Where("fromaddr = ?", chat.Fromaddr).
 		Where("toaddr = ?", chat.Toaddr).
 		Where("timestamp = ?", chat.Timestamp).
-		Update("unread", chat.Unread)
+		Update("unread", chat.Msgread)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
