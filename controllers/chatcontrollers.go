@@ -214,12 +214,13 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(requestBody, &chat)
 
-	//for now only support updating the message and read status
-	database.Connector.Model(&entity.Chatitem{}).
-		Where("fromaddr = ?", chat.Fromaddr).
-		Where("toaddr = ?", chat.Toaddr).
-		Where("timestamp = ?", chat.Timestamp).
-		Update("message", chat.Message)
+	//for now only support updating the read status
+	//we would need to re-encrypt the data on message update (not hard just need to add it)
+	// database.Connector.Model(&entity.Chatitem{}).
+	// 	Where("fromaddr = ?", chat.Fromaddr).
+	// 	Where("toaddr = ?", chat.Toaddr).
+	// 	Where("timestamp = ?", chat.Timestamp).
+	// 	Update("message", chat.Message)
 	database.Connector.Model(&entity.Chatitem{}).
 		Where("fromaddr = ?", chat.Fromaddr).
 		Where("toaddr = ?", chat.Toaddr).
