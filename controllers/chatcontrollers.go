@@ -108,11 +108,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		firstItemWCount.Message = firstItem.Message
 		firstItemWCount.Unreadcnt = len(chatCount)
 		var secondItemWCount entity.Chatiteminbox
-		secondItemWCount.Fromaddr = firstItem.Fromaddr
-		secondItemWCount.Toaddr = firstItem.Toaddr
-		secondItemWCount.Timestamp = firstItem.Timestamp
-		secondItemWCount.Msgread = firstItem.Msgread
-		secondItemWCount.Message = firstItem.Message
+		secondItemWCount.Fromaddr = secondItem.Fromaddr
+		secondItemWCount.Toaddr = secondItem.Toaddr
+		secondItemWCount.Timestamp = secondItem.Timestamp
+		secondItemWCount.Msgread = secondItem.Msgread
+		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
 
 		//pick the most recent message
