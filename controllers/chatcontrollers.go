@@ -34,7 +34,7 @@ func stringInSlice(a string, list []string) bool {
 //TODO: properly design the relational DB structs to optimize this search/retrieve
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["address"]
+	key := vars["address"] //owner of the inbox
 
 	//fmt.Printf("GetInboxByOwner: %#v\n", key)
 
@@ -62,7 +62,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Printf("find first message now")
 	//for each unique chat member that is not the owner addr, get the latest message
-	var userInbox []entity.Chatitem
+	var userInbox []entity.Chatiteminbox
 	for _, chatmember := range uniqueChatMembers {
 		var firstItem entity.Chatitem
 		var secondItem entity.Chatitem
@@ -88,17 +88,37 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		if len(firstItems) > 0 {
 			firstItem = firstItems[0]
 		}
-		fmt.Printf("FirstItem : %#v\n", firstItem)
+		//fmt.Printf("FirstItem : %#v\n", firstItem)
 		database.Connector.Where("fromaddr = ?", key).Where("toaddr = ?", chatmember).Order("id desc").Find(&secondItems)
 		if len(secondItems) > 0 {
 			secondItem = secondItems[0]
 		}
-		fmt.Printf("SecondItem : %#v\n", secondItem)
+		//fmt.Printf("SecondItem : %#v\n", secondItem)
+
+		//add Unread msg count to both first/second items since we don't know which one is newer yet
+		var chatCount []entity.Chatitem
+		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chatCount)
+
+		//probably a more effecient way, but
+		var firstItemWCount entity.Chatiteminbox
+		firstItemWCount.Fromaddr = firstItem.Fromaddr
+		firstItemWCount.Toaddr = firstItem.Toaddr
+		firstItemWCount.Timestamp = firstItem.Timestamp
+		firstItemWCount.Msgread = firstItem.Msgread
+		firstItemWCount.Message = firstItem.Message
+		firstItemWCount.Unreadcnt = len(chatCount)
+		var secondItemWCount entity.Chatiteminbox
+		secondItemWCount.Fromaddr = firstItem.Fromaddr
+		secondItemWCount.Toaddr = firstItem.Toaddr
+		secondItemWCount.Timestamp = firstItem.Timestamp
+		secondItemWCount.Msgread = firstItem.Msgread
+		secondItemWCount.Message = firstItem.Message
+		secondItemWCount.Unreadcnt = len(chatCount)
 
 		//pick the most recent message
 		if firstItem.Fromaddr != "" {
 			if secondItem.Fromaddr == "" {
-				userInbox = append(userInbox, firstItem)
+				userInbox = append(userInbox, firstItemWCount)
 			} else {
 				layout := "2006-01-02T15:04:05.000Z"
 				firstTime, error := time.Parse(layout, firstItem.Timestamp)
@@ -113,13 +133,13 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if firstTime.After(secondTime) {
-					userInbox = append(userInbox, firstItem)
+					userInbox = append(userInbox, firstItemWCount)
 				} else {
-					userInbox = append(userInbox, secondItem)
+					userInbox = append(userInbox, secondItemWCount)
 				}
 			}
 		} else if secondItem.Fromaddr != "" {
-			userInbox = append(userInbox, secondItem)
+			userInbox = append(userInbox, secondItemWCount)
 		}
 	}
 
@@ -204,7 +224,7 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 		Where("fromaddr = ?", chat.Fromaddr).
 		Where("toaddr = ?", chat.Toaddr).
 		Where("timestamp = ?", chat.Timestamp).
-		Update("unread", chat.Msgread)
+		Update("msgread", chat.Msgread)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
