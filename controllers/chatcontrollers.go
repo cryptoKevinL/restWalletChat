@@ -143,7 +143,7 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("toaddr = ?", key).Where("msgread != ?", "true").Find(&chat)
+	database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
@@ -157,7 +157,7 @@ func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	owner := vars["fromaddr"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Where("msgread != ?", "true").Find(&chat)
+	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Where("msgread != ?", true).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
