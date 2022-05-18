@@ -285,3 +285,57 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(settings)
 }
+
+func CreateComments(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var comment entity.Comments
+	json.Unmarshal(requestBody, &comment)
+
+	database.Connector.Create(comment)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(comment)
+}
+
+// func UpdateComments(w http.ResponseWriter, r *http.Request) {
+// 	requestBody, _ := ioutil.ReadAll(r.Body)
+// 	var comment entity.Comment
+
+// 	json.Unmarshal(requestBody, &comment)
+// 	database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("publickey", settings.Publickey)
+
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusOK)
+// 	json.NewEncoder(w).Encode(comment)
+// }
+
+func DeleteComments(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	fromaddr := vars["address"]
+	nftaddr := vars["nftaddr"]
+	nftid := vars["nftid"]
+
+	var comment entity.Comments
+
+	database.Connector.Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Where("nftid = ?", nftid).Delete(&comment)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func GetComments(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["nftid"]
+	addr := vars["nftaddr"]
+
+	var comment []entity.Comments
+	database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&comment)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(comment)
+}
+
+func GetAllComments(w http.ResponseWriter, r *http.Request) {
+	var comment []entity.Comments
+	database.Connector.Find(&comment)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(comment)
+}

@@ -32,6 +32,10 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/update_settings", controllers.UpdateSettings).Methods("PUT")
 	router.HandleFunc("/get_settings/{address}", controllers.GetSettings).Methods("GET")
 	router.HandleFunc("/delete_settings/{address}", controllers.DeleteSettings).Methods("DELETE")
+	router.HandleFunc("/create_comments", controllers.CreateComments).Methods("POST")
+	router.HandleFunc("/get_comments", controllers.GetAllComments).Methods("GET")
+	router.HandleFunc("/get_comments/{nftaddr}/{nftid}", controllers.GetComments).Methods("GET")
+	router.HandleFunc("/delete_comments/{fromaddr}/{nftaddr}/{nftid}", controllers.DeleteComments).Methods("DELETE")
 }
 
 func initDB() {
@@ -54,6 +58,7 @@ func initDB() {
 	if err != nil {
 		panic(err.Error())
 	}
-	//database.Migrate(&entity.Settings{})
-	//database.MigrateChatitem(&entity.Chatitem{})
+	// database.Migrate(&entity.Settings{})
+	//database.MigrateComments(&entity.Comments{})
+	// database.MigrateChatitem(&entity.Chatitem{})
 }

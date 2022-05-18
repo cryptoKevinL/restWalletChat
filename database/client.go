@@ -26,6 +26,10 @@ func Migrate(table *entity.Settings) {
 	Connector.AutoMigrate(&table)
 	log.Println("Settings migrated")
 }
+func MigrateComments(table *entity.Comments) {
+	Connector.AutoMigrate(&table)
+	log.Println("Settings migrated")
+}
 func MigrateChatitem(table *entity.Chatitem) {
 	Connector.AutoMigrate(&table)
 	log.Println("Chatitems migrated")
