@@ -205,6 +205,16 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
 //CreateChatitem creates Chatitem
 func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
