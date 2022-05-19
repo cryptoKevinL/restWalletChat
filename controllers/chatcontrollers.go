@@ -189,7 +189,7 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
+	database.Connector.Where("nftid = ?", 0).Where("fromaddr = ?", key).Or("toaddr = ?", key).Where("nftid = ?", 0).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -210,7 +210,7 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
+	database.Connector.Where("nftid != ?", 0).Where("fromaddr = ?", key).Or("toaddr = ?", key).Where("nftid != ?", 0).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
