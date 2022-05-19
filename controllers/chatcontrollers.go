@@ -189,7 +189,7 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("nftid = ?", 0).Where("fromaddr = ?", key).Or("toaddr = ?", key).Where("nftid = ?", 0).Find(&chat)
+	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -208,9 +208,12 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
+	addr := vars["nftaddr"]
+	id := vars["nftid"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("nftid != ?", 0).Where("fromaddr = ?", key).Or("toaddr = ?", key).Where("nftid != ?", 0).Find(&chat)
+	database.Connector.Where(database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Where("fromaddr = ?", key)).
+		Or(database.Connector.Where("toaddr = ?", key).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat))
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
