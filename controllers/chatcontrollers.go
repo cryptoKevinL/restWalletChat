@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"rest-go-demo/database"
@@ -68,7 +67,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		var secondItem entity.Chatitem
 		var firstItems []entity.Chatitem
 		var secondItems []entity.Chatitem
-		fmt.Printf("Unique Chat Addr Check for : %#v\n", chatmember)
+		//fmt.Printf("Unique Chat Addr Check for : %#v\n", chatmember)
 		// rowsto, err := database.Connector.DB().Query("SELECT * FROM chatitems WHERE fromaddr = ? AND toaddr = ? ORDER BY id DESC", chatmember, key)
 		// if err != nil {
 		// 	fmt.Printf("error 1")
@@ -191,6 +190,17 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
+func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nftaddr := vars["nftaddr"]
+	nftid := vars["nftid"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("nftaddr = ?", nftaddr).Where("nftid = ?", nftid).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
