@@ -211,9 +211,10 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	addr := vars["nftaddr"]
 	id := vars["nftid"]
 
+	//fmt.Printf("params called: %#v, %#v, %#v \n", key, addr, id)
+
 	var chat []entity.Chatitem
-	database.Connector.Where(database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Where("fromaddr = ?", key)).
-		Or(database.Connector.Where("toaddr = ?", key).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat))
+	database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
