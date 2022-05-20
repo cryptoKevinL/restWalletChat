@@ -239,8 +239,9 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 			returnChat = append(returnChat, chatmember)
 			lastTime = currTime
 		} else {
-			for i, retmember := range returnChat {
-				ret_time, error := time.Parse(layout, retmember.Timestamp)
+			//for i, retmember := range returnChat {
+			for i := len(returnChat) - 1; i >= 0; i-- {
+				ret_time, error := time.Parse(layout, returnChat[i].Timestamp)
 				if error != nil {
 					return
 				}
