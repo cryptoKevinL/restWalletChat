@@ -220,37 +220,37 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	var chat2 []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
 
-	chat = append(chat, chat2...)
+	//chat = append(chat, chat2...)
 
 	//this is aweful but these other commented out ways just are not working
-	var returnChat []entity.Chatitem
+	//var returnChat []entity.Chatitem
 	layout := "2006-01-02T15:04:05.000Z"
-	last := "1971-01-02T15:04:05.000Z"
-	lastTime, error := time.Parse(layout, last)
-	if error != nil {
-		return
-	}
-	for _, chatmember := range chat {
+	//last := "1971-01-02T15:04:05.000Z"
+	// lastTime, error := time.Parse(layout, last)
+	// if error != nil {
+	// 	return
+	// }
+	for _, chatmember := range chat2 {
 		currTime, error := time.Parse(layout, chatmember.Timestamp)
 		if error != nil {
 			return
 		}
-		if currTime.After(lastTime) {
-			returnChat = append(returnChat, chatmember)
-			lastTime = currTime
-		} else {
-			//for i, retmember := range returnChat {
-			for i := len(returnChat) - 1; i >= 0; i-- {
-				ret_time, error := time.Parse(layout, returnChat[i].Timestamp)
-				if error != nil {
-					return
-				}
-				if currTime.After(ret_time) {
-					returnChat = append(returnChat[:i+1], returnChat[i:]...)
-					returnChat[i] = chatmember
-					break
-				}
+		found := false
+		//both lists are already sorted, so we can use the assumption here
+		for i := 0; i < len(chat); i++ {
+			ret_time, error := time.Parse(layout, chat[i].Timestamp)
+			if error != nil {
+				return
 			}
+			if currTime.Before(ret_time) {
+				chat = append(chat[:i+1], chat[i:]...)
+				chat[i] = chatmember
+				found = true
+				break
+			}
+		}
+		if !found {
+			chat = append(chat, chatmember)
 		}
 	}
 
@@ -268,7 +268,7 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	// ).Find(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(returnChat)
+	json.NewEncoder(w).Encode(chat)
 }
 
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
