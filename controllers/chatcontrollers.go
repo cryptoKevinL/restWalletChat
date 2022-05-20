@@ -214,16 +214,14 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	from := vars["fromaddr"]
 	to := vars["toaddr"]
 
-	var chat1 []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat1)
+	var chat []entity.Chatitem
+	//database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
 
-	var chat2 []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
-
-	chat1 = append(chat1, chat2...)
+	//this is bad, shouldn't have to do this but the complex query is not working for me
+	database.Connector.Raw("select * from chatitems where (fromaddr = @from, AND toaddr = @to) OR (fromaddr = @to AND toaddr = @from", map[string]interface{}{"from": from, "to": to}).Find(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chat1)
+	json.NewEncoder(w).Encode(chat)
 }
 
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
