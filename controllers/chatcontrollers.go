@@ -214,10 +214,16 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	from := vars["fromaddr"]
 	to := vars["toaddr"]
 
-	var chat []entity.Chatitem
-	database.Connector.Where(database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to)).Or(database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from)).Find(&chat)
+	var chat1 []entity.Chatitem
+	database.Connector.Where(database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to)).Find(&chat1)
+
+	var chat2 []entity.Chatitem
+	database.Connector.Where(database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from)).Find(&chat2)
+
+	chat1 = append(chat1, chat2...)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chat)
+	json.NewEncoder(w).Encode(chat1)
 }
 
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
