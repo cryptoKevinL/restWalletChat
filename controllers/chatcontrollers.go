@@ -215,10 +215,10 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	to := vars["toaddr"]
 
 	var chat1 []entity.Chatitem
-	database.Connector.Where(database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to)).Find(&chat1)
+	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat1)
 
 	var chat2 []entity.Chatitem
-	database.Connector.Where(database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from)).Find(&chat2)
+	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
 
 	chat1 = append(chat1, chat2...)
 
