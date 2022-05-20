@@ -211,25 +211,54 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 //return both directions of this chat
 func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fromaddr := vars["fromaddr"]
-	toaddr := vars["toaddr"]
+	from := vars["fromaddr"]
+	to := vars["toaddr"]
 
 	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
 	// database.Connector.Where(
 	// 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to),
 	// ).Or(
 	// 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from),
 	// ).Find(&chat)
 
-	type NamedArgument struct {
-		To   string
-		From string
+	var chat2 []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
+
+	chat = append(chat, chat2...)
+
+	//this is aweful but these other commented out ways just are not working
+	var returnChat []entity.Chatitem
+	layout := "2006-01-02T15:04:05.000Z"
+	last := "1971-01-02T15:04:05.000Z"
+	lastTime, error := time.Parse(layout, last)
+	if error != nil {
+		//fmt.Println(error)
+		return
 	}
+	for _, chatmember := range chat {
+		currTime, error := time.Parse(layout, chatmember.Timestamp)
+		if error != nil {
+			//fmt.Println(error)
+			return
+		}
+		if currTime.After(lastTime) {
+			returnChat = append(returnChat, chatmember)
+		} else {
+			returnChat = append(returnChat[:1], returnChat[0:]...)
+			returnChat[0] = chatmember
+		}
+	}
+
+	// type NamedArgument struct {
+	// 	To   string
+	// 	From string
+	// }
 	//this is bad, shouldn't have to do this but the above complex query is not working for me
-	database.Connector.Raw("select * from chatitems where (fromaddr = @from, AND toaddr = @to) OR (fromaddr = @to AND toaddr = @from)", NamedArgument{To: toaddr, From: fromaddr}).Find(&chat)
+	//database.Connector.Raw("select * from chatitems where (fromaddr = @from, AND toaddr = @to) OR (fromaddr = @to AND toaddr = @from)", NamedArgument{To: toaddr, From: fromaddr}).Find(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chat)
+	json.NewEncoder(w).Encode(returnChat)
 }
 
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
