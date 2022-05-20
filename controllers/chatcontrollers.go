@@ -225,9 +225,8 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 		To   string
 		From string
 	}
-
 	//this is bad, shouldn't have to do this but the above complex query is not working for me
-	database.Connector.Raw("select * from chatitems where (fromaddr = @from, AND toaddr = @to) OR (fromaddr = @to AND toaddr = @from", NamedArgument{To: toaddr, From: fromaddr}).Find(&chat)
+	database.Connector.Raw("select * from chatitems where (fromaddr = @from, AND toaddr = @to) OR (fromaddr = @to AND toaddr = @from)", NamedArgument{To: toaddr, From: fromaddr}).Find(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
