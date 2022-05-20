@@ -239,14 +239,14 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 			returnChat = append(returnChat, chatmember)
 			lastTime = currTime
 		} else {
-			for _, retmember := range returnChat {
+			for i, retmember := range returnChat {
 				ret_time, error := time.Parse(layout, retmember.Timestamp)
 				if error != nil {
 					return
 				}
 				if currTime.After(ret_time) {
-					returnChat = append(returnChat[:1], returnChat[0:]...)
-					returnChat[0] = chatmember
+					returnChat = append(returnChat[:i+1], returnChat[0:]...)
+					returnChat[i] = chatmember
 					break
 				}
 			}
