@@ -169,6 +169,20 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(chat))
 }
 
+func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+	addr := vars["nftaddr"]
+	id := vars["nftid"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("toaddr = ?", key).Where("nftaddr = ?", addr).Where("nftid = ?", id).Where("msgread = ?", false).Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(len(chat))
+}
+
 //unread count per conversation
 func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

@@ -25,6 +25,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{fromaddr}/{toaddr}", controllers.GetUnreadMsgCnt).Methods("GET")
+	router.HandleFunc("/get_unread_cnt/{address}/{nftaddr}/{nftid}", controllers.GetUnreadMsgCntNft).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{address}", controllers.GetChatFromAddress).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{address}/{nftaddr}/{nftid}", controllers.GetChatNftAllItemsFromAddr).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{nftaddr}/{nftid}", controllers.GetChatNftContext).Methods("GET")
