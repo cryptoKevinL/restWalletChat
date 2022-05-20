@@ -245,7 +245,7 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				if currTime.After(ret_time) {
-					returnChat = append(returnChat[:i+1], returnChat[0:]...)
+					returnChat = append(returnChat[:i+1], returnChat[i:]...)
 					returnChat[i] = chatmember
 					break
 				}
