@@ -208,13 +208,14 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+//return both directions of this chat
 func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
 	to := vars["toaddr"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
+	database.Connector.Where(database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to)).Or(database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from)).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
