@@ -216,11 +216,6 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
-	// database.Connector.Where(
-	// 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to),
-	// ).Or(
-	// 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from),
-	// ).Find(&chat)
 
 	var chat2 []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
@@ -233,21 +228,28 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	last := "1971-01-02T15:04:05.000Z"
 	lastTime, error := time.Parse(layout, last)
 	if error != nil {
-		//fmt.Println(error)
 		return
 	}
 	for _, chatmember := range chat {
 		currTime, error := time.Parse(layout, chatmember.Timestamp)
 		if error != nil {
-			//fmt.Println(error)
 			return
 		}
 		if currTime.After(lastTime) {
 			returnChat = append(returnChat, chatmember)
 			lastTime = currTime
 		} else {
-			returnChat = append(returnChat[:1], returnChat[0:]...)
-			returnChat[0] = chatmember
+			for _, retmember := range returnChat {
+				ret_time, error := time.Parse(layout, retmember.Timestamp)
+				if error != nil {
+					return
+				}
+				if currTime.After(ret_time) {
+					returnChat = append(returnChat[:1], returnChat[0:]...)
+					returnChat[0] = chatmember
+					break
+				}
+			}
 		}
 	}
 
@@ -257,6 +259,12 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	// }
 	//this is bad, shouldn't have to do this but the above complex query is not working for me
 	//database.Connector.Raw("select * from chatitems where (fromaddr = @from, AND toaddr = @to) OR (fromaddr = @to AND toaddr = @from)", NamedArgument{To: toaddr, From: fromaddr}).Find(&chat)
+
+	// database.Connector.Where(
+	// 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to),
+	// ).Or(
+	// 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from),
+	// ).Find(&chat)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(returnChat)
