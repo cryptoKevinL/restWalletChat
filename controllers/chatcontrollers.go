@@ -208,6 +208,17 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	from := vars["fromaddr"]
+	to := vars["toaddr"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["nftaddr"]
