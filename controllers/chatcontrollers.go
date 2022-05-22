@@ -284,14 +284,49 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 
 func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["address"]
+	from := vars["fromaddr"]
+	to := vars["toaddr"]
 	addr := vars["nftaddr"]
 	id := vars["nftid"]
 
-	//fmt.Printf("params called: %#v, %#v, %#v \n", key, addr, id)
-
 	var chat []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
+	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
+
+	var chat2 []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
+
+	//this is aweful but the complex OR query is just not working in this golang implementation
+	//var returnChat []entity.Chatitem
+	layout := "2006-01-02T15:04:05.000Z"
+	//last := "1971-01-02T15:04:05.000Z"
+	// lastTime, error := time.Parse(layout, last)
+	// if error != nil {
+	// 	return
+	// }
+	for _, chatmember := range chat2 {
+		currTime, error := time.Parse(layout, chatmember.Timestamp)
+		if error != nil {
+			return
+		}
+		found := false
+		//both lists are already sorted, so we can use the assumption here
+		for i := 0; i < len(chat); i++ {
+			ret_time, error := time.Parse(layout, chat[i].Timestamp)
+			if error != nil {
+				return
+			}
+			if currTime.Before(ret_time) {
+				chat = append(chat[:i+1], chat[i:]...)
+				chat[i] = chatmember
+				found = true
+				break
+			}
+		}
+		if !found {
+			chat = append(chat, chatmember)
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
