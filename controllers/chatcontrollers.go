@@ -293,7 +293,7 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
 
 	var chat2 []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
+	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat2)
 
 	//this is aweful but the complex OR query is just not working in this golang implementation
 	//var returnChat []entity.Chatitem
