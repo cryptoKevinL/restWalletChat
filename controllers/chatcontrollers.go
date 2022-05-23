@@ -183,6 +183,18 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(chat))
 }
 
+func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Where("msgread = ?", false).Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(len(chat))
+}
+
 //unread count per conversation
 func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -282,7 +294,7 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
+func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
 	to := vars["toaddr"]
@@ -294,6 +306,54 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 
 	var chat2 []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat2)
+
+	//this is aweful but the complex OR query is just not working in this golang implementation
+	//var returnChat []entity.Chatitem
+	layout := "2006-01-02T15:04:05.000Z"
+	//last := "1971-01-02T15:04:05.000Z"
+	// lastTime, error := time.Parse(layout, last)
+	// if error != nil {
+	// 	return
+	// }
+	for _, chatmember := range chat2 {
+		currTime, error := time.Parse(layout, chatmember.Timestamp)
+		if error != nil {
+			return
+		}
+		found := false
+		//both lists are already sorted, so we can use the assumption here
+		for i := 0; i < len(chat); i++ {
+			ret_time, error := time.Parse(layout, chat[i].Timestamp)
+			if error != nil {
+				return
+			}
+			if currTime.Before(ret_time) {
+				chat = append(chat[:i+1], chat[i:]...)
+				chat[i] = chatmember
+				found = true
+				break
+			}
+		}
+		if !found {
+			chat = append(chat, chatmember)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
+func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	walletaddr := vars["address"]
+	addr := vars["nftaddr"]
+	id := vars["nftid"]
+
+	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", walletaddr).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
+
+	var chat2 []entity.Chatitem
+	database.Connector.Where("toaddr = ?", walletaddr).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat2)
 
 	//this is aweful but the complex OR query is just not working in this golang implementation
 	//var returnChat []entity.Chatitem
