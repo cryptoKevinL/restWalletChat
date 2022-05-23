@@ -188,7 +188,7 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("toaddr = ?", key).Where("nftaddr = ?", nil).Where("msgread = ?", false).Find(&chat)
+	database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Where("msgread = ?", false).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
