@@ -5,6 +5,7 @@ type Chatitem struct {
 	Toaddr    string `json:"toaddr"`
 	Timestamp string `json:"timestamp"`
 	Msgread   bool   `json:"read"`
+	Mmkeyused bool   `json:"mmkeyused"`
 	Message   string `json:"message"`
 	Nftaddr   string `json:"nftaddr"`
 	Nftid     int    `json:"nftid"`
