@@ -188,11 +188,60 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 
 	var chat []entity.Chatitem
-	database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Where("msgread = ?", false).Find(&chat)
+	database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Find(&chat)
+
+	//first we need to find unique senders (has to be a better way to use SQL db for this)
+	var senderlist []string
+	for i := 0; i < len(chat); i++ {
+		if !stringInSlice(chat[i].Fromaddr, senderlist) {
+			senderlist = append(senderlist, chat[i].Fromaddr)
+		}
+	}
+
+	//now for each sender we need get unique nft contract addresses
+	var nftretval []entity.Nftsidebar
+
+	for i := 0; i < len(senderlist); i++ {
+		var senderAddr = senderlist[i]
+		var chatUniqueNft []entity.Chatitem
+		database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Where("fromaddr = ?", senderAddr).Find(&chatUniqueNft)
+
+		var uniquecontracts []string
+		for j := 0; j < len(chatUniqueNft); j++ {
+			if !stringInSlice(chatUniqueNft[i].Nftaddr, uniquecontracts) {
+				//for the given senderAddr this is unique list of contract addresses
+				uniquecontracts = append(uniquecontracts, chatUniqueNft[i].Nftaddr)
+			}
+		}
+
+		//now for each unqiue sender, and unique nft contract address, get unique NFT ids
+		for k := 0; k < len(uniquecontracts); k++ {
+			var uniqueNftAddr = uniquecontracts[k]
+			var chatUniqueNftIds []entity.Chatitem
+			database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Where("fromaddr = ?", senderAddr).Where("nftaddr = ?", uniqueNftAddr).Find(&chatUniqueNftIds)
+
+			for l := 0; l < len(chatUniqueNftIds); l++ {
+				var nftid = chatUniqueNftIds[l].Nftid
+				var chatNftId []entity.Chatitem
+				database.Connector.Where("toaddr = ?", key).
+					Where("nftid = ?", nftid).Where("fromaddr = ?", senderAddr).
+					Where("nftaddr = ?", uniqueNftAddr).
+					Where("msgread = ?", false).Find(&chatNftId)
+
+				var sbitem entity.Nftsidebar
+				sbitem.Fromaddr = senderAddr
+				sbitem.Nftaddr = uniqueNftAddr
+				sbitem.Nftid = nftid
+				sbitem.Unread = len(chatNftId)
+
+				nftretval = append(nftretval, sbitem)
+			}
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(w).Encode(len(chat))
+	json.NewEncoder(w).Encode(nftretval)
 }
 
 //unread count per conversation

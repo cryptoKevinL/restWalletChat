@@ -10,6 +10,13 @@ type Chatitem struct {
 	Nftid     int    `json:"nftid"`
 }
 
+type Nftsidebar struct {
+	Fromaddr string `json:"fromaddr"`
+	Unread   int    `json:"unread"`
+	Nftaddr  string `json:"nftaddr"`
+	Nftid    int    `json:"nftid"`
+}
+
 type Chatiteminbox struct {
 	Fromaddr  string `json:"fromaddr"`
 	Toaddr    string `json:"toaddr"`
