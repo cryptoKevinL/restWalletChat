@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -220,21 +221,27 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 			var chatUniqueNftIds []entity.Chatitem
 			database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Where("fromaddr = ?", senderAddr).Where("nftaddr = ?", uniqueNftAddr).Find(&chatUniqueNftIds)
 
+			var uniquenftids []string
 			for l := 0; l < len(chatUniqueNftIds); l++ {
 				var nftid = chatUniqueNftIds[l].Nftid
 				var chatNftId []entity.Chatitem
+
 				database.Connector.Where("toaddr = ?", key).
 					Where("nftid = ?", nftid).Where("fromaddr = ?", senderAddr).
 					Where("nftaddr = ?", uniqueNftAddr).
 					Where("msgread = ?", false).Find(&chatNftId)
 
-				var sbitem entity.Nftsidebar
-				sbitem.Fromaddr = senderAddr
-				sbitem.Nftaddr = uniqueNftAddr
-				sbitem.Nftid = nftid
-				sbitem.Unread = len(chatNftId)
+				if !stringInSlice(strconv.Itoa(nftid), uniquenftids) {
+					uniquenftids = append(uniquenftids, strconv.Itoa(nftid))
 
-				nftretval = append(nftretval, sbitem)
+					var sbitem entity.Nftsidebar
+					sbitem.Fromaddr = senderAddr
+					sbitem.Nftaddr = uniqueNftAddr
+					sbitem.Nftid = nftid
+					sbitem.Unread = len(chatNftId)
+
+					nftretval = append(nftretval, sbitem)
+				}
 			}
 		}
 	}
