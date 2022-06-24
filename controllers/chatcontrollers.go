@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
@@ -195,6 +197,7 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	var senderlist []string
 	for i := 0; i < len(chat); i++ {
 		if !stringInSlice(chat[i].Fromaddr, senderlist) {
+			fmt.Printf("Found Unique Sender: %#v\n", chat[i].Fromaddr)
 			senderlist = append(senderlist, chat[i].Fromaddr)
 		}
 	}
@@ -210,6 +213,7 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 		var uniquecontracts []string
 		for j := 0; j < len(chatUniqueNft); j++ {
 			if !stringInSlice(chatUniqueNft[i].Nftaddr, uniquecontracts) {
+				fmt.Printf("Found Unique NFT Contract: %#v\n", chatUniqueNft[i].Nftaddr)
 				//for the given senderAddr this is unique list of contract addresses
 				uniquecontracts = append(uniquecontracts, chatUniqueNft[i].Nftaddr)
 			}
@@ -225,6 +229,7 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 			for l := 0; l < len(chatUniqueNftIds); l++ {
 				var nftid = chatUniqueNftIds[l].Nftid
 				var chatNftId []entity.Chatitem
+				fmt.Printf("Unique NFT ID : %#v\n", nftid)
 
 				database.Connector.Where("toaddr = ?", key).
 					Where("nftid = ?", nftid).Where("fromaddr = ?", senderAddr).
@@ -600,4 +605,209 @@ func GetAllComments(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comment)
+}
+
+func GetTwitter(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	contract := vars["contract"]
+
+	//slug := GetOpeseaSlug(contract)
+	handle := GetTwitterHandle(contract)
+	twitterID := GetTwitterID(handle)
+	tweets := GetTweetsFromAPI(twitterID)
+
+	//var comment []entity.Comments
+	//database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&comment)
+	//w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tweets)
+}
+
+func GetTwitterHandle(contractAddr string) string {
+	url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
+
+	// Create a Bearer string by appending string access token
+	//bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
+	//bearer := "X-API-KEY: " + "33594256d2b0446d869ff5d3a7f9c152"
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("X-API-KEY", "33594256d2b0446d869ff5d3a7f9c152")
+
+	// add authorization header to the req
+	//req.Header.Add("Authorization", bearer)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	var result OpenseaData
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	collection := result.Collection.TwitterUsername
+
+	//fmt.Printf("test: %#v\n", collection)
+
+	return collection
+}
+
+func GetTwitterID(twitterHandle string) string {
+	url := "https://api.twitter.com/2/users/by/username/" + twitterHandle
+
+	// Create a Bearer string by appending string access token
+	bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", bearer)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	var result TwitterIdResp
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	twitterID := result.Data.ID
+
+	return twitterID
+}
+
+func GetTweetsFromAPI(twitterID string) string {
+	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets"
+
+	// Create a Bearer string by appending string access token
+	bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+
+	// add authorization header to the req
+	req.Header.Add("Authorization", bearer)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	var result TwitterTweetsData
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	tweets := string(body)
+
+	return tweets
+}
+
+type TwitterTweetsData struct {
+	Data []struct {
+		ID   string `json:"id"`
+		Text string `json:"text"`
+	} `json:"data"`
+	Meta struct {
+		ResultCount int    `json:"result_count"`
+		NewestID    string `json:"newest_id"`
+		OldestID    string `json:"oldest_id"`
+		NextToken   string `json:"next_token"`
+	} `json:"meta"`
+}
+
+type TwitterIdResp struct {
+	Data struct {
+		ID       string `json:"id"`
+		Name     string `json:"name"`
+		Username string `json:"username"`
+	} `json:"data"`
+}
+
+type OpenseaData struct {
+	Collection struct {
+		BannerImageURL          string      `json:"banner_image_url"`
+		ChatURL                 interface{} `json:"chat_url"`
+		CreatedDate             string      `json:"created_date"`
+		DefaultToFiat           bool        `json:"default_to_fiat"`
+		Description             string      `json:"description"`
+		DevBuyerFeeBasisPoints  string      `json:"dev_buyer_fee_basis_points"`
+		DevSellerFeeBasisPoints string      `json:"dev_seller_fee_basis_points"`
+		DiscordURL              string      `json:"discord_url"`
+		DisplayData             struct {
+			CardDisplayStyle string `json:"card_display_style"`
+		} `json:"display_data"`
+		ExternalURL                 string      `json:"external_url"`
+		Featured                    bool        `json:"featured"`
+		FeaturedImageURL            string      `json:"featured_image_url"`
+		Hidden                      bool        `json:"hidden"`
+		SafelistRequestStatus       string      `json:"safelist_request_status"`
+		ImageURL                    string      `json:"image_url"`
+		IsSubjectToWhitelist        bool        `json:"is_subject_to_whitelist"`
+		LargeImageURL               string      `json:"large_image_url"`
+		MediumUsername              string      `json:"medium_username"`
+		Name                        string      `json:"name"`
+		OnlyProxiedTransfers        bool        `json:"only_proxied_transfers"`
+		OpenseaBuyerFeeBasisPoints  string      `json:"opensea_buyer_fee_basis_points"`
+		OpenseaSellerFeeBasisPoints string      `json:"opensea_seller_fee_basis_points"`
+		PayoutAddress               string      `json:"payout_address"`
+		RequireEmail                bool        `json:"require_email"`
+		ShortDescription            interface{} `json:"short_description"`
+		Slug                        string      `json:"slug"`
+		TelegramURL                 interface{} `json:"telegram_url"`
+		TwitterUsername             string      `json:"twitter_username"`
+		InstagramUsername           string      `json:"instagram_username"`
+		WikiURL                     interface{} `json:"wiki_url"`
+		IsNsfw                      bool        `json:"is_nsfw"`
+	} `json:"collection"`
+	Address                     string      `json:"address"`
+	AssetContractType           string      `json:"asset_contract_type"`
+	CreatedDate                 string      `json:"created_date"`
+	Name                        string      `json:"name"`
+	NftVersion                  string      `json:"nft_version"`
+	OpenseaVersion              interface{} `json:"opensea_version"`
+	Owner                       int         `json:"owner"`
+	SchemaName                  string      `json:"schema_name"`
+	Symbol                      string      `json:"symbol"`
+	TotalSupply                 string      `json:"total_supply"`
+	Description                 string      `json:"description"`
+	ExternalLink                string      `json:"external_link"`
+	ImageURL                    string      `json:"image_url"`
+	DefaultToFiat               bool        `json:"default_to_fiat"`
+	DevBuyerFeeBasisPoints      int         `json:"dev_buyer_fee_basis_points"`
+	DevSellerFeeBasisPoints     int         `json:"dev_seller_fee_basis_points"`
+	OnlyProxiedTransfers        bool        `json:"only_proxied_transfers"`
+	OpenseaBuyerFeeBasisPoints  int         `json:"opensea_buyer_fee_basis_points"`
+	OpenseaSellerFeeBasisPoints int         `json:"opensea_seller_fee_basis_points"`
+	BuyerFeeBasisPoints         int         `json:"buyer_fee_basis_points"`
+	SellerFeeBasisPoints        int         `json:"seller_fee_basis_points"`
+	PayoutAddress               string      `json:"payout_address"`
 }

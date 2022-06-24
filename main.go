@@ -43,22 +43,23 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_comments", controllers.GetAllComments).Methods("GET")
 	router.HandleFunc("/get_comments/{nftaddr}/{nftid}", controllers.GetComments).Methods("GET")
 	router.HandleFunc("/delete_comments/{fromaddr}/{nftaddr}/{nftid}", controllers.DeleteComments).Methods("DELETE")
+	router.HandleFunc("/get_twitter/{contract}", controllers.GetTwitter).Methods("GET")
 }
 
 func initDB() {
 	config :=
-		database.Config{
-			User:       "doadmin",
-			Password:   "AVNS_7q8_Jqll_0sA9Fi",
-			ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
-			DB:         "walletchat",
-		}
 		// database.Config{
-		// 	User:       "root",
-		// 	Password:   "",
-		// 	ServerName: "localhost:3306",
+		// 	User:       "doadmin",
+		// 	Password:   "AVNS_7q8_Jqll_0sA9Fi",
+		// 	ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
 		// 	DB:         "walletchat",
 		// }
+		database.Config{
+			User:       "root",
+			Password:   "",
+			ServerName: "localhost:3306",
+			DB:         "walletchat",
+		}
 
 	connectionString := database.GetConnectionString(config)
 	err := database.Connect(connectionString)
