@@ -776,7 +776,7 @@ func GetTwitterID(twitterHandle string) string {
 
 func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	//url := "https://api.twitter.com/2/users/" + twitterID + "/tweets"
-	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets?media.fields=height,width,url,preview_image_url,type&tweet.fields=attachments,created_at&user.fields=profile_image_url,username&expansions=author_id,attachments.media_keys&exclude=retweets"
+	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets?media.fields=height,width,url,preview_image_url,type&tweet.fields=attachments,created_at&user.fields=profile_image_url,username&expansions=author_id,attachments.media_keys"
 
 	// Create a Bearer string by appending string access token
 	bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
