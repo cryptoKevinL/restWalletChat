@@ -474,6 +474,62 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+//CreateGroupChatitem creates GroupChatitem
+func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var chat entity.Groupchatitem
+	json.Unmarshal(requestBody, &chat)
+
+	fmt.Printf("Group Chat Item: %#v\n", chat)
+
+	database.Connector.Create(chat)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(chat)
+}
+
+func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var chat []entity.Groupchatitem
+	database.Connector.Where("nftaddr = ?", key).Find(&chat)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
+func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nftaddr := vars["address"]
+	fromaddr := vars["useraddress"]
+
+	var chat []entity.Groupchatitem
+
+	var chatReadTime entity.Groupchatreadtime
+	database.Connector.Where("fromaddr = ?", fromaddr).Find(&chatReadTime)
+
+	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime.Lasttimestamp)
+
+	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
+	if chatReadTime.Fromaddr == "" {
+		database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)
+
+		//add the first read element to the group timestamp table cross reference
+		chatReadTime.Fromaddr = fromaddr
+		chatReadTime.Nftaddr = nftaddr
+		chatReadTime.Lasttimestamp = time.Now()
+		database.Connector.Create(chatReadTime)
+	} else {
+		//set timestamp when this was last grabbed
+		currtime := time.Now()
+		database.Connector.Model(&entity.Settings{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("fromaddr", currtime)
+
+		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
 //UpdateInboxByOwner updates person with respective owner address
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)

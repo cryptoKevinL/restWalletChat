@@ -23,6 +23,11 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
 	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
+	//group chat
+	router.HandleFunc("/create_groupchatitem", controllers.CreateGroupChatitem).Methods("POST")
+	router.HandleFunc("/get_groupchatitems/{address}", controllers.GetGroupChatItems).Methods("GET")
+	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
+	//end group chat
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{fromaddr}/{toaddr}", controllers.GetUnreadMsgCnt).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{address}/{nftaddr}/{nftid}", controllers.GetUnreadMsgCntNft).Methods("GET")

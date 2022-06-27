@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 type Chatitem struct {
 	Fromaddr  string `json:"fromaddr"`
 	Toaddr    string `json:"toaddr"`
@@ -8,6 +10,21 @@ type Chatitem struct {
 	Message   string `json:"message"`
 	Nftaddr   string `json:"nftaddr"`
 	Nftid     int    `json:"nftid"`
+}
+
+//changing case causes _ in Golang table name calls....confused
+type Groupchatitem struct {
+	Fromaddr  string    `json:"fromaddr"`
+	Timestamp time.Time `json:"timestamp"`
+	Message   string    `json:"message"`
+	Nftaddr   string    `json:"nftaddr"`
+}
+
+//secondary table to help only load new messages for each user (not reload whole chat history)
+type Groupchatreadtime struct {
+	Fromaddr      string    `json:"fromaddr"`
+	Lasttimestamp time.Time `json:"lasttimestamp"`
+	Nftaddr       string    `json:"nftaddr"`
 }
 
 type Nftsidebar struct {
