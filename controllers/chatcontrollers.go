@@ -655,6 +655,17 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(comment)
 }
 
+func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["nftid"]
+	addr := vars["nftaddr"]
+
+	var comment []entity.Comments
+	database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&comment)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(len(comment))
+}
+
 func GetAllComments(w http.ResponseWriter, r *http.Request) {
 	var comment []entity.Comments
 	database.Connector.Find(&comment)
@@ -672,10 +683,21 @@ func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	twitterID := GetTwitterID(handle)
 	tweets := GetTweetsFromAPI(twitterID)
 
-	//var comment []entity.Comments
-	//database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&comment)
-	//w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tweets)
+}
+
+func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	contract := vars["contract"]
+
+	//slug := GetOpeseaSlug(contract)
+	handle := GetTwitterHandle(contract)
+	twitterID := GetTwitterID(handle)
+	tweets := GetTweetsFromAPI(twitterID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(len(tweets.Data))
 }
 
 func GetTwitterHandle(contractAddr string) string {
@@ -752,7 +774,7 @@ func GetTwitterID(twitterHandle string) string {
 	return twitterID
 }
 
-func GetTweetsFromAPI(twitterID string) string {
+func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	//url := "https://api.twitter.com/2/users/" + twitterID + "/tweets"
 	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets?media.fields=height,width,url,preview_image_url,type&tweet.fields=attachments,created_at&user.fields=profile_image_url,username&expansions=author_id,attachments.media_keys&exclude=retweets"
 
@@ -783,9 +805,7 @@ func GetTweetsFromAPI(twitterID string) string {
 		fmt.Println("Can not unmarshal JSON")
 	}
 
-	tweets := string(body)
-
-	return tweets
+	return result
 }
 
 type TwitterTweetsData struct {

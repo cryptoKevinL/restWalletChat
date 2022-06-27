@@ -49,6 +49,8 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_comments/{nftaddr}/{nftid}", controllers.GetComments).Methods("GET")
 	router.HandleFunc("/delete_comments/{fromaddr}/{nftaddr}/{nftid}", controllers.DeleteComments).Methods("DELETE")
 	router.HandleFunc("/get_twitter/{contract}", controllers.GetTwitter).Methods("GET")
+	router.HandleFunc("/get_twitter_cnt/{contract}", controllers.GetTwitterCount).Methods("GET")
+	router.HandleFunc("/get_comments_cnt/{nftaddr}/{nftid}", controllers.GetCommentsCount).Methods("GET")
 }
 
 func initDB() {
