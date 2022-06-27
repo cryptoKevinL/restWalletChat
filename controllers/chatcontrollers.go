@@ -681,7 +681,7 @@ func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	//slug := GetOpeseaSlug(contract)
 	handle := GetTwitterHandle(contract)
 	twitterID := GetTwitterID(handle)
-	tweets := GetTweetsFromAPI(twitterID)
+	tweets, _ := GetTweetsFromAPI(twitterID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tweets)
@@ -694,10 +694,10 @@ func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
 	//slug := GetOpeseaSlug(contract)
 	handle := GetTwitterHandle(contract)
 	twitterID := GetTwitterID(handle)
-	tweets := GetTweetsFromAPI(twitterID)
+	_, count := GetTweetsFromAPI(twitterID)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(len(tweets.Data))
+	json.NewEncoder(w).Encode(count)
 }
 
 func GetTwitterHandle(contractAddr string) string {
@@ -774,9 +774,9 @@ func GetTwitterID(twitterHandle string) string {
 	return twitterID
 }
 
-func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
+func GetTweetsFromAPI(twitterID string) (string, int) {
 	//url := "https://api.twitter.com/2/users/" + twitterID + "/tweets"
-	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets?media.fields=height,width,url,preview_image_url,type&tweet.fields=attachments,created_at&user.fields=profile_image_url,username&expansions=author_id,attachments.media_keys"
+	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets?media.fields=height,width,url,preview_image_url,type&tweet.fields=attachments,created_at&user.fields=profile_image_url,username&expansions=author_id,attachments.media_keys&exclude=retweets"
 
 	// Create a Bearer string by appending string access token
 	bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
@@ -804,8 +804,11 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
+	//fmt.Println("length twitter: ", len(result.Data))
 
-	return result
+	tweets := string(body)
+
+	return tweets, len(result.Data)
 }
 
 type TwitterTweetsData struct {
