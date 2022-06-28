@@ -681,7 +681,7 @@ func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	//slug := GetOpeseaSlug(contract)
 	handle := GetTwitterHandle(contract)
 	twitterID := GetTwitterID(handle)
-	tweets, _ := GetTweetsFromAPI(twitterID)
+	tweets := GetTweetsFromAPI(twitterID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tweets)
@@ -694,10 +694,10 @@ func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
 	//slug := GetOpeseaSlug(contract)
 	handle := GetTwitterHandle(contract)
 	twitterID := GetTwitterID(handle)
-	_, count := GetTweetsFromAPI(twitterID)
+	tweets := GetTweetsFromAPI(twitterID)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(count)
+	json.NewEncoder(w).Encode(len(tweets.Data))
 }
 
 func GetTwitterHandle(contractAddr string) string {
@@ -774,7 +774,7 @@ func GetTwitterID(twitterHandle string) string {
 	return twitterID
 }
 
-func GetTweetsFromAPI(twitterID string) (string, int) {
+func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	//url := "https://api.twitter.com/2/users/" + twitterID + "/tweets"
 	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets?media.fields=height,width,url,preview_image_url,type&tweet.fields=attachments,created_at&user.fields=profile_image_url,username&expansions=author_id,attachments.media_keys&exclude=retweets"
 
@@ -806,21 +806,40 @@ func GetTweetsFromAPI(twitterID string) (string, int) {
 	}
 	//fmt.Println("length twitter: ", len(result.Data))
 
-	tweets := string(body)
-
-	return tweets, len(result.Data)
+	return result
 }
 
 type TwitterTweetsData struct {
 	Data []struct {
-		ID   string `json:"id"`
-		Text string `json:"text"`
+		Text        string `json:"text"`
+		ID          string `json:"id"`
+		Attachments struct {
+			MediaKeys []string `json:"media_keys"`
+		} `json:"attachments,omitempty"`
+		AuthorID  string    `json:"author_id"`
+		CreatedAt time.Time `json:"created_at"`
 	} `json:"data"`
+	Includes struct {
+		Media []struct {
+			Type            string `json:"type"`
+			Width           int    `json:"width"`
+			PreviewImageURL string `json:"preview_image_url,omitempty"`
+			Height          int    `json:"height"`
+			MediaKey        string `json:"media_key"`
+			URL             string `json:"url,omitempty"`
+		} `json:"media"`
+		Users []struct {
+			Username        string `json:"username"`
+			ProfileImageURL string `json:"profile_image_url"`
+			ID              string `json:"id"`
+			Name            string `json:"name"`
+		} `json:"users"`
+	} `json:"includes"`
 	Meta struct {
+		NextToken   string `json:"next_token"`
 		ResultCount int    `json:"result_count"`
 		NewestID    string `json:"newest_id"`
 		OldestID    string `json:"oldest_id"`
-		NextToken   string `json:"next_token"`
 	} `json:"meta"`
 }
 
