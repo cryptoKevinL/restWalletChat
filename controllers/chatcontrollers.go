@@ -682,9 +682,10 @@ func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	handle := GetTwitterHandle(contract)
 	twitterID := GetTwitterID(handle)
 	tweets := GetTweetsFromAPI(twitterID)
+	formatted := FormatTwitterData(tweets)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tweets)
+	json.NewEncoder(w).Encode(formatted)
 }
 
 func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
@@ -809,6 +810,71 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	return result
 }
 
+func FormatTwitterData(data TwitterTweetsData) []TweetType {
+	var tweets []TweetType
+	if len(data.Data) > 0 {
+		var user User
+		if len(data.Includes.Users) > 0 {
+			user = data.Includes.Users[0]
+		}
+
+		//for i, item := range data.data {
+		//first copy just data.data stuff
+		for i := 0; i < len(data.Data); i++ {
+			// Text        string `json:"text"`
+			// ID          string `json:"id"`
+			// Attachments struct {
+			// 	MediaKeys []string `json:"media_keys"`
+			// } `json:"attachments"`
+			// AuthorID  string    `json:"author_id"`
+			// CreatedAt time.Time `json:"created_at"`
+			var initData TweetType
+			initData.Text = data.Data[i].Text
+			initData.ID = data.Data[i].ID
+			initData.Attachments = data.Data[i].Attachments
+			initData.AuthorID = data.Data[i].AuthorID
+			initData.CreatedAt = data.Data[i].CreatedAt
+			tweets = append(tweets, initData)
+		}
+
+		for i := 0; i < len(data.Data); i++ {
+			tweets[i].User = user
+
+			if len(data.Data[i].Attachments.MediaKeys) > 0 {
+				var localAttachment Attachments
+				for j := 0; j < len(tweets[i].Attachments.MediaKeys); j++ {
+					var mediaKey = tweets[i].Attachments.MediaKeys[j]
+					if len(data.Includes.Media) > 0 {
+						//var matched = data.includes.media.find((item => item.media_key === mediaKey))
+						for _, v := range data.Includes.Media {
+							if v.MediaKey == mediaKey {
+								if v.URL != "" {
+									localAttachment.MediaKeys = append(localAttachment.MediaKeys, v.URL)
+								}
+							}
+						}
+					}
+				}
+				if len(localAttachment.MediaKeys) > 0 {
+					tweets[i].Media = localAttachment
+				}
+			}
+		}
+	}
+	return tweets
+}
+
+type User struct {
+	Username        string `json:"username"`
+	ProfileImageURL string `json:"profile_image_url"`
+	ID              string `json:"id"`
+	Name            string `json:"name"`
+}
+
+type Attachments struct {
+	MediaKeys []string `json:"media_keys"`
+}
+
 type TwitterTweetsData struct {
 	Data []struct {
 		Text        string `json:"text"`
@@ -841,6 +907,24 @@ type TwitterTweetsData struct {
 		NewestID    string `json:"newest_id"`
 		OldestID    string `json:"oldest_id"`
 	} `json:"meta"`
+}
+
+//formatted for use in client side per Mana
+type TweetType struct {
+	Text        string `json:"text"`
+	ID          string `json:"id"`
+	Attachments struct {
+		MediaKeys []string `json:"media_keys"`
+	} `json:"attachments"`
+	AuthorID  string    `json:"author_id"`
+	CreatedAt time.Time `json:"created_at"`
+	User      struct {
+		Username        string `json:"username"`
+		ProfileImageURL string `json:"profile_image_url"`
+		ID              string `json:"id"`
+		Name            string `json:"name"`
+	} `json:"user"`
+	Media Attachments `json:"media"`
 }
 
 type TwitterIdResp struct {
