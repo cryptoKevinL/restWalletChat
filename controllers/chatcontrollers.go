@@ -530,6 +530,28 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nftaddr := vars["address"]
+	fromaddr := vars["useraddress"]
+
+	var chat []entity.Groupchatitem
+
+	var chatReadTime entity.Groupchatreadtime
+	database.Connector.Where("fromaddr = ?", fromaddr).Find(&chatReadTime)
+
+	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime.Lasttimestamp)
+
+	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
+	if chatReadTime.Fromaddr == "" {
+		database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)
+	} else {
+		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(len(chat))
+}
+
 //UpdateInboxByOwner updates person with respective owner address
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
