@@ -480,7 +480,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Groupchatitem
 	json.Unmarshal(requestBody, &chat)
 
-	fmt.Printf("Group Chat Item: %#v\n", chat)
+	//fmt.Printf("Group Chat Item: %#v\n", chat)
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -496,6 +496,29 @@ func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("nftaddr = ?", key).Find(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
+}
+
+func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var bookmark entity.Bookmarkitem
+	json.Unmarshal(requestBody, &bookmark)
+
+	//fmt.Printf("Bookmark Item: %#v\n", chat)
+
+	database.Connector.Create(bookmark)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(bookmark)
+}
+
+func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	var bookmark []entity.Bookmarkitem
+	database.Connector.Where("walletaddr = ?", key).Find(&bookmark)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(bookmark)
 }
 
 func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
