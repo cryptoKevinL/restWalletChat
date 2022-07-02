@@ -515,10 +515,40 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
 
-	var bookmark []entity.Bookmarkitem
-	database.Connector.Where("walletaddr = ?", key).Find(&bookmark)
+	var bookmarks []entity.Bookmarkitem
+	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
+
+	//now add last message from group chat this bookmark is for
+	var returnItems []entity.BookmarkReturnItem
+	var chat entity.Groupchatitem
+	for i := 0; i < len(bookmarks); i++ {
+		chat.Message = "NOT_FOUND"
+		//chat.Timestamp
+		database.Connector.Where("nftaddr = ?", bookmarks[i].Nftaddr).Find(&chat)
+
+		//get num unread messages
+		var chatCnt []entity.Groupchatitem
+		var chatReadTime entity.Groupchatreadtime
+		database.Connector.Where("fromaddr = ?", key).Find(&chatReadTime)
+		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
+		if chatReadTime.Fromaddr == "" {
+			database.Connector.Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
+		} else {
+			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
+		}
+		//end get num unread messages
+
+		var returnItem entity.BookmarkReturnItem
+		returnItem.Lastmsg = chat.Message
+		returnItem.Lasttimestamp = chat.Timestamp
+		returnItem.Nftaddr = bookmarks[i].Nftaddr
+		returnItem.Walletaddr = bookmarks[i].Walletaddr
+		returnItem.Unreadcnt = len(chatCnt)
+		returnItems = append(returnItems, returnItem)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(bookmark)
+	json.NewEncoder(w).Encode(returnItems)
 }
 
 func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {

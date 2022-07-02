@@ -32,6 +32,14 @@ type Bookmarkitem struct {
 	Nftaddr    string `json:"nftaddr"`
 }
 
+type BookmarkReturnItem struct {
+	Walletaddr    string    `json:"walletaddr"`
+	Nftaddr       string    `json:"nftaddr"`
+	Lastmsg       string    `json:"lastmsg"`
+	Lasttimestamp time.Time `json:"lasttimestamp"`
+	Unreadcnt     int       `json:unreadcnt`
+}
+
 type Nftsidebar struct {
 	Fromaddr string `json:"fromaddr"`
 	Unread   int    `json:"unread"`
