@@ -32,6 +32,7 @@ func initaliseHandlers(router *mux.Router) {
 	//end group chat
 
 	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")
+	router.HandleFunc("/delete_bookmark", controllers.DeleteBookmarkItem).Methods("POST")
 	router.HandleFunc("/get_bookmarks/{address}", controllers.GetBookmarkItems).Methods("GET")
 	router.HandleFunc("/get_bookmarks/{walletaddr}/{nftaddr}", controllers.IsBookmarkItem).Methods("GET")
 

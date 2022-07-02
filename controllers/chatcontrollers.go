@@ -511,6 +511,23 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bookmark)
 }
 
+func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var bookmark entity.Bookmarkitem
+	json.Unmarshal(requestBody, &bookmark)
+
+	var success = database.Connector.Where("nftaddr = ?", bookmark.Nftaddr).Where("walletaddr = ?", bookmark.Walletaddr).Delete(bookmark)
+
+	var returnval bool
+	if success.RowsAffected > 0 {
+		returnval = true
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(returnval)
+}
+
 func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletaddr := vars["walletaddr"]
