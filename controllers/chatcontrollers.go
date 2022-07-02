@@ -522,7 +522,7 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	var returnItems []entity.BookmarkReturnItem
 	var chat entity.Groupchatitem
 	for i := 0; i < len(bookmarks); i++ {
-		chat.Message = "NOT_FOUND"
+		chat.Message = ""
 		//chat.Timestamp
 		database.Connector.Where("nftaddr = ?", bookmarks[i].Nftaddr).Find(&chat)
 
@@ -544,6 +544,12 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 		returnItem.Nftaddr = bookmarks[i].Nftaddr
 		returnItem.Walletaddr = bookmarks[i].Walletaddr
 		returnItem.Unreadcnt = len(chatCnt)
+		if returnItem.Lastmsg == "" {
+			var unsetTime time.Time
+			var noInt int
+			returnItem.Unreadcnt = noInt
+			returnItem.Lasttimestamp = unsetTime
+		}
 		returnItems = append(returnItems, returnItem)
 	}
 
