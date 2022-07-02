@@ -511,6 +511,24 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bookmark)
 }
 
+func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	walletaddr := vars["walletaddr"]
+	nftaddr := vars["nftaddr"]
+
+	var bookmarks []entity.Bookmarkitem
+	database.Connector.Where("walletaddr = ?", walletaddr).Where("nftaddr = ?", nftaddr).Find(&bookmarks)
+
+	var returnval bool
+	if len(bookmarks) > 0 {
+		returnval = true
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(returnval)
+}
+
 func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
