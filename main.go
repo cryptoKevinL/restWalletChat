@@ -29,12 +29,17 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
 	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
 	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
-	//end group chat
 
+	//bookmarks
 	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")
 	router.HandleFunc("/delete_bookmark", controllers.DeleteBookmarkItem).Methods("POST")
 	router.HandleFunc("/get_bookmarks/{address}", controllers.GetBookmarkItems).Methods("GET")
 	router.HandleFunc("/get_bookmarks/{walletaddr}/{nftaddr}", controllers.IsBookmarkItem).Methods("GET")
+
+	//naming addresses (users or NFT collections)
+	router.HandleFunc("/name", controllers.CreateAddrNameItem).Methods("POST")
+	router.HandleFunc("/name", controllers.UpdateAddrNameItem).Methods("PUT")
+	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
 
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{fromaddr}/{toaddr}", controllers.GetUnreadMsgCnt).Methods("GET")

@@ -592,6 +592,49 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(returnItems)
 }
 
+//give a common name to a user address, or NFT collection
+func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var addrname entity.Addrnameitem
+	json.Unmarshal(requestBody, &addrname)
+
+	database.Connector.Create(addrname)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(addrname)
+}
+
+func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+
+	var addrname []entity.Addrnameitem
+
+	database.Connector.Where("address = ?", address).Find(&addrname)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(addrname)
+}
+
+func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var addrname entity.Addrnameitem
+	json.Unmarshal(requestBody, &addrname)
+
+	var result = database.Connector.Model(&entity.Addrnameitem{}).
+		Where("address = ?", addrname.Address).
+		Update("name", addrname.Name)
+
+	var returnval bool
+	if result.RowsAffected > 0 {
+		returnval = true
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(returnval)
+}
+
 func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
@@ -1049,6 +1092,44 @@ type TwitterIdResp struct {
 		Name     string `json:"name"`
 		Username string `json:"username"`
 	} `json:"data"`
+}
+
+type Social struct {
+	SocialMsg []string `json:"social"`
+}
+
+type SocialMsg struct {
+	Type     string `json:"type"`
+	Username string `json:"username"`
+}
+
+type LandingPageItemms struct {
+	Members    int                    `json:"members"`
+	Logo       string                 `json:"logo"`        // logo url, stored in backend
+	Verified   bool                   `json:"is_verified"` // is this group verified? WalletChat's group is verified by default
+	Bookmarked bool                   `json:"bookmarked"`
+	Messaged   bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
+	Messages   []entity.Groupchatitem `json:"messages"`
+	// messages: [
+	// 	{
+	// 		type: string, // [message, welcome], welcome-type message is auto-generated in the backend whenever a new user joins WalletChat
+	// 		message: string,
+	// 		timestamp: string,
+	// 		id: number // optional
+	// 	}, ...
+	// ],
+	Tweets TwitterTweetsData `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
+	Social []SocialMsg       `json:"social"`
+	// social: [
+	// 	{
+	// 		type: 'twitter',
+	// 		username: string,
+	// 	},
+	// 	{
+	// 		type: 'discord',
+	// 		username: string
+	// 	}
+	// ]
 }
 
 type OpenseaData struct {

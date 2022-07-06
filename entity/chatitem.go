@@ -27,6 +27,11 @@ type Groupchatreadtime struct {
 	Nftaddr       string    `json:"nftaddr"`
 }
 
+type Addrnameitem struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
+}
+
 type Bookmarkitem struct {
 	Walletaddr string `json:"walletaddr"`
 	Nftaddr    string `json:"nftaddr"`
@@ -37,7 +42,7 @@ type BookmarkReturnItem struct {
 	Nftaddr       string    `json:"nftaddr"`
 	Lastmsg       string    `json:"lastmsg"`
 	Lasttimestamp time.Time `json:"lasttimestamp"`
-	Unreadcnt     int       `json:unreadcnt`
+	Unreadcnt     int       `json:"unreadcnt"`
 }
 
 type Nftsidebar struct {
