@@ -14,15 +14,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//GetAllInbox get all inboxes data
-// func GetAllInbox(w http.ResponseWriter, r *http.Request) {
-// 	var inbox []entity.Inbox
-// 	database.Connector.Find(&inbox)
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusOK)
-// 	json.NewEncoder(w).Encode(inbox)
-// }
-
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -337,19 +328,6 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// type NamedArgument struct {
-	// 	To   string
-	// 	From string
-	// }
-	//this is bad, shouldn't have to do this but the above complex query is not working for me
-	//database.Connector.Raw("select * from chatitems where (fromaddr = @from, AND toaddr = @to) OR (fromaddr = @to AND toaddr = @from)", NamedArgument{To: toaddr, From: fromaddr}).Find(&chat)
-
-	// database.Connector.Where(
-	// 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to),
-	// ).Or(
-	// 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from),
-	// ).Find(&chat)
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -481,6 +459,20 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(requestBody, &chat)
 
 	//fmt.Printf("Group Chat Item: %#v\n", chat)
+
+	database.Connector.Create(chat)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(chat)
+}
+
+//CreateGroupChatitem creates GroupChatitem
+func CreateGroupChatitemV2(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var chat entity.V2groupchatitem
+	json.Unmarshal(requestBody, &chat)
+
+	//fmt.Printf("V2 Group Chat Item: %#v\n", chat)
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -1023,6 +1015,73 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 	return tweets
 }
 
+// Members    int              `json:"members"`
+// Logo       string           `json:"logo"`        // logo url, stored in backend
+// Verified   bool             `json:"is_verified"` // is this group verified? WalletChat's group is verified by default
+// Joined     bool             `json:"joined"`
+// Messaged   bool             `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
+// Messages   []LandingPageMsg `json:"messages"`
+// // messages: [
+// // 	{
+// // 		type: string, // [message, welcome], welcome-type message is auto-generated in the backend whenever a new user joins WalletChat
+// // 		message: string,
+// // 		timestamp: string,
+// // 		id: number // optional
+// // 	}, ...
+// // ],
+// Tweets TwitterTweetsData `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
+// Social []SocialMsg       `json:"social"`
+func GetWalletChat(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+	var landingData LandingPageItems
+
+	//for now, the walletchat living room is all users by default
+	var settings []entity.Settings
+	database.Connector.Find(&settings)
+	landingData.Members = len(settings)
+
+	//logo url
+	landingData.Logo = "Logo Address Here"
+
+	//WalletChat is verified of course
+	landingData.Verified = true
+
+	//by default everyone is joined to Walletchat
+	landingData.Joined = true
+
+	//has messaged - check messages for this user address
+	var groupchat []entity.V2groupchatitem
+	database.Connector.Where("nftaddr = ?", "walletchat").Where("fromaddr = ?", key).Find(&groupchat)
+	var hasMessaged bool
+	if len(groupchat) > 0 {
+		hasMessaged = true
+	} else {
+		//TODO: create the welcome message and  get all the data again?
+	}
+	landingData.Messaged = hasMessaged
+	landingData.Messages = groupchat
+
+	//get twitter data
+	twitterID := GetTwitterID("wallet_chat") //could get this once and hardcode the ID in here too to save one API call
+	tweets := GetTweetsFromAPI(twitterID)
+	formatted := FormatTwitterData(tweets)
+	landingData.Tweets = formatted
+
+	//social data
+	var twitterSocial SocialMsg
+	twitterSocial.Type = "twitter"
+	twitterSocial.Username = "@wallet_chat"
+	landingData.Social = append(landingData.Social, twitterSocial)
+	var discordSocial SocialMsg
+	discordSocial.Type = "discord"
+	discordSocial.Username = "WalletChat???"
+	landingData.Social = append(landingData.Social, discordSocial)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(landingData)
+}
+
 type User struct {
 	Username        string `json:"username"`
 	ProfileImageURL string `json:"profile_image_url"`
@@ -1103,33 +1162,15 @@ type SocialMsg struct {
 	Username string `json:"username"`
 }
 
-type LandingPageItemms struct {
-	Members    int                    `json:"members"`
-	Logo       string                 `json:"logo"`        // logo url, stored in backend
-	Verified   bool                   `json:"is_verified"` // is this group verified? WalletChat's group is verified by default
-	Bookmarked bool                   `json:"bookmarked"`
-	Messaged   bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
-	Messages   []entity.Groupchatitem `json:"messages"`
-	// messages: [
-	// 	{
-	// 		type: string, // [message, welcome], welcome-type message is auto-generated in the backend whenever a new user joins WalletChat
-	// 		message: string,
-	// 		timestamp: string,
-	// 		id: number // optional
-	// 	}, ...
-	// ],
-	Tweets TwitterTweetsData `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
-	Social []SocialMsg       `json:"social"`
-	// social: [
-	// 	{
-	// 		type: 'twitter',
-	// 		username: string,
-	// 	},
-	// 	{
-	// 		type: 'discord',
-	// 		username: string
-	// 	}
-	// ]
+type LandingPageItems struct {
+	Members  int                      `json:"members"`
+	Logo     string                   `json:"logo"`         // logo url, stored in backend
+	Verified bool                     `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
+	Joined   bool                     `json:"joined"`       //number of members of the group
+	Messaged bool                     `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
+	Messages []entity.V2groupchatitem `json:"messages"`
+	Tweets   []TweetType              `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
+	Social   []SocialMsg              `json:"social"`
 }
 
 type OpenseaData struct {

@@ -20,27 +20,7 @@ func main() {
 }
 
 func initaliseHandlers(router *mux.Router) {
-	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
-	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
-	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
-	//group chat
-	router.HandleFunc("/create_groupchatitem", controllers.CreateGroupChatitem).Methods("POST")
-	router.HandleFunc("/get_groupchatitems/{address}", controllers.GetGroupChatItems).Methods("GET")
-	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
-	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
-	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
-
-	//bookmarks
-	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")
-	router.HandleFunc("/delete_bookmark", controllers.DeleteBookmarkItem).Methods("POST")
-	router.HandleFunc("/get_bookmarks/{address}", controllers.GetBookmarkItems).Methods("GET")
-	router.HandleFunc("/get_bookmarks/{walletaddr}/{nftaddr}", controllers.IsBookmarkItem).Methods("GET")
-
-	//naming addresses (users or NFT collections)
-	router.HandleFunc("/name", controllers.CreateAddrNameItem).Methods("POST")
-	router.HandleFunc("/name", controllers.UpdateAddrNameItem).Methods("PUT")
-	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
-
+	//1-to-1 chats (both general and NFT related)
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{fromaddr}/{toaddr}", controllers.GetUnreadMsgCnt).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{address}/{nftaddr}/{nftid}", controllers.GetUnreadMsgCntNft).Methods("GET")
@@ -53,14 +33,47 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/getnft_chatitems/{address}", controllers.GetNftChatFromAddress).Methods("GET")
 	router.HandleFunc("/update_chatitem/{fromaddr}/{toaddr}", controllers.UpdateChatitemByOwner).Methods("PUT")
 	router.HandleFunc("/deleteall_chatitems/{address}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
+	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
+	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
+	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
+
+	//someday needs addtional params?
+	router.HandleFunc("/walletchat/{address}", controllers.GetWalletChat).Methods("GET")
+
+	//group chat
+	router.HandleFunc("/create_groupchatitem", controllers.CreateGroupChatitem).Methods("POST")
+	router.HandleFunc("/get_groupchatitems/{address}", controllers.GetGroupChatItems).Methods("GET")
+	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
+	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
+	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
+
+	//group chat V2 used for walletchat living room (needed another type and old version to keep working for now)
+	router.HandleFunc("/create_livngroom_message", controllers.CreateGroupChatitemV2).Methods("POST")
+
+	//bookmarks
+	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")
+	router.HandleFunc("/delete_bookmark", controllers.DeleteBookmarkItem).Methods("POST")
+	router.HandleFunc("/get_bookmarks/{address}", controllers.GetBookmarkItems).Methods("GET")
+	router.HandleFunc("/get_bookmarks/{walletaddr}/{nftaddr}", controllers.IsBookmarkItem).Methods("GET")
+
+	//naming addresses (users or NFT collections)
+	router.HandleFunc("/name", controllers.CreateAddrNameItem).Methods("POST")
+	router.HandleFunc("/name", controllers.UpdateAddrNameItem).Methods("PUT")
+	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
+
+	//settings items - currently this is the public key added upon first login for encryption/signing without MM
 	router.HandleFunc("/create_settings", controllers.CreateSettings).Methods("POST")
 	router.HandleFunc("/update_settings", controllers.UpdateSettings).Methods("PUT")
 	router.HandleFunc("/get_settings/{address}", controllers.GetSettings).Methods("GET")
 	router.HandleFunc("/delete_settings/{address}", controllers.DeleteSettings).Methods("DELETE")
+
+	//comments on a specific NFT
 	router.HandleFunc("/create_comments", controllers.CreateComments).Methods("POST")
 	router.HandleFunc("/get_comments", controllers.GetAllComments).Methods("GET")
 	router.HandleFunc("/get_comments/{nftaddr}/{nftid}", controllers.GetComments).Methods("GET")
 	router.HandleFunc("/delete_comments/{fromaddr}/{nftaddr}/{nftid}", controllers.DeleteComments).Methods("DELETE")
+
+	//Twitter Related APIs
 	router.HandleFunc("/get_twitter/{contract}", controllers.GetTwitter).Methods("GET")
 	router.HandleFunc("/get_twitter_cnt/{contract}", controllers.GetTwitterCount).Methods("GET")
 	router.HandleFunc("/get_comments_cnt/{nftaddr}/{nftid}", controllers.GetCommentsCount).Methods("GET")
@@ -86,6 +99,9 @@ func initDB() {
 	if err != nil {
 		panic(err.Error())
 	}
+
+	//These are supposed to help create the proper DB based on the data struct if it doesn't already exist
+	//had some issues with it and just created the tables directly in MySQL (still have to match data structs)
 	// database.Migrate(&entity.Settings{})
 	//database.MigrateComments(&entity.Comments{})
 	// database.MigrateChatitem(&entity.Chatitem{})

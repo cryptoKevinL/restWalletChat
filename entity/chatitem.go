@@ -12,7 +12,7 @@ type Chatitem struct {
 	Nftid     int    `json:"nftid"`
 }
 
-//changing case causes _ in Golang table name calls....confused
+//changing case causes _ in Golang table name calls....thats why its all lower case after first char
 type Groupchatitem struct {
 	Fromaddr  string    `json:"fromaddr"`
 	Timestamp time.Time `json:"timestamp"`
@@ -20,11 +20,27 @@ type Groupchatitem struct {
 	Nftaddr   string    `json:"nftaddr"`
 }
 
+//have to make a new version of the table with type, for walletchat living room welcome messsages
+//can convert over to this fully when released in store with UI changes (this helps current store verisons keep working)
+type V2groupchatitem struct {
+	Fromaddr  string    `json:"fromaddr"`
+	Timestamp time.Time `json:"timestamp"`
+	Message   string    `json:"message"`
+	Nftaddr   string    `json:"nftaddr"`
+	Type      string    `json:"type"`
+}
+
 //secondary table to help only load new messages for each user (not reload whole chat history)
 type Groupchatreadtime struct {
 	Fromaddr      string    `json:"fromaddr"`
 	Lasttimestamp time.Time `json:"lasttimestamp"`
 	Nftaddr       string    `json:"nftaddr"`
+}
+
+//potentially use this to keep track of user logins for DAU metrics
+type Logintime struct {
+	Address   string    `json:"address"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type Addrnameitem struct {
@@ -62,12 +78,3 @@ type Chatiteminbox struct {
 	Nftid     int    `json:"nftid"`
 	Unreadcnt int    `json:"unread"`
 }
-
-// type ChatitemRsp struct {
-// 	ID        int    `json:"id"`
-// 	Fromaddr  string `json:"fromaddr"`a
-// 	Toaddr    string `json:"toaddr"`
-// 	Timestamp string `json:"timestamp"`
-// 	Read    string `json:"read"`
-// 	Message   string `json:"message"`
-// }
