@@ -1057,9 +1057,19 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	if len(groupchat) > 0 {
 		hasMessaged = true
 	} else {
-		//TODO: create the welcome message and  get all the data again?
+		//create the welcome message, save it
+		var newgroupchatuser entity.V2groupchatitem
+		newgroupchatuser.Type = "welcome"
+		newgroupchatuser.Fromaddr = key
+		newgroupchatuser.Nftaddr = "walletchat"
+		newgroupchatuser.Message = "Welcome " + key + " to the Wallet Chat Living Room!"
+		newgroupchatuser.Timestamp = time.Now()
+		//add it to the database
+		database.Connector.Create(newgroupchatuser)
 	}
 	landingData.Messaged = hasMessaged
+	//grab all the data for walletchat group
+	database.Connector.Where("nftaddr = ?", "walletchat").Find(&groupchat)
 	landingData.Messages = groupchat
 
 	//get twitter data
