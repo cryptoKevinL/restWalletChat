@@ -590,6 +590,12 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	var addrname entity.Addrnameitem
 	json.Unmarshal(requestBody, &addrname)
 
+	//auto-join new users to WalletChat community (they can leave later)
+	var bookmark entity.Bookmarkitem
+	bookmark.Nftaddr = "walletchat"
+	bookmark.Walletaddr = addrname.Address
+	database.Connector.Create(bookmark)
+
 	database.Connector.Create(addrname)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
