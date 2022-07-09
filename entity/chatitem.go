@@ -77,4 +77,5 @@ type Chatiteminbox struct {
 	Nftaddr   string `json:"nftaddr"`
 	Nftid     int    `json:"nftid"`
 	Unreadcnt int    `json:"unread"`
+	Type      string `json:"type"`
 }

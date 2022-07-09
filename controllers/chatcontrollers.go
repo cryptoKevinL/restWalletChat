@@ -61,21 +61,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		var secondItem entity.Chatitem
 		var firstItems []entity.Chatitem
 		var secondItems []entity.Chatitem
-		//fmt.Printf("Unique Chat Addr Check for : %#v\n", chatmember)
-		// rowsto, err := database.Connector.DB().Query("SELECT * FROM chatitems WHERE fromaddr = ? AND toaddr = ? ORDER BY id DESC", chatmember, key)
-		// if err != nil {
-		// 	fmt.Printf("error 1")
-		// }
-		// for rowsto.Next() {
-		// 	rowsto.Scan(&firstItem)
-		// }
-		// rowsfrom, err := database.Connector.DB().Query("SELECT * FROM chatitems WHERE fromaddr = ? AND toaddr = ? ORDER BY id DESC", key, chatmember)
-		// if err != nil {
-		// 	fmt.Printf("error 2")
-		// }
-		// for rowsfrom.Next() {
-		// 	rowsfrom.Scan(&secondItem)
-		// }
+
+		//TODO change time in DB to DATETIME not string...
 
 		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Order("id desc").Find(&firstItems)
 		if len(firstItems) > 0 {
@@ -100,6 +87,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		firstItemWCount.Msgread = firstItem.Msgread
 		firstItemWCount.Message = firstItem.Message
 		firstItemWCount.Unreadcnt = len(chatCount)
+		firstItemWCount.Type = "nft"
+		if firstItem.Nftaddr == "" {
+			firstItemWCount.Type = "dm"
+		}
 		var secondItemWCount entity.Chatiteminbox
 		secondItemWCount.Fromaddr = secondItem.Fromaddr
 		secondItemWCount.Toaddr = secondItem.Toaddr
@@ -107,6 +98,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		secondItemWCount.Msgread = secondItem.Msgread
 		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
+		secondItemWCount.Type = "nft"
+		if firstItem.Nftaddr == "" {
+			secondItemWCount.Type = "dm"
+		}
 
 		//pick the most recent message
 		if firstItem.Fromaddr != "" {
@@ -135,6 +130,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			userInbox = append(userInbox, secondItemWCount)
 		}
 	}
+
+	//now get bookmarked/joined groups as well
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
@@ -1039,7 +1036,8 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 // Social []SocialMsg       `json:"social"`
 func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["community"]
+	community := vars["community"]
+	key := vars["address"]
 	var landingData LandingPageItems
 
 	//for now, the walletchat living room is all users by default
@@ -1061,11 +1059,15 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 
 	//has messaged - check messages for this user address
 	var groupchat []entity.V2groupchatitem
-	database.Connector.Where("nftaddr = ?", "walletchat").Where("fromaddr = ?", key).Find(&groupchat)
+	database.Connector.Where("nftaddr = ?", community).Where("fromaddr = ?", key).Find(&groupchat)
+
+	fmt.Printf("group chat: %#v\n", groupchat)
+
 	var hasMessaged bool
 	if len(groupchat) > 0 {
 		hasMessaged = true
 	} else {
+		hasMessaged = false
 		//create the welcome message, save it
 		var newgroupchatuser entity.V2groupchatitem
 		newgroupchatuser.Type = "welcome"
