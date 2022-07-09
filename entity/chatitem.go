@@ -18,6 +18,7 @@ type Groupchatitem struct {
 	Timestamp time.Time `json:"timestamp"`
 	Message   string    `json:"message"`
 	Nftaddr   string    `json:"nftaddr"`
+	Name      string    `json:"name"`
 }
 
 //have to make a new version of the table with type, for walletchat living room welcome messsages

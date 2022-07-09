@@ -168,7 +168,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Nftaddr = bookmarks[i].Nftaddr
 		returnItem.Fromaddr = bookmarks[i].Walletaddr
 		returnItem.Unreadcnt = len(chatCnt)
-		returnItem.Type = "community"
+		returnItem.Type = "nft"
 		returnItem.Sendername = ""
 		if returnItem.Message == "" {
 			var unsetTime time.Time
@@ -180,6 +180,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//mana is getting V2 wallet chat living room stuff directly for now
+	//type will be "community" here
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
@@ -531,6 +532,16 @@ func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Groupchatitem
 	database.Connector.Where("nftaddr = ?", key).Find(&chat)
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
