@@ -6,4 +6,5 @@ type Comments struct {
 	Nftid     int    `json:"nftid"`
 	Timestamp string `json:"timestamp"`
 	Message   string `json:"message"`
+	Name      string `json:"name"`
 }

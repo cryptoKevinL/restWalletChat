@@ -191,6 +191,17 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
 	var chat []entity.Chatitem
 	database.Connector.Find(&chat)
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(chat)
@@ -324,6 +335,17 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", key).Where("nftid != ?", 0).Or("toaddr = ?", key).Where("nftid != ?", 0).Find(&chat)
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -374,6 +396,16 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -385,6 +417,17 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Chatitem
 	database.Connector.Where("nftaddr = ?", nftaddr).Where("nftid = ?", nftid).Find(&chat)
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -434,6 +477,16 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -481,6 +534,16 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 			chat = append(chat, chatmember)
 		}
 	}
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
@@ -541,6 +604,7 @@ func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
 			chat[i].Name = addrname.Name
 		}
 	}
+	//end of adding names for fromaddr
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
@@ -717,6 +781,17 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 
 		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
 	}
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(chat); i++ {
+		var result = database.Connector.Where("address = ?", chat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			chat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(chat)
 }
@@ -864,6 +939,17 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 
 	var comment []entity.Comments
 	database.Connector.Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&comment)
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(comment); i++ {
+		var result = database.Connector.Where("address = ?", comment[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			comment[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comment)
 }
@@ -882,6 +968,17 @@ func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 func GetAllComments(w http.ResponseWriter, r *http.Request) {
 	var comment []entity.Comments
 	database.Connector.Find(&comment)
+
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(comment); i++ {
+		var result = database.Connector.Where("address = ?", comment[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			comment[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(comment)

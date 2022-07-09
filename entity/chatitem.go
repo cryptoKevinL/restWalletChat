@@ -10,6 +10,7 @@ type Chatitem struct {
 	Message   string `json:"message"`
 	Nftaddr   string `json:"nftaddr"`
 	Nftid     int    `json:"nftid"`
+	Name      string `json:"name"`
 }
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
