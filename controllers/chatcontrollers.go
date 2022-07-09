@@ -131,7 +131,44 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	//now get bookmarked/joined groups as well
+	//now get bookmarked/joined groups as well but fit it into the inbox return val type
+	var bookmarks []entity.Bookmarkitem
+	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
+
+	//now add last message from group chat this bookmark is for
+	var bookmarkchat entity.Groupchatitem
+	for i := 0; i < len(bookmarks); i++ {
+		bookmarkchat.Message = ""
+		//bookmarkchat.Timestamp
+		database.Connector.Where("nftaddr = ?", bookmarks[i].Nftaddr).Find(&bookmarkchat)
+
+		//get num unread messages
+		var chatCnt []entity.Groupchatitem
+		var chatReadTime entity.Groupchatreadtime
+		database.Connector.Where("fromaddr = ?", key).Find(&chatReadTime)
+		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
+		if chatReadTime.Fromaddr == "" {
+			database.Connector.Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
+		} else {
+			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
+		}
+		//end get num unread messages
+
+		var returnItem entity.Chatiteminbox
+		returnItem.Message = bookmarkchat.Message
+		returnItem.Timestamp = bookmarkchat.Timestamp.String()
+		returnItem.Nftaddr = bookmarks[i].Nftaddr
+		returnItem.Fromaddr = bookmarks[i].Walletaddr
+		returnItem.Unreadcnt = len(chatCnt)
+		returnItem.Type = "community"
+		if returnItem.Message == "" {
+			var unsetTime time.Time
+			var noInt int
+			returnItem.Unreadcnt = noInt
+			returnItem.Timestamp = unsetTime.String()
+		}
+		userInbox = append(userInbox, returnItem)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
