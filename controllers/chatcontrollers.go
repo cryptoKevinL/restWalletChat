@@ -170,6 +170,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		userInbox = append(userInbox, returnItem)
 	}
 
+	//mana is getting V2 wallet chat living room stuff directly for now
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
 }
@@ -1109,7 +1111,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		var newgroupchatuser entity.V2groupchatitem
 		newgroupchatuser.Type = "welcome"
 		newgroupchatuser.Fromaddr = key
-		newgroupchatuser.Nftaddr = "walletchat"
+		newgroupchatuser.Nftaddr = community
 		newgroupchatuser.Message = "Welcome " + key + " to the Wallet Chat Living Room!"
 		newgroupchatuser.Timestamp = time.Now()
 		//add it to the database
