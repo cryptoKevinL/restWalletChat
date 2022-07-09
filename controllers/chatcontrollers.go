@@ -1246,8 +1246,10 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	//name
 	landingData.Name = "WalletChat HQ"
 
-	//logo url
-	landingData.Logo = "Logo Address Here"
+	//logo base64 data (url requires other changes)
+	var imgname entity.Imageitem
+	database.Connector.Where("name = ?", community).Find(&imgname)
+	landingData.Logo = imgname.Base64data
 
 	//WalletChat is verified of course
 	landingData.Verified = true
