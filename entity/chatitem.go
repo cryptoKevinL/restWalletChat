@@ -50,6 +50,11 @@ type Addrnameitem struct {
 	Name    string `json:"name"`
 }
 
+type Imageitem struct {
+	Base64data string `json:"base64data"`
+	Name       string `json:"name"`
+}
+
 type Bookmarkitem struct {
 	Walletaddr string `json:"walletaddr"`
 	Nftaddr    string `json:"nftaddr"`

@@ -41,7 +41,6 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/create_groupchatitem", controllers.CreateGroupChatitem).Methods("POST")
 	router.HandleFunc("/get_groupchatitems/{address}", controllers.GetGroupChatItems).Methods("GET")
 	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
-	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
 	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
 
 	//group chat V2 used for walletchat living room (needed another type and old version to keep working for now)
@@ -58,6 +57,11 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/name", controllers.CreateAddrNameItem).Methods("POST")
 	router.HandleFunc("/name", controllers.UpdateAddrNameItem).Methods("PUT")
 	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
+
+	//Logos / Images stored in base64
+	router.HandleFunc("/image", controllers.CreateImageItem).Methods("POST")
+	router.HandleFunc("/image", controllers.UpdateImageItem).Methods("PUT")
+	router.HandleFunc("/image/{name}", controllers.GetImageItem).Methods("GET")
 
 	//settings items - currently this is the public key added upon first login for encryption/signing without MM
 	router.HandleFunc("/create_settings", controllers.CreateSettings).Methods("POST")

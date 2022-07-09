@@ -704,6 +704,48 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(returnItems)
 }
 
+func CreateImageItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var imgname entity.Imageitem
+	json.Unmarshal(requestBody, &imgname)
+
+	database.Connector.Create(imgname)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(imgname)
+}
+
+func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var imgname entity.Imageitem
+	json.Unmarshal(requestBody, &imgname)
+
+	var result = database.Connector.Model(&entity.Addrnameitem{}).
+		Where("name = ?", imgname.Name).
+		Update("base64data", imgname.Base64data)
+
+	var returnval bool
+	if result.RowsAffected > 0 {
+		returnval = true
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(returnval)
+}
+
+func GetImageItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	var imgname []entity.Imageitem
+
+	database.Connector.Where("name = ?", name).Find(&imgname)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(imgname)
+}
+
 //give a common name to a user address, or NFT collection
 func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
