@@ -1033,13 +1033,16 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 // Social []SocialMsg       `json:"social"`
 func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["address"]
+	key := vars["community"]
 	var landingData LandingPageItems
 
 	//for now, the walletchat living room is all users by default
 	var settings []entity.Settings
 	database.Connector.Find(&settings)
 	landingData.Members = len(settings)
+
+	//name
+	landingData.Name = "WalletChat HQ"
 
 	//logo url
 	landingData.Logo = "Logo Address Here"
@@ -1085,7 +1088,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	landingData.Social = append(landingData.Social, twitterSocial)
 	var discordSocial SocialMsg
 	discordSocial.Type = "discord"
-	discordSocial.Username = "WalletChat???"
+	discordSocial.Username = "WalletChat"
 	landingData.Social = append(landingData.Social, discordSocial)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -1173,6 +1176,7 @@ type SocialMsg struct {
 }
 
 type LandingPageItems struct {
+	Name     string                   `json:"name"`
 	Members  int                      `json:"members"`
 	Logo     string                   `json:"logo"`         // logo url, stored in backend
 	Verified bool                     `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default

@@ -37,9 +37,6 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
 	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
 
-	//someday needs addtional params?
-	router.HandleFunc("/walletchat/{address}", controllers.GetWalletChat).Methods("GET")
-
 	//group chat
 	router.HandleFunc("/create_groupchatitem", controllers.CreateGroupChatitem).Methods("POST")
 	router.HandleFunc("/get_groupchatitems/{address}", controllers.GetGroupChatItems).Methods("GET")
@@ -48,7 +45,8 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
 
 	//group chat V2 used for walletchat living room (needed another type and old version to keep working for now)
-	router.HandleFunc("/create_livngroom_message", controllers.CreateGroupChatitemV2).Methods("POST")
+	router.HandleFunc("/community/{community/{address}", controllers.GetWalletChat).Methods("GET")
+	router.HandleFunc("/community", controllers.CreateGroupChatitemV2).Methods("POST")
 
 	//bookmarks
 	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")
