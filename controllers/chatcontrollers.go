@@ -79,6 +79,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		var chatCount []entity.Chatitem
 		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chatCount)
 
+		//get name for return val
+		var addrname entity.Addrnameitem
+		database.Connector.Where("address = ?", chatmember).Find(&addrname)
+
 		//probably a more effecient way, but
 		var firstItemWCount entity.Chatiteminbox
 		firstItemWCount.Fromaddr = firstItem.Fromaddr
@@ -88,8 +92,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		firstItemWCount.Message = firstItem.Message
 		firstItemWCount.Unreadcnt = len(chatCount)
 		firstItemWCount.Type = "nft"
+		firstItemWCount.Sendername = ""
 		if firstItem.Nftaddr == "" {
 			firstItemWCount.Type = "dm"
+			firstItemWCount.Sendername = addrname.Name
 		}
 		var secondItemWCount entity.Chatiteminbox
 		secondItemWCount.Fromaddr = secondItem.Fromaddr
@@ -99,8 +105,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
 		secondItemWCount.Type = "nft"
+		secondItemWCount.Sendername = ""
 		if firstItem.Nftaddr == "" {
 			secondItemWCount.Type = "dm"
+			secondItemWCount.Sendername = addrname.Name
 		}
 
 		//pick the most recent message
@@ -161,6 +169,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Fromaddr = bookmarks[i].Walletaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		returnItem.Type = "community"
+		returnItem.Sendername = ""
 		if returnItem.Message == "" {
 			var unsetTime time.Time
 			var noInt int

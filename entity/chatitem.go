@@ -69,13 +69,14 @@ type Nftsidebar struct {
 }
 
 type Chatiteminbox struct {
-	Fromaddr  string `json:"fromaddr"`
-	Toaddr    string `json:"toaddr"`
-	Timestamp string `json:"timestamp"`
-	Msgread   bool   `json:"read"`
-	Message   string `json:"message"`
-	Nftaddr   string `json:"nftaddr"`
-	Nftid     int    `json:"nftid"`
-	Unreadcnt int    `json:"unread"`
-	Type      string `json:"type"`
+	Fromaddr   string `json:"fromaddr"`
+	Toaddr     string `json:"toaddr"`
+	Timestamp  string `json:"timestamp"`
+	Msgread    bool   `json:"read"`
+	Message    string `json:"message"`
+	Nftaddr    string `json:"nftaddr"`
+	Nftid      int    `json:"nftid"`
+	Unreadcnt  int    `json:"unread"`
+	Type       string `json:"type"`
+	Sendername string `json:"sender_name"`
 }
