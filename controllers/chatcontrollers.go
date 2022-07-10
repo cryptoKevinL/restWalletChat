@@ -162,7 +162,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Nftaddr = bookmarkchat.Nftaddr
 		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
-		//returnItem.Type = "nft" (shoud be set already with /community or /create_groupchat)
+		returnItem.Type = bookmarkchat.Type
 		//until we fix up old tables, we can hack this to double check
 		if strings.HasPrefix(returnItem.Nftaddr, "0x") {
 			returnItem.Type = "nft"
@@ -1302,7 +1302,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Type = "communitywelcome"
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
-		newgroupchatuser.Message = "Welcome " + key + " to the Wallet Chat Living Room!"
+		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
 		newgroupchatuser.Timestamp = time.Now()
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
