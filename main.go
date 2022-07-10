@@ -44,8 +44,8 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
 
 	//group chat
-	router.HandleFunc("/community/{community}/{address}", controllers.GetWalletChat).Methods("GET")
-	router.HandleFunc("/community", controllers.CreateGroupChatitemV2).Methods("POST")
+	router.HandleFunc("/community/{community}/{address}", controllers.GetWalletChat).Methods("GET") //TODO: make common
+	router.HandleFunc("/community", controllers.CreateCommunityChatitem).Methods("POST")
 
 	//bookmarks
 	router.HandleFunc("/create_bookmark", controllers.CreateBookmarkItem).Methods("POST")

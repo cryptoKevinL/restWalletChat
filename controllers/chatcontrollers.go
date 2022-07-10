@@ -91,12 +91,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		firstItemWCount.Msgread = firstItem.Msgread
 		firstItemWCount.Message = firstItem.Message
 		firstItemWCount.Unreadcnt = len(chatCount)
-		firstItemWCount.Type = "nft"
-		firstItemWCount.Sendername = ""
-		if firstItem.Nftaddr == "" {
-			firstItemWCount.Type = "dm"
-			firstItemWCount.Sendername = addrname.Name
-		}
+		//firstItemWCount.Type = "nft"  (shoud be set already with /community or /create_groupchat)
+		firstItemWCount.Type = "dm"
+		firstItemWCount.Sendername = addrname.Name
+
 		var secondItemWCount entity.Chatiteminbox
 		secondItemWCount.Fromaddr = secondItem.Fromaddr
 		secondItemWCount.Toaddr = secondItem.Toaddr
@@ -104,12 +102,9 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		secondItemWCount.Msgread = secondItem.Msgread
 		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
-		secondItemWCount.Type = "nft"
-		secondItemWCount.Sendername = ""
-		if firstItem.Nftaddr == "" {
-			secondItemWCount.Type = "dm"
-			secondItemWCount.Sendername = addrname.Name
-		}
+		//secondItemWCount.Type = "nft" (shoud be set already with /community or /create_groupchat)
+		secondItemWCount.Type = "dm"
+		secondItemWCount.Sendername = addrname.Name
 
 		//pick the most recent message
 		if firstItem.Fromaddr != "" {
@@ -168,7 +163,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Nftaddr = bookmarkchat.Nftaddr
 		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
-		returnItem.Type = "nft"
+		//returnItem.Type = "nft" (shoud be set already with /community or /create_groupchat)
 		returnItem.Sendername = ""
 		if returnItem.Message == "" {
 			var unsetTime time.Time
@@ -179,43 +174,43 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		userInbox = append(userInbox, returnItem)
 	}
 
-	//eventaully this will be combined and we won't need V2
-	//type will be "community" here
-	var groupchats []entity.Groupchatitem
-	database.Connector.Where("fromaddr = ?", key).Find(&groupchats)
-	var groupchat entity.Groupchatitem
-	for i := 0; i < len(groupchats); i++ {
-		groupchat.Message = ""
-		database.Connector.Where("nftaddr = ?", groupchats[i].Nftaddr).Find(&groupchat)
+	// //eventaully this will be combined and we won't need V2
+	// //type will be "community" here
+	// var groupchats []entity.Groupchatitem
+	// database.Connector.Where("fromaddr = ?", key).Find(&groupchats)
+	// var groupchat entity.Groupchatitem
+	// for i := 0; i < len(groupchats); i++ {
+	// 	groupchat.Message = ""
+	// 	database.Connector.Where("nftaddr = ?", groupchats[i].Nftaddr).Find(&groupchat)
 
-		//get num unread messages
-		var chatCnt []entity.Groupchatitem
-		var chatReadTime entity.Groupchatreadtime
-		database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
-		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
-		if chatReadTime.Fromaddr == "" {
-			database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
-		} else {
-			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
-		}
-		//end get num unread messages
+	// 	//get num unread messages
+	// 	var chatCnt []entity.Groupchatitem
+	// 	var chatReadTime entity.Groupchatreadtime
+	// 	database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
+	// 	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
+	// 	if chatReadTime.Fromaddr == "" {
+	// 		database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+	// 	} else {
+	// 		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+	// 	}
+	// 	//end get num unread messages
 
-		var returnItem entity.Chatiteminbox
-		returnItem.Message = groupchat.Message
-		returnItem.Timestamp = groupchat.Timestamp.String()
-		returnItem.Nftaddr = groupchat.Nftaddr
-		returnItem.Fromaddr = groupchat.Fromaddr
-		returnItem.Unreadcnt = len(chatCnt)
-		returnItem.Type = "community"
-		returnItem.Sendername = ""
-		if returnItem.Message == "" {
-			var unsetTime time.Time
-			var noInt int
-			returnItem.Unreadcnt = noInt
-			returnItem.Timestamp = unsetTime.String()
-		}
-		userInbox = append(userInbox, returnItem)
-	}
+	// 	var returnItem entity.Chatiteminbox
+	// 	returnItem.Message = groupchat.Message
+	// 	returnItem.Timestamp = groupchat.Timestamp.String()
+	// 	returnItem.Nftaddr = groupchat.Nftaddr
+	// 	returnItem.Fromaddr = groupchat.Fromaddr
+	// 	returnItem.Unreadcnt = len(chatCnt)
+	// 	returnItem.Type = "community"
+	// 	returnItem.Sendername = ""
+	// 	if returnItem.Message == "" {
+	// 		var unsetTime time.Time
+	// 		var noInt int
+	// 		returnItem.Unreadcnt = noInt
+	// 		returnItem.Timestamp = unsetTime.String()
+	// 	}
+	// 	userInbox = append(userInbox, returnItem)
+	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
@@ -602,7 +597,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Groupchatitem
 	json.Unmarshal(requestBody, &chat)
 
-	//fmt.Printf("Group Chat Item: %#v\n", chat)
+	chat.Type = "nft"
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -610,13 +605,14 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//CreateGroupChatitem creates GroupChatitem
-func CreateGroupChatitemV2(w http.ResponseWriter, r *http.Request) {
+//CreateGroupChatitem creates GroupChatitem just with community tag (don't really need this separate anymore)
+func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
 	json.Unmarshal(requestBody, &chat)
 
-	//fmt.Printf("V2 Group Chat Item: %#v\n", chat)
+	//set type (could hack this in GET side but this is probably cleaner?)
+	chat.Type = "communitymsg"
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -786,12 +782,6 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrname entity.Addrnameitem
 	json.Unmarshal(requestBody, &addrname)
-
-	//auto-join new users to WalletChat community (they can leave later)
-	var bookmark entity.Bookmarkitem
-	bookmark.Nftaddr = "walletchat"
-	bookmark.Walletaddr = addrname.Address
-	database.Connector.Create(bookmark)
 
 	database.Connector.Create(addrname)
 	w.Header().Set("Content-Type", "application/json")
@@ -1305,13 +1295,19 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		hasMessaged = false
 		//create the welcome message, save it
 		var newgroupchatuser entity.Groupchatitem
-		newgroupchatuser.Type = "welcome"
+		newgroupchatuser.Type = "communitywelcome"
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
 		newgroupchatuser.Message = "Welcome " + key + " to the Wallet Chat Living Room!"
 		newgroupchatuser.Timestamp = time.Now()
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
+
+		//auto-join new users to WalletChat community (they can leave later)
+		var bookmark entity.Bookmarkitem
+		bookmark.Nftaddr = "walletchat"
+		bookmark.Walletaddr = key
+		database.Connector.Create(bookmark)
 	}
 
 	landingData.Messaged = hasMessaged
