@@ -711,9 +711,9 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 		//get num unread messages
 		var chatCnt []entity.Groupchatitem
 		var chatReadTime entity.Groupchatreadtime
-		database.Connector.Where("fromaddr = ?", key).Find(&chatReadTime)
+		var dbQuery = database.Connector.Where("fromaddr = ?", key).Find(&chatReadTime)
 		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
-		if chatReadTime.Fromaddr == "" {
+		if dbQuery.RowsAffected == 0 {
 			database.Connector.Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
 		} else {
 			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
@@ -849,7 +849,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
 		//set timestamp when this was last grabbed
 		currtime := time.Now()
-		database.Connector.Model(&entity.Settings{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("fromaddr", currtime)
+		database.Connector.Model(&entity.Settings{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("lasttimestamp", currtime)
 	}
 
 	//make sure to get the name if it wasn't there (not there by default now)
