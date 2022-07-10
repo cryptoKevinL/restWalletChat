@@ -19,16 +19,6 @@ type Groupchatitem struct {
 	Timestamp time.Time `json:"timestamp"`
 	Message   string    `json:"message"`
 	Nftaddr   string    `json:"nftaddr"`
-	Name      string    `json:"name"`
-}
-
-//have to make a new version of the table with type, for walletchat living room welcome messsages
-//can convert over to this fully when released in store with UI changes (this helps current store verisons keep working)
-type V2groupchatitem struct {
-	Fromaddr  string    `json:"fromaddr"`
-	Timestamp time.Time `json:"timestamp"`
-	Message   string    `json:"message"`
-	Nftaddr   string    `json:"nftaddr"`
 	Type      string    `json:"type"`
 	Name      string    `json:"name"`
 }

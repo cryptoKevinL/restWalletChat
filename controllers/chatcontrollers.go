@@ -153,7 +153,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		//get num unread messages
 		var chatCnt []entity.Groupchatitem
 		var chatReadTime entity.Groupchatreadtime
-		database.Connector.Where("fromaddr = ?", key).Find(&chatReadTime)
+		database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatReadTime)
 		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 		if chatReadTime.Fromaddr == "" {
 			database.Connector.Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
@@ -165,8 +165,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		var returnItem entity.Chatiteminbox
 		returnItem.Message = bookmarkchat.Message
 		returnItem.Timestamp = bookmarkchat.Timestamp.String()
-		returnItem.Nftaddr = bookmarks[i].Nftaddr
-		returnItem.Fromaddr = bookmarks[i].Walletaddr
+		returnItem.Nftaddr = bookmarkchat.Nftaddr
+		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		returnItem.Type = "nft"
 		returnItem.Sendername = ""
@@ -179,10 +179,43 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		userInbox = append(userInbox, returnItem)
 	}
 
-	//eventaully this will be combined
+	//eventaully this will be combined and we won't need V2
 	//type will be "community" here
-	var groupchat []entity.V2groupchatitem
-	database.Connector.Where("fromaddr = ?", key).Find(&groupchat)
+	var groupchats []entity.Groupchatitem
+	database.Connector.Where("fromaddr = ?", key).Find(&groupchats)
+	var groupchat entity.Groupchatitem
+	for i := 0; i < len(groupchats); i++ {
+		groupchat.Message = ""
+		database.Connector.Where("nftaddr = ?", groupchats[i].Nftaddr).Find(&groupchat)
+
+		//get num unread messages
+		var chatCnt []entity.Groupchatitem
+		var chatReadTime entity.Groupchatreadtime
+		database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
+		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
+		if chatReadTime.Fromaddr == "" {
+			database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+		} else {
+			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+		}
+		//end get num unread messages
+
+		var returnItem entity.Chatiteminbox
+		returnItem.Message = groupchat.Message
+		returnItem.Timestamp = groupchat.Timestamp.String()
+		returnItem.Nftaddr = groupchat.Nftaddr
+		returnItem.Fromaddr = groupchat.Fromaddr
+		returnItem.Unreadcnt = len(chatCnt)
+		returnItem.Type = "community"
+		returnItem.Sendername = ""
+		if returnItem.Message == "" {
+			var unsetTime time.Time
+			var noInt int
+			returnItem.Unreadcnt = noInt
+			returnItem.Timestamp = unsetTime.String()
+		}
+		userInbox = append(userInbox, returnItem)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
@@ -580,7 +613,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 //CreateGroupChatitem creates GroupChatitem
 func CreateGroupChatitemV2(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
-	var chat entity.V2groupchatitem
+	var chat entity.Groupchatitem
 	json.Unmarshal(requestBody, &chat)
 
 	//fmt.Printf("V2 Group Chat Item: %#v\n", chat)
@@ -1260,7 +1293,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	landingData.Joined = true
 
 	//has messaged - check messages for this user address
-	var groupchat []entity.V2groupchatitem
+	var groupchat []entity.Groupchatitem
 	database.Connector.Where("nftaddr = ?", community).Where("fromaddr = ?", key).Find(&groupchat)
 
 	//fmt.Printf("group chat: %#v\n", groupchat)
@@ -1271,7 +1304,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	} else {
 		hasMessaged = false
 		//create the welcome message, save it
-		var newgroupchatuser entity.V2groupchatitem
+		var newgroupchatuser entity.Groupchatitem
 		newgroupchatuser.Type = "welcome"
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
@@ -1397,15 +1430,15 @@ type SocialMsg struct {
 }
 
 type LandingPageItems struct {
-	Name     string                   `json:"name"`
-	Members  int                      `json:"members"`
-	Logo     string                   `json:"logo"`         // logo url, stored in backend
-	Verified bool                     `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
-	Joined   bool                     `json:"joined"`       //number of members of the group
-	Messaged bool                     `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
-	Messages []entity.V2groupchatitem `json:"messages"`
-	Tweets   []TweetType              `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
-	Social   []SocialMsg              `json:"social"`
+	Name     string                 `json:"name"`
+	Members  int                    `json:"members"`
+	Logo     string                 `json:"logo"`         // logo url, stored in backend
+	Verified bool                   `json:"is_verified"`  // is this group verified? WalletChat's group is verified by default
+	Joined   bool                   `json:"joined"`       //number of members of the group
+	Messaged bool                   `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
+	Messages []entity.Groupchatitem `json:"messages"`
+	Tweets   []TweetType            `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
+	Social   []SocialMsg            `json:"social"`
 }
 
 type OpenseaData struct {

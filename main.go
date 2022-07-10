@@ -43,7 +43,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_groupchatitems/{address}/{useraddress}", controllers.GetGroupChatItemsByAddr).Methods("GET")
 	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
 
-	//group chat V2 used for walletchat living room (needed another type and old version to keep working for now)
+	//group chat
 	router.HandleFunc("/community/{community}/{address}", controllers.GetWalletChat).Methods("GET")
 	router.HandleFunc("/community", controllers.CreateGroupChatitemV2).Methods("POST")
 
