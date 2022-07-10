@@ -9,6 +9,7 @@ import (
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -91,7 +92,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		firstItemWCount.Msgread = firstItem.Msgread
 		firstItemWCount.Message = firstItem.Message
 		firstItemWCount.Unreadcnt = len(chatCount)
-		//firstItemWCount.Type = "nft"  (shoud be set already with /community or /create_groupchat)
 		firstItemWCount.Type = "dm"
 		firstItemWCount.Sendername = addrname.Name
 
@@ -102,7 +102,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		secondItemWCount.Msgread = secondItem.Msgread
 		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
-		//secondItemWCount.Type = "nft" (shoud be set already with /community or /create_groupchat)
 		secondItemWCount.Type = "dm"
 		secondItemWCount.Sendername = addrname.Name
 
@@ -164,6 +163,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		//returnItem.Type = "nft" (shoud be set already with /community or /create_groupchat)
+		//until we fix up old tables, we can hack this to double check
+		if strings.HasPrefix(returnItem.Nftaddr, "0x") {
+			returnItem.Type = "nft"
+		}
+
 		returnItem.Sendername = ""
 		if returnItem.Message == "" {
 			var unsetTime time.Time
