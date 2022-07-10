@@ -147,9 +147,9 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		//get num unread messages
 		var chatCnt []entity.Groupchatitem
 		var chatReadTime entity.Groupchatreadtime
-		database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatReadTime)
+		var dbQuery = database.Connector.Where("fromaddr = ?", key).Find(&chatReadTime)
 		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
-		if chatReadTime.Fromaddr == "" {
+		if dbQuery.RowsAffected == 0 {
 			database.Connector.Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
 		} else {
 			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
@@ -832,12 +832,12 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	var chat []entity.Groupchatitem
 
 	var chatReadTime entity.Groupchatreadtime
-	database.Connector.Where("fromaddr = ?", fromaddr).Find(&chatReadTime)
+	var dbQuery = database.Connector.Where("fromaddr = ?", fromaddr).Find(&chatReadTime)
 
 	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime.Lasttimestamp)
 
 	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
-	if chatReadTime.Fromaddr == "" {
+	if dbQuery.RowsAffected == 0 {
 		database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)
 
 		//add the first read element to the group timestamp table cross reference
