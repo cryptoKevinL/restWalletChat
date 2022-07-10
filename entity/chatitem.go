@@ -30,6 +30,7 @@ type V2groupchatitem struct {
 	Message   string    `json:"message"`
 	Nftaddr   string    `json:"nftaddr"`
 	Type      string    `json:"type"`
+	Name      string    `json:"name"`
 }
 
 //secondary table to help only load new messages for each user (not reload whole chat history)

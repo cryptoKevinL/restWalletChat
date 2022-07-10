@@ -179,8 +179,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		userInbox = append(userInbox, returnItem)
 	}
 
-	//mana is getting V2 wallet chat living room stuff directly for now
+	//eventaully this will be combined
 	//type will be "community" here
+	var groupchat []entity.V2groupchatitem
+	database.Connector.Where("fromaddr = ?", key).Find(&groupchat)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
@@ -1261,7 +1263,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	var groupchat []entity.V2groupchatitem
 	database.Connector.Where("nftaddr = ?", community).Where("fromaddr = ?", key).Find(&groupchat)
 
-	fmt.Printf("group chat: %#v\n", groupchat)
+	//fmt.Printf("group chat: %#v\n", groupchat)
 
 	var hasMessaged bool
 	if len(groupchat) > 0 {
@@ -1278,9 +1280,20 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
 	}
+
 	landingData.Messaged = hasMessaged
+
 	//grab all the data for walletchat group
 	database.Connector.Where("nftaddr = ?", "walletchat").Find(&groupchat)
+	//make sure to get the name if it wasn't there (not there by default now)
+	var addrname entity.Addrnameitem
+	for i := 0; i < len(groupchat); i++ {
+		var result = database.Connector.Where("address = ?", groupchat[i].Fromaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			groupchat[i].Name = addrname.Name
+		}
+	}
+	//end of adding names for fromaddr
 	landingData.Messages = groupchat
 
 	//get twitter data
