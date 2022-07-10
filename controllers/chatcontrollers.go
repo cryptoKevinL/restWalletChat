@@ -846,11 +846,10 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		chatReadTime.Lasttimestamp = time.Now()
 		database.Connector.Create(chatReadTime)
 	} else {
+		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
 		//set timestamp when this was last grabbed
 		currtime := time.Now()
 		database.Connector.Model(&entity.Settings{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("fromaddr", currtime)
-
-		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
 	}
 
 	//make sure to get the name if it wasn't there (not there by default now)
