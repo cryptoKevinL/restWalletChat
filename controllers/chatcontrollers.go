@@ -163,6 +163,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		returnItem.Type = bookmarkchat.Type
+		returnItem.Sendername = bookmarkchat.Name
 		//until we fix up old tables, we can hack this to double check
 		if strings.HasPrefix(returnItem.Nftaddr, "0x") {
 			returnItem.Type = "nft"
