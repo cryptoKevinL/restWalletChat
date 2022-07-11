@@ -10,7 +10,7 @@ type Chatitem struct {
 	Message   string `json:"message"`
 	Nftaddr   string `json:"nftaddr"`
 	Nftid     int    `json:"nftid"`
-	Name      string `json:"name"`
+	Name      string `json:"sender_name"`
 }
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
@@ -20,7 +20,7 @@ type Groupchatitem struct {
 	Message   string    `json:"message"`
 	Nftaddr   string    `json:"nftaddr"`
 	Type      string    `json:"type"`
-	Name      string    `json:"name"`
+	Name      string    `json:"sender_name"`
 }
 
 //secondary table to help only load new messages for each user (not reload whole chat history)
