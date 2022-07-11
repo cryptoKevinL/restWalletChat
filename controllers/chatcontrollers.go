@@ -248,9 +248,11 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Chatitem
 	database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
+
+	//get group chat unread items as well
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
 	json.NewEncoder(w).Encode(len(chat))
 }
 
@@ -838,7 +840,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 
 	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 	if dbQuery.RowsAffected == 0 {
-		database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)
+		//database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)  //mana requests all data for now
 
 		//add the first read element to the group timestamp table cross reference
 		chatReadTime.Fromaddr = fromaddr
@@ -846,11 +848,13 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		chatReadTime.Lasttimestamp = time.Now()
 		database.Connector.Create(chatReadTime)
 	} else {
-		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
+		//database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
 		//set timestamp when this was last grabbed
 		currtime := time.Now()
 		database.Connector.Model(&entity.Groupchatreadtime{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("lasttimestamp", currtime)
 	}
+	//this line goes away if we selectively load data in the future
+	database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
 
 	//make sure to get the name if it wasn't there (not there by default now)
 	var addrname entity.Addrnameitem
