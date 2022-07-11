@@ -2,6 +2,19 @@ package entity
 
 import "time"
 
+//rename the type in GET /inbox to context_type: [nft, community, dm] and
+//retain variable name type in message objects in communities to be [welcome, message] instead of [communitymsg, communitywelcome]
+// string mapping
+const ( //context_type mapping just for bookkeeping(golang sucks for enums as well...)
+	Nft       string = "nft"
+	Community string = "community"
+	DM        string = "dm"
+)
+const ( //type mapping just for bookkeeping(golang sucks for enums as well...)
+	Welcome string = "welcome"
+	Message string = "message"
+)
+
 type Chatitem struct {
 	Fromaddr  string `json:"fromaddr"`
 	Toaddr    string `json:"toaddr"`
@@ -15,12 +28,13 @@ type Chatitem struct {
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
 type Groupchatitem struct {
-	Fromaddr  string    `json:"fromaddr"`
-	Timestamp time.Time `json:"timestamp"`
-	Message   string    `json:"message"`
-	Nftaddr   string    `json:"nftaddr"`
-	Type      string    `json:"type"`
-	Name      string    `json:"sender_name"`
+	Fromaddr    string    `json:"fromaddr"`
+	Timestamp   time.Time `json:"timestamp"`
+	Message     string    `json:"message"`
+	Nftaddr     string    `json:"nftaddr"`
+	Type        string    `json:"type"`
+	Contexttype string    `json:"context_type"`
+	Name        string    `json:"sender_name"`
 }
 
 //secondary table to help only load new messages for each user (not reload whole chat history)
@@ -66,15 +80,17 @@ type Nftsidebar struct {
 	Nftid    int    `json:"nftid"`
 }
 
+//this is a return type only
 type Chatiteminbox struct {
-	Fromaddr   string `json:"fromaddr"`
-	Toaddr     string `json:"toaddr"`
-	Timestamp  string `json:"timestamp"`
-	Msgread    bool   `json:"read"`
-	Message    string `json:"message"`
-	Nftaddr    string `json:"nftaddr"`
-	Nftid      int    `json:"nftid"`
-	Unreadcnt  int    `json:"unread"`
-	Type       string `json:"type"`
-	Sendername string `json:"sender_name"`
+	Fromaddr    string `json:"fromaddr"`
+	Toaddr      string `json:"toaddr"`
+	Timestamp   string `json:"timestamp"`
+	Msgread     bool   `json:"read"`
+	Message     string `json:"message"`
+	Nftaddr     string `json:"nftaddr"`
+	Nftid       int    `json:"nftid"`
+	Unreadcnt   int    `json:"unread"`
+	Type        string `json:"type"`
+	Contexttype string `json:"context_type"`
+	Sendername  string `json:"sender_name"`
 }

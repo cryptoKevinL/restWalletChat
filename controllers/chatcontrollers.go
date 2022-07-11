@@ -84,7 +84,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		var addrname entity.Addrnameitem
 		database.Connector.Where("address = ?", chatmember).Find(&addrname)
 
-		//probably a more effecient way, but
+		//probably a more effecient way, but...
 		var firstItemWCount entity.Chatiteminbox
 		firstItemWCount.Fromaddr = firstItem.Fromaddr
 		firstItemWCount.Toaddr = firstItem.Toaddr
@@ -92,7 +92,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		firstItemWCount.Msgread = firstItem.Msgread
 		firstItemWCount.Message = firstItem.Message
 		firstItemWCount.Unreadcnt = len(chatCount)
-		firstItemWCount.Type = "dm"
+		firstItemWCount.Contexttype = entity.DM
+		firstItemWCount.Type = entity.Message
 		firstItemWCount.Sendername = addrname.Name
 
 		var secondItemWCount entity.Chatiteminbox
@@ -102,7 +103,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		secondItemWCount.Msgread = secondItem.Msgread
 		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
-		secondItemWCount.Type = "dm"
+		secondItemWCount.Contexttype = entity.Message
+		firstItemWCount.Type = secondItemWCount.Type
 		secondItemWCount.Sendername = addrname.Name
 
 		//pick the most recent message
@@ -163,10 +165,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		returnItem.Type = bookmarkchat.Type
+		returnItem.Contexttype = entity.Community
 		returnItem.Sendername = bookmarkchat.Name
 		//until we fix up old tables, we can hack this to double check
 		if strings.HasPrefix(returnItem.Nftaddr, "0x") {
-			returnItem.Type = "nft"
+			returnItem.Contexttype = entity.Nft
 		}
 
 		returnItem.Sendername = ""
@@ -604,7 +607,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Groupchatitem
 	json.Unmarshal(requestBody, &chat)
 
-	chat.Type = "nft"
+	chat.Type = entity.Nft
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -619,7 +622,9 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(requestBody, &chat)
 
 	//set type (could hack this in GET side but this is probably cleaner?)
-	chat.Type = "communitymsg"
+	if chat.Type != entity.Welcome {
+		chat.Type = entity.Message
+	}
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -1303,7 +1308,8 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		hasMessaged = false
 		//create the welcome message, save it
 		var newgroupchatuser entity.Groupchatitem
-		newgroupchatuser.Type = "communitywelcome"
+		newgroupchatuser.Type = entity.Welcome
+		newgroupchatuser.Contexttype = entity.Community
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
 		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
