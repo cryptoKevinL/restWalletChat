@@ -103,8 +103,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		secondItemWCount.Msgread = secondItem.Msgread
 		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
-		secondItemWCount.Contexttype = entity.Message
-		firstItemWCount.Type = secondItemWCount.Type
+		secondItemWCount.Contexttype = entity.DM
+		secondItemWCount.Type = entity.Message
 		secondItemWCount.Sendername = addrname.Name
 
 		//pick the most recent message
@@ -149,7 +149,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		//get num unread messages
 		var chatCnt []entity.Groupchatitem
 		var chatReadTime entity.Groupchatreadtime
-		var dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?").Find(&chatReadTime)
+		var dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatReadTime)
 		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 		if dbQuery.RowsAffected == 0 {
 			database.Connector.Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
@@ -165,6 +165,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		returnItem.Type = bookmarkchat.Type
+		//retrofit old messages prior to setting Type
+		if returnItem.Type != entity.Message && returnItem.Type != entity.Welcome {
+			returnItem.Type = entity.Message
+		}
 		returnItem.Contexttype = entity.Community
 		returnItem.Sendername = bookmarkchat.Name
 		//until we fix up old tables, we can hack this to double check
