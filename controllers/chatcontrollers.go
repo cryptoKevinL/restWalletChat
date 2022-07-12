@@ -611,7 +611,9 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Groupchatitem
 	json.Unmarshal(requestBody, &chat)
 
-	chat.Type = entity.Nft
+	//these will get overwritten as needed when returning data
+	chat.Contexttype = entity.Nft
+	chat.Type = entity.Message
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
