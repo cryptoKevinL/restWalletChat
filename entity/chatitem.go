@@ -93,4 +93,6 @@ type Chatiteminbox struct {
 	Type        string `json:"type"`
 	Contexttype string `json:"context_type"`
 	Sendername  string `json:"sender_name"`
+	Name        string `json:"name"`
+	LogoData    string `json:"logo"`
 }

@@ -170,7 +170,20 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			returnItem.Type = entity.Message
 		}
 		returnItem.Contexttype = entity.Community
-		returnItem.Sendername = bookmarkchat.Name
+
+		//get common name from nftaddress
+		var addrname entity.Addrnameitem
+		var result = database.Connector.Where("address = ?", bookmarkchat.Nftaddr).Find(&addrname)
+		if result.RowsAffected > 0 {
+			returnItem.Name = addrname.Name
+		}
+		//not sure if long term we will store by name (WalletChat HQ) or nftaddr (walletchat)
+		var imgname entity.Imageitem
+		result = database.Connector.Where("name = ?", returnItem.Name).Find(&imgname)
+		if result.RowsAffected > 0 {
+			returnItem.LogoData = imgname.Base64data
+		}
+
 		//until we fix up old tables, we can hack this to double check
 		if strings.HasPrefix(returnItem.Nftaddr, "0x") {
 			returnItem.Contexttype = entity.Nft
