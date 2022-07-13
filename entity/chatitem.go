@@ -26,6 +26,18 @@ type Chatitem struct {
 	Name      string `json:"sender_name"`
 }
 
+type Chatitems_tmp struct {
+	Fromaddr      string    `json:"fromaddr"`
+	Toaddr        string    `json:"toaddr"`
+	Timestamp     string    `json:"timestamp"`
+	Timestamp_dtm time.Time `json:"timestamp_dtm"`
+	Msgread       bool      `json:"read"`
+	Message       string    `json:"message"`
+	Nftaddr       string    `json:"nftaddr"`
+	Nftid         int       `json:"nftid"`
+	Name          string    `json:"sender_name"`
+}
+
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
 type Groupchatitem struct {
 	Fromaddr    string    `json:"fromaddr"`

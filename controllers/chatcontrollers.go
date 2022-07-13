@@ -618,6 +618,24 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+func CreateChatitemTmp(w http.ResponseWriter, r *http.Request) {
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var chat entity.Chatitems_tmp
+	json.Unmarshal(requestBody, &chat)
+
+	chat.Timestamp_dtm = time.Now()
+
+	var dbQuery = database.Connector.Create(chat)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if dbQuery.RowsAffected > 0 {
+		json.NewEncoder(w).Encode(chat)
+	} else {
+		json.NewEncoder(w).Encode(false)
+	}
+
+}
+
 //CreateGroupChatitem creates GroupChatitem
 func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)

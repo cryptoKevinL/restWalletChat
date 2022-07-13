@@ -35,6 +35,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/deleteall_chatitems/{address}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
 	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
+	router.HandleFunc("/create_chatitem_tmp", controllers.CreateChatitemTmp).Methods("POST")
 	router.HandleFunc("/getall_chatitems", controllers.GetAllChatitems).Methods("GET")
 
 	//group chat
