@@ -709,6 +709,8 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Chatitem
 	json.Unmarshal(requestBody, &chat)
 
+	chat.Timestamp_dtm = time.Now()
+
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -760,6 +762,7 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	if chat.Type != entity.Welcome {
 		chat.Type = entity.Message
 	}
+	chat.Timestamp_dtm = time.Now()
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
