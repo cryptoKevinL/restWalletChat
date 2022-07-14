@@ -16,17 +16,19 @@ const ( //type mapping just for bookkeeping(golang sucks for enums as well...)
 )
 
 type Chatitem struct {
-	Fromaddr  string `json:"fromaddr"`
-	Toaddr    string `json:"toaddr"`
-	Timestamp string `json:"timestamp"`
-	Msgread   bool   `json:"read"`
-	Message   string `json:"message"`
-	Nftaddr   string `json:"nftaddr"`
-	Nftid     int    `json:"nftid"`
-	Name      string `json:"sender_name"`
+	Fromaddr      string    `json:"fromaddr"`
+	Toaddr        string    `json:"toaddr"`
+	Timestamp     string    `json:"timestamp"`
+	Timestamp_dtm time.Time `json:"timestamp_dtm"`
+	Msgread       bool      `json:"read"`
+	Message       string    `json:"message"`
+	Nftaddr       string    `json:"nftaddr"`
+	Nftid         int       `json:"nftid"`
+	Name          string    `json:"sender_name"`
 }
 
-type Chatitems_tmp struct {
+//for olivers view function
+type V_chatitem struct {
 	Fromaddr      string    `json:"fromaddr"`
 	Toaddr        string    `json:"toaddr"`
 	Timestamp     string    `json:"timestamp"`
@@ -40,20 +42,22 @@ type Chatitems_tmp struct {
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
 type Groupchatitem struct {
-	Fromaddr    string    `json:"fromaddr"`
-	Timestamp   time.Time `json:"timestamp"`
-	Message     string    `json:"message"`
-	Nftaddr     string    `json:"nftaddr"`
-	Type        string    `json:"type"`
-	Contexttype string    `json:"context_type"`
-	Name        string    `json:"sender_name"`
+	Fromaddr      string    `json:"fromaddr"`
+	Timestamp     string    `json:"timestamp"`
+	Timestamp_dtm time.Time `json:"timestamp_dtm"`
+	Message       string    `json:"message"`
+	Nftaddr       string    `json:"nftaddr"`
+	Type          string    `json:"type"`
+	Contexttype   string    `json:"context_type"`
+	Name          string    `json:"sender_name"`
 }
 
 //secondary table to help only load new messages for each user (not reload whole chat history)
 type Groupchatreadtime struct {
-	Fromaddr      string    `json:"fromaddr"`
-	Lasttimestamp time.Time `json:"lasttimestamp"`
-	Nftaddr       string    `json:"nftaddr"`
+	Fromaddr          string    `json:"fromaddr"`
+	Lasttimestamp     time.Time `json:"lasttimestamp"`
+	Lasttimestamp_dtm time.Time `json:"lasttimestamp_dtm"`
+	Nftaddr           string    `json:"nftaddr"`
 }
 
 //potentially use this to keep track of user logins for DAU metrics
@@ -78,11 +82,12 @@ type Bookmarkitem struct {
 }
 
 type BookmarkReturnItem struct {
-	Walletaddr    string    `json:"walletaddr"`
-	Nftaddr       string    `json:"nftaddr"`
-	Lastmsg       string    `json:"lastmsg"`
-	Lasttimestamp time.Time `json:"lasttimestamp"`
-	Unreadcnt     int       `json:"unreadcnt"`
+	Walletaddr        string    `json:"walletaddr"`
+	Nftaddr           string    `json:"nftaddr"`
+	Lastmsg           string    `json:"lastmsg"`
+	Lasttimestamp     string    `json:"lasttimestamp"`
+	Lasttimestamp_dtm time.Time `json:"lasttimestamp_dtm"`
+	Unreadcnt         int       `json:"unreadcnt"`
 }
 
 type Nftsidebar struct {
@@ -94,17 +99,18 @@ type Nftsidebar struct {
 
 //this is a return type only
 type Chatiteminbox struct {
-	Fromaddr    string `json:"fromaddr"`
-	Toaddr      string `json:"toaddr"`
-	Timestamp   string `json:"timestamp"`
-	Msgread     bool   `json:"read"`
-	Message     string `json:"message"`
-	Nftaddr     string `json:"nftaddr"`
-	Nftid       int    `json:"nftid"`
-	Unreadcnt   int    `json:"unread"`
-	Type        string `json:"type"`
-	Contexttype string `json:"context_type"`
-	Sendername  string `json:"sender_name"`
-	Name        string `json:"name"`
-	LogoData    string `json:"logo"`
+	Fromaddr      string    `json:"fromaddr"`
+	Toaddr        string    `json:"toaddr"`
+	Timestamp     string    `json:"timestamp"`
+	Timestamp_dtm time.Time `json:"timestamp_dtm"`
+	Msgread       bool      `json:"read"`
+	Message       string    `json:"message"`
+	Nftaddr       string    `json:"nftaddr"`
+	Nftid         int       `json:"nftid"`
+	Unreadcnt     int       `json:"unread"`
+	Type          string    `json:"type"`
+	Contexttype   string    `json:"context_type"`
+	Sendername    string    `json:"sender_name"`
+	Name          string    `json:"name"`
+	LogoData      string    `json:"logo"`
 }

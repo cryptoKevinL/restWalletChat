@@ -89,6 +89,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		firstItemWCount.Fromaddr = firstItem.Fromaddr
 		firstItemWCount.Toaddr = firstItem.Toaddr
 		firstItemWCount.Timestamp = firstItem.Timestamp
+		firstItemWCount.Timestamp_dtm = firstItem.Timestamp_dtm
 		firstItemWCount.Msgread = firstItem.Msgread
 		firstItemWCount.Message = firstItem.Message
 		firstItemWCount.Unreadcnt = len(chatCount)
@@ -100,6 +101,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		secondItemWCount.Fromaddr = secondItem.Fromaddr
 		secondItemWCount.Toaddr = secondItem.Toaddr
 		secondItemWCount.Timestamp = secondItem.Timestamp
+		secondItemWCount.Timestamp_dtm = secondItem.Timestamp_dtm
 		secondItemWCount.Msgread = secondItem.Msgread
 		secondItemWCount.Message = secondItem.Message
 		secondItemWCount.Unreadcnt = len(chatCount)
@@ -110,7 +112,23 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		//pick the most recent message
 		if firstItem.Fromaddr != "" {
 			if secondItem.Fromaddr == "" {
-				userInbox = append(userInbox, firstItemWCount)
+				//userInbox = append(userInbox, firstItemWCount)
+				//fmt.Printf("firstItem! : %#v\n", firstItemWCount.Timestamp)
+				//timesort the append
+				found := false
+				for i := 0; i < len(userInbox); i++ {
+					if firstItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
+						userInbox = append(userInbox[:i+1], userInbox[i:]...)
+						userInbox[i] = firstItemWCount
+						found = true
+						//fmt.Printf("firstItem found true! : %#v\n", firstItemWCount.Timestamp)
+						break
+					}
+				}
+				if !found {
+					userInbox = append(userInbox, firstItemWCount)
+				}
+				//end timesort the append
 			} else {
 				layout := "2006-01-02T15:04:05.000Z"
 				firstTime, error := time.Parse(layout, firstItem.Timestamp)
@@ -125,14 +143,77 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if firstTime.After(secondTime) {
-					userInbox = append(userInbox, firstItemWCount)
+					//userInbox = append(userInbox, firstItemWCount)
+
+					//timesort the append
+					found := false
+					for i := 0; i < len(userInbox); i++ {
+						if firstItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
+							userInbox = append(userInbox[:i+1], userInbox[i:]...)
+							userInbox[i] = firstItemWCount
+							found = true
+							//fmt.Printf("firstItem found true! : %#v\n", firstItemWCount.Timestamp)
+							break
+						}
+					}
+					if !found {
+						userInbox = append(userInbox, firstItemWCount)
+					}
+					//end timesort the append
+
+					//fmt.Println("firstItem!")
+					//fmt.Printf("firstItem! : %#v\n", firstItemWCount.Timestamp)
 				} else {
-					userInbox = append(userInbox, secondItemWCount)
+					//userInbox = append(userInbox, secondItemWCount)
+					//fmt.Println("secondItem!")
+					//fmt.Printf("secondItem! : %#v\n", secondItemWCount.Timestamp)
+					//timesort the append
+					found := false
+					for i := 0; i < len(userInbox); i++ {
+						if secondItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
+							userInbox = append(userInbox[:i+1], userInbox[i:]...)
+							userInbox[i] = secondItemWCount
+							found = true
+							//fmt.Printf("secondItem found true! : %#v\n", secondItemWCount.Timestamp)
+							break
+						}
+					}
+					if !found {
+						userInbox = append(userInbox, secondItemWCount)
+					}
+					//end timesort the append
 				}
 			}
 		} else if secondItem.Fromaddr != "" {
-			userInbox = append(userInbox, secondItemWCount)
+			//userInbox = append(userInbox, secondItemWCount)
+			//fmt.Println("secondItem!")
+			//fmt.Printf("secondItem! : %#v\n", secondItemWCount.Timestamp)
+			//timesort the append
+			found := false
+			for i := 0; i < len(userInbox); i++ {
+				if secondItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
+					userInbox = append(userInbox[:i+1], userInbox[i:]...)
+					userInbox[i] = secondItemWCount
+					//fmt.Printf("secondItem found true! : %#v\n", secondItemWCount.Timestamp)
+					found = true
+					break
+				}
+			}
+			if !found {
+				userInbox = append(userInbox, secondItemWCount)
+			}
+			//end timesort the append
 		}
+
+		//testing olivers view
+		//var testView []entity.V_chatitem
+		//fmt.Printf("****chatmember: : %#v\n", chatmember)
+		//database.Connector.Where("fromaddr in(?)", []string{chatmember, key}).Find(&testView)
+		//var dbQuery = database.Connector.Where("fromaddr = ? AND toaddr = ?", chatmember, key).Find(&testView)
+		//var dbQuery = database.Connector.Raw("select * from v_chatitems WHERE fromaddr in('0xcafebabe', '0xdeadbeef');").Scan(&testView)
+		// if dbQuery.RowsAffected > 0 {
+		// 	fmt.Printf("New View! : %#v\n", testView[0])
+		// }
 	}
 
 	//now get bookmarked/joined groups as well but fit it into the inbox return val type
@@ -160,7 +241,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 		var returnItem entity.Chatiteminbox
 		returnItem.Message = bookmarkchat.Message
-		returnItem.Timestamp = bookmarkchat.Timestamp.String()
+		returnItem.Timestamp = bookmarkchat.Timestamp
+		returnItem.Timestamp_dtm = bookmarkchat.Timestamp_dtm
 		returnItem.Nftaddr = bookmarkchat.Nftaddr
 		returnItem.Fromaddr = bookmarkchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
@@ -196,7 +278,22 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			returnItem.Unreadcnt = noInt
 			returnItem.Timestamp = unsetTime.String()
 		}
-		userInbox = append(userInbox, returnItem)
+
+		//timesort the append
+		found := false
+		for i := 0; i < len(userInbox); i++ {
+			if returnItem.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
+				userInbox = append(userInbox[:i+1], userInbox[i:]...)
+				userInbox[i] = returnItem
+				//fmt.Printf("secondItem found true! : %#v\n", secondItemWCount.Timestamp)
+				found = true
+				break
+			}
+		}
+		if !found {
+			userInbox = append(userInbox, returnItem)
+		}
+		//userInbox = append(userInbox, returnItem)
 	}
 
 	// //eventaully this will be combined and we won't need V2
@@ -618,23 +715,23 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-func CreateChatitemTmp(w http.ResponseWriter, r *http.Request) {
-	requestBody, _ := ioutil.ReadAll(r.Body)
-	var chat entity.Chatitems_tmp
-	json.Unmarshal(requestBody, &chat)
+// func CreateChatitemTmp(w http.ResponseWriter, r *http.Request) {
+// 	requestBody, _ := ioutil.ReadAll(r.Body)
+// 	var chat entity.Chatitems_tmp
+// 	json.Unmarshal(requestBody, &chat)
 
-	chat.Timestamp_dtm = time.Now()
+// 	chat.Timestamp_dtm = time.Now()
 
-	var dbQuery = database.Connector.Create(chat)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	if dbQuery.RowsAffected > 0 {
-		json.NewEncoder(w).Encode(chat)
-	} else {
-		json.NewEncoder(w).Encode(false)
-	}
+// 	var dbQuery = database.Connector.Create(chat)
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusCreated)
+// 	if dbQuery.RowsAffected > 0 {
+// 		json.NewEncoder(w).Encode(chat)
+// 	} else {
+// 		json.NewEncoder(w).Encode(false)
+// 	}
 
-}
+// }
 
 //CreateGroupChatitem creates GroupChatitem
 func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
@@ -645,6 +742,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	//these will get overwritten as needed when returning data
 	chat.Contexttype = entity.Nft
 	chat.Type = entity.Message
+	chat.Timestamp_dtm = time.Now()
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -761,21 +859,24 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 		if dbQuery.RowsAffected == 0 {
 			database.Connector.Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
 		} else {
-			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
+			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp_dtm).Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
 		}
 		//end get num unread messages
 
 		var returnItem entity.BookmarkReturnItem
 		returnItem.Lastmsg = chat.Message
 		returnItem.Lasttimestamp = chat.Timestamp
+		returnItem.Lasttimestamp_dtm = chat.Timestamp_dtm
 		returnItem.Nftaddr = bookmarks[i].Nftaddr
 		returnItem.Walletaddr = bookmarks[i].Walletaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		if returnItem.Lastmsg == "" {
-			var unsetTime time.Time
+			var unsetTimeDtm time.Time
+			var unsetTime string
 			var noInt int
 			returnItem.Unreadcnt = noInt
 			returnItem.Lasttimestamp = unsetTime
+			returnItem.Lasttimestamp_dtm = unsetTimeDtm
 		}
 		returnItems = append(returnItems, returnItem)
 	}
@@ -1350,7 +1451,8 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
 		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
-		newgroupchatuser.Timestamp = time.Now()
+		newgroupchatuser.Timestamp_dtm = time.Now()
+		newgroupchatuser.Timestamp = time.Now().Format(time.RFC3339)
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
 
