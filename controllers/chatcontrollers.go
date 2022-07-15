@@ -116,7 +116,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		if dbQuery.RowsAffected == 0 {
 			database.Connector.Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
 		} else {
-			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
+			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Lasttimestamp_dtm).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
 		}
 		//end get num unread messages
 
@@ -176,44 +176,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		}
 		//userInbox = append(userInbox, returnItem)
 	}
-
-	// //eventaully this will be combined and we won't need V2
-	// //type will be "community" here
-	// var groupchats []entity.Groupchatitem
-	// database.Connector.Where("fromaddr = ?", key).Find(&groupchats)
-	// var groupchat entity.Groupchatitem
-	// for i := 0; i < len(groupchats); i++ {
-	// 	groupchat.Message = ""
-	// 	database.Connector.Where("nftaddr = ?", groupchats[i].Nftaddr).Find(&groupchat)
-
-	// 	//get num unread messages
-	// 	var chatCnt []entity.Groupchatitem
-	// 	var chatReadTime entity.Groupchatreadtime
-	// 	database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
-	// 	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
-	// 	if chatReadTime.Fromaddr == "" {
-	// 		database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
-	// 	} else {
-	// 		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
-	// 	}
-	// 	//end get num unread messages
-
-	// 	var returnItem entity.Chatiteminbox
-	// 	returnItem.Message = groupchat.Message
-	// 	returnItem.Timestamp = groupchat.Timestamp.String()
-	// 	returnItem.Nftaddr = groupchat.Nftaddr
-	// 	returnItem.Fromaddr = groupchat.Fromaddr
-	// 	returnItem.Unreadcnt = len(chatCnt)
-	// 	returnItem.Type = "community"
-	// 	returnItem.Sendername = ""
-	// 	if returnItem.Message == "" {
-	// 		var unsetTime time.Time
-	// 		var noInt int
-	// 		returnItem.Unreadcnt = noInt
-	// 		returnItem.Timestamp = unsetTime.String()
-	// 	}
-	// 	userInbox = append(userInbox, returnItem)
-	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userInbox)
