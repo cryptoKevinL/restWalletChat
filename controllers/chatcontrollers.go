@@ -25,7 +25,6 @@ func stringInSlice(a string, list []string) bool {
 }
 
 //GetInboxByID returns the latest message for each unique conversation
-//TODO: properly design the relational DB structs to optimize this search/retrieve
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"] //owner of the inbox
@@ -42,13 +41,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		//fmt.Printf("search for unique addrs")
 		if chatitem.Fromaddr != key {
 			if !stringInSlice(chatitem.Fromaddr, uniqueChatMembers) {
-				//fmt.Printf("Unique Addr Found: %#v\n", chatitem.Fromaddr)
 				uniqueChatMembers = append(uniqueChatMembers, chatitem.Fromaddr)
 			}
 		}
 		if chatitem.Toaddr != key {
 			if !stringInSlice(chatitem.Toaddr, uniqueChatMembers) {
-				//fmt.Printf("Unique Addr Found: %#v\n", chatitem.Toaddr)
 				uniqueChatMembers = append(uniqueChatMembers, chatitem.Toaddr)
 			}
 		}
@@ -58,162 +55,46 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//for each unique chat member that is not the owner addr, get the latest message
 	var userInbox []entity.Chatiteminbox
 	for _, chatmember := range uniqueChatMembers {
-		var firstItem entity.Chatitem
-		var secondItem entity.Chatitem
-		var firstItems []entity.Chatitem
-		var secondItems []entity.Chatitem
-
-		//TODO change time in DB to DATETIME not string...
-
-		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Order("id desc").Find(&firstItems)
-		if len(firstItems) > 0 {
-			firstItem = firstItems[0]
-		}
-		//fmt.Printf("FirstItem : %#v\n", firstItem)
-		database.Connector.Where("fromaddr = ?", key).Where("toaddr = ?", chatmember).Order("id desc").Find(&secondItems)
-		if len(secondItems) > 0 {
-			secondItem = secondItems[0]
-		}
-		//fmt.Printf("SecondItem : %#v\n", secondItem)
-
-		//add Unread msg count to both first/second items since we don't know which one is newer yet
+		// //add Unread msg count to both first/second items since we don't know which one is newer yet
 		var chatCount []entity.Chatitem
 		database.Connector.Where("fromaddr = ?", chatmember).Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chatCount)
 
-		//get name for return val
+		// //get name for return val
 		var addrname entity.Addrnameitem
 		database.Connector.Where("address = ?", chatmember).Find(&addrname)
 
-		//probably a more effecient way, but...
-		var firstItemWCount entity.Chatiteminbox
-		firstItemWCount.Fromaddr = firstItem.Fromaddr
-		firstItemWCount.Toaddr = firstItem.Toaddr
-		firstItemWCount.Timestamp = firstItem.Timestamp
-		firstItemWCount.Timestamp_dtm = firstItem.Timestamp_dtm
-		firstItemWCount.Msgread = firstItem.Msgread
-		firstItemWCount.Message = firstItem.Message
-		firstItemWCount.Unreadcnt = len(chatCount)
-		firstItemWCount.Contexttype = entity.DM
-		firstItemWCount.Type = entity.Message
-		firstItemWCount.Sendername = addrname.Name
+		//database view - local code replaced 7/14
+		var vchatitem entity.V_chatitem
+		var dbQuery = database.Connector.Where("fromaddr = ? AND toaddr = ?", key, chatmember).Find(&vchatitem)
+		//var dbQuery = database.Connector.Raw("select * from v_chatitems WHERE fromaddr in('0xcafebabe', '0xdeadbeef');").Scan(&testView)
 
-		var secondItemWCount entity.Chatiteminbox
-		secondItemWCount.Fromaddr = secondItem.Fromaddr
-		secondItemWCount.Toaddr = secondItem.Toaddr
-		secondItemWCount.Timestamp = secondItem.Timestamp
-		secondItemWCount.Timestamp_dtm = secondItem.Timestamp_dtm
-		secondItemWCount.Msgread = secondItem.Msgread
-		secondItemWCount.Message = secondItem.Message
-		secondItemWCount.Unreadcnt = len(chatCount)
-		secondItemWCount.Contexttype = entity.DM
-		secondItemWCount.Type = entity.Message
-		secondItemWCount.Sendername = addrname.Name
+		var itemToInsert entity.Chatiteminbox
+		if dbQuery.RowsAffected > 0 {
+			itemToInsert.Fromaddr = vchatitem.Fromaddr
+			itemToInsert.Toaddr = vchatitem.Toaddr
+			itemToInsert.Timestamp = vchatitem.Timestamp
+			itemToInsert.Timestamp_dtm = vchatitem.Timestamp_dtm
+			itemToInsert.Msgread = vchatitem.Msgread
+			itemToInsert.Message = vchatitem.Message
+			itemToInsert.Unreadcnt = len(chatCount)
+			itemToInsert.Contexttype = entity.DM
+			itemToInsert.Type = entity.Message
+			itemToInsert.Sendername = addrname.Name
 
-		//pick the most recent message
-		if firstItem.Fromaddr != "" {
-			if secondItem.Fromaddr == "" {
-				//userInbox = append(userInbox, firstItemWCount)
-				//fmt.Printf("firstItem! : %#v\n", firstItemWCount.Timestamp)
-				//timesort the append
-				found := false
-				for i := 0; i < len(userInbox); i++ {
-					if firstItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
-						userInbox = append(userInbox[:i+1], userInbox[i:]...)
-						userInbox[i] = firstItemWCount
-						found = true
-						//fmt.Printf("firstItem found true! : %#v\n", firstItemWCount.Timestamp)
-						break
-					}
-				}
-				if !found {
-					userInbox = append(userInbox, firstItemWCount)
-				}
-				//end timesort the append
-			} else {
-				layout := "2006-01-02T15:04:05.000Z"
-				firstTime, error := time.Parse(layout, firstItem.Timestamp)
-				if error != nil {
-					//fmt.Println(error)
-					return
-				}
-				secondTime, error := time.Parse(layout, secondItem.Timestamp)
-				if error != nil {
-					//fmt.Println(error)
-					return
-				}
-
-				if firstTime.After(secondTime) {
-					//userInbox = append(userInbox, firstItemWCount)
-
-					//timesort the append
-					found := false
-					for i := 0; i < len(userInbox); i++ {
-						if firstItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
-							userInbox = append(userInbox[:i+1], userInbox[i:]...)
-							userInbox[i] = firstItemWCount
-							found = true
-							//fmt.Printf("firstItem found true! : %#v\n", firstItemWCount.Timestamp)
-							break
-						}
-					}
-					if !found {
-						userInbox = append(userInbox, firstItemWCount)
-					}
-					//end timesort the append
-
-					//fmt.Println("firstItem!")
-					//fmt.Printf("firstItem! : %#v\n", firstItemWCount.Timestamp)
-				} else {
-					//userInbox = append(userInbox, secondItemWCount)
-					//fmt.Println("secondItem!")
-					//fmt.Printf("secondItem! : %#v\n", secondItemWCount.Timestamp)
-					//timesort the append
-					found := false
-					for i := 0; i < len(userInbox); i++ {
-						if secondItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
-							userInbox = append(userInbox[:i+1], userInbox[i:]...)
-							userInbox[i] = secondItemWCount
-							found = true
-							//fmt.Printf("secondItem found true! : %#v\n", secondItemWCount.Timestamp)
-							break
-						}
-					}
-					if !found {
-						userInbox = append(userInbox, secondItemWCount)
-					}
-					//end timesort the append
-				}
-			}
-		} else if secondItem.Fromaddr != "" {
-			//userInbox = append(userInbox, secondItemWCount)
-			//fmt.Println("secondItem!")
-			//fmt.Printf("secondItem! : %#v\n", secondItemWCount.Timestamp)
-			//timesort the append
 			found := false
 			for i := 0; i < len(userInbox); i++ {
-				if secondItemWCount.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
+				if itemToInsert.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
 					userInbox = append(userInbox[:i+1], userInbox[i:]...)
-					userInbox[i] = secondItemWCount
-					//fmt.Printf("secondItem found true! : %#v\n", secondItemWCount.Timestamp)
+					userInbox[i] = itemToInsert
 					found = true
 					break
 				}
 			}
 			if !found {
-				userInbox = append(userInbox, secondItemWCount)
+				userInbox = append(userInbox, itemToInsert)
 			}
 			//end timesort the append
 		}
-
-		//testing olivers view
-		//var testView []entity.V_chatitem
-		//fmt.Printf("****chatmember: : %#v\n", chatmember)
-		//database.Connector.Where("fromaddr in(?)", []string{chatmember, key}).Find(&testView)
-		//var dbQuery = database.Connector.Where("fromaddr = ? AND toaddr = ?", chatmember, key).Find(&testView)
-		//var dbQuery = database.Connector.Raw("select * from v_chatitems WHERE fromaddr in('0xcafebabe', '0xdeadbeef');").Scan(&testView)
-		// if dbQuery.RowsAffected > 0 {
-		// 	fmt.Printf("New View! : %#v\n", testView[0])
-		// }
 	}
 
 	//now get bookmarked/joined groups as well but fit it into the inbox return val type
@@ -516,28 +397,12 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	var chat2 []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
 
-	//chat = append(chat, chat2...)
-
-	//this is aweful but these other commented out ways just are not working
-	//var returnChat []entity.Chatitem
-	layout := "2006-01-02T15:04:05.000Z"
-	//last := "1971-01-02T15:04:05.000Z"
-	// lastTime, error := time.Parse(layout, last)
-	// if error != nil {
-	// 	return
-	// }
 	for _, chatmember := range chat2 {
-		currTime, error := time.Parse(layout, chatmember.Timestamp)
-		if error != nil {
-			return
-		}
+		currTime := chatmember.Timestamp_dtm
 		found := false
 		//both lists are already sorted, so we can use the assumption here
 		for i := 0; i < len(chat); i++ {
-			ret_time, error := time.Parse(layout, chat[i].Timestamp)
-			if error != nil {
-				return
-			}
+			ret_time := chat[i].Timestamp_dtm
 			if currTime.Before(ret_time) {
 				chat = append(chat[:i+1], chat[i:]...)
 				chat[i] = chatmember
@@ -599,26 +464,14 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	var chat2 []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat2)
 
-	//this is aweful but the complex OR query is just not working in this golang implementation
-	//var returnChat []entity.Chatitem
-	layout := "2006-01-02T15:04:05.000Z"
-	//last := "1971-01-02T15:04:05.000Z"
-	// lastTime, error := time.Parse(layout, last)
-	// if error != nil {
-	// 	return
-	// }
+	//TODO: should be a way to called a stored proc for this to sort in MySQL using timestamp
 	for _, chatmember := range chat2 {
-		currTime, error := time.Parse(layout, chatmember.Timestamp)
-		if error != nil {
-			return
-		}
+		currTime := chatmember.Timestamp_dtm
 		found := false
 		//both lists are already sorted, so we can use the assumption here
 		for i := 0; i < len(chat); i++ {
-			ret_time, error := time.Parse(layout, chat[i].Timestamp)
-			if error != nil {
-				return
-			}
+			ret_time := chat[i].Timestamp_dtm
+
 			if currTime.Before(ret_time) {
 				chat = append(chat[:i+1], chat[i:]...)
 				chat[i] = chatmember
@@ -657,26 +510,13 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	var chat2 []entity.Chatitem
 	database.Connector.Where("toaddr = ?", walletaddr).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat2)
 
-	//this is aweful but the complex OR query is just not working in this golang implementation
-	//var returnChat []entity.Chatitem
-	layout := "2006-01-02T15:04:05.000Z"
-	//last := "1971-01-02T15:04:05.000Z"
-	// lastTime, error := time.Parse(layout, last)
-	// if error != nil {
-	// 	return
-	// }
+	//TODO, should do this and similar sorts in a stored proc probably which sort (call 2 queries above with and ORDER)
 	for _, chatmember := range chat2 {
-		currTime, error := time.Parse(layout, chatmember.Timestamp)
-		if error != nil {
-			return
-		}
+		currTime := chatmember.Timestamp_dtm
 		found := false
 		//both lists are already sorted, so we can use the assumption here
 		for i := 0; i < len(chat); i++ {
-			ret_time, error := time.Parse(layout, chat[i].Timestamp)
-			if error != nil {
-				return
-			}
+			ret_time := chat[i].Timestamp_dtm
 			if currTime.Before(ret_time) {
 				chat = append(chat[:i+1], chat[i:]...)
 				chat[i] = chatmember
@@ -716,24 +556,6 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(chat)
 }
-
-// func CreateChatitemTmp(w http.ResponseWriter, r *http.Request) {
-// 	requestBody, _ := ioutil.ReadAll(r.Body)
-// 	var chat entity.Chatitems_tmp
-// 	json.Unmarshal(requestBody, &chat)
-
-// 	chat.Timestamp_dtm = time.Now()
-
-// 	var dbQuery = database.Connector.Create(chat)
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusCreated)
-// 	if dbQuery.RowsAffected > 0 {
-// 		json.NewEncoder(w).Encode(chat)
-// 	} else {
-// 		json.NewEncoder(w).Encode(false)
-// 	}
-
-// }
 
 //CreateGroupChatitem creates GroupChatitem
 func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
