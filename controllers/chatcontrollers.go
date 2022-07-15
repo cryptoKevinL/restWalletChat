@@ -105,7 +105,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	var bookmarkchat entity.Groupchatitem
 	for i := 0; i < len(bookmarks); i++ {
 		bookmarkchat.Message = ""
-		//bookmarkchat.Timestamp
 		database.Connector.Where("nftaddr = ?", bookmarks[i].Nftaddr).Find(&bookmarkchat)
 
 		//get num unread messages
@@ -114,9 +113,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		var dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatReadTime)
 		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 		if dbQuery.RowsAffected == 0 {
+			//fmt.Printf("sending all values! \n")
 			database.Connector.Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
 		} else {
-			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Lasttimestamp_dtm).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
+			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
+			//fmt.Printf("sending time based count \n")
 		}
 		//end get num unread messages
 
@@ -166,7 +167,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			if returnItem.Timestamp_dtm.After(userInbox[i].Timestamp_dtm) {
 				userInbox = append(userInbox[:i+1], userInbox[i:]...)
 				userInbox[i] = returnItem
-				//fmt.Printf("secondItem found true! : %#v\n", secondItemWCount.Timestamp)
 				found = true
 				break
 			}
@@ -646,7 +646,7 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 		if dbQuery.RowsAffected == 0 {
 			database.Connector.Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
 		} else {
-			database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp_dtm).Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
+			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", chat.Nftaddr).Find(&chatCnt)
 		}
 		//end get num unread messages
 
@@ -767,7 +767,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	var chatReadTime entity.Groupchatreadtime
 	var dbQuery = database.Connector.Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Find(&chatReadTime)
 
-	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime.Lasttimestamp)
+	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime)
 
 	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 	if dbQuery.RowsAffected == 0 {
@@ -776,13 +776,13 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		//add the first read element to the group timestamp table cross reference
 		chatReadTime.Fromaddr = fromaddr
 		chatReadTime.Nftaddr = nftaddr
-		chatReadTime.Lasttimestamp = time.Now()
+		chatReadTime.Readtimestamp_dtm = time.Now()
 		database.Connector.Create(chatReadTime)
 	} else {
-		//database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
+		//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
 		//set timestamp when this was last grabbed
 		currtime := time.Now()
-		database.Connector.Model(&entity.Groupchatreadtime{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("lasttimestamp", currtime)
+		database.Connector.Model(&entity.Groupchatreadtime{}).Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Update("readtimestamp_dtm", currtime)
 	}
 	//this line goes away if we selectively load data in the future
 	database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
@@ -811,13 +811,13 @@ func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 	var chatReadTime entity.Groupchatreadtime
 	var dbQuery = database.Connector.Where("fromaddr = ?", fromaddr).Where("nftaddr = ?", nftaddr).Find(&chatReadTime)
 
-	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime.Lasttimestamp)
+	//fmt.Printf("Group Chat Get By Addr Result: %#v\n", chatReadTime.Readtimestamp_dtm)
 
 	//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 	if dbQuery.RowsAffected == 0 {
 		database.Connector.Where("nftaddr = ?", nftaddr).Find(&chat)
 	} else {
-		database.Connector.Where("timestamp > ?", chatReadTime.Lasttimestamp).Where("nftaddr = ?", nftaddr).Find(&chat)
+		database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(len(chat))
@@ -1201,6 +1201,9 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	key := vars["address"]
 	var landingData LandingPageItems
 
+	//todo someday this will be for general communities (need to rename functions)
+	//fmt.Printf("Get WalletChat HQ: %#v\n", community)
+
 	//for now, the walletchat living room is all users by default
 	var settings []entity.Settings
 	database.Connector.Find(&settings)
@@ -1216,21 +1219,13 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 
 	//WalletChat is verified of course
 	landingData.Verified = true
-
 	//by default everyone is joined to Walletchat
 	landingData.Joined = true
 
-	//has messaged - check messages for this user address
-	var groupchat []entity.Groupchatitem
-	database.Connector.Where("nftaddr = ?", community).Where("fromaddr = ?", key).Find(&groupchat)
-
-	//fmt.Printf("group chat: %#v\n", groupchat)
-
-	var hasMessaged bool
-	if len(groupchat) > 0 {
-		hasMessaged = true
-	} else {
-		hasMessaged = false
+	//auto-join new users to WalletChat community (they can leave later)
+	var bookmark entity.Bookmarkitem
+	var dbQuery = database.Connector.Where("nftaddr = ?", community).Where("walletaddr = ?", key).Find(&bookmark)
+	if dbQuery.RowsAffected == 0 {
 		//create the welcome message, save it
 		var newgroupchatuser entity.Groupchatitem
 		newgroupchatuser.Type = entity.Welcome
@@ -1243,17 +1238,41 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
 
-		//auto-join new users to WalletChat community (they can leave later)
-		var bookmark entity.Bookmarkitem
 		bookmark.Nftaddr = "walletchat"
 		bookmark.Walletaddr = key
 		database.Connector.Create(bookmark)
 	}
 
+	//check messages read for this user address because this GetWalletChat is being called
+	//separately each time (I thought it would be filled from bookmarks)
+	var groupchat []entity.Groupchatitem
+	database.Connector.Where("nftaddr = ?", community).Where("fromaddr = ?", key).Find(&groupchat)
+	//redoing some things already done in getGroupChatItemsByAddr
+	var chatReadTime entity.Groupchatreadtime
+	dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", community).Find(&chatReadTime)
+	if dbQuery.RowsAffected == 0 {
+		//add the first read element to the group timestamp table cross reference
+		chatReadTime.Fromaddr = key
+		chatReadTime.Nftaddr = community
+		chatReadTime.Readtimestamp_dtm = time.Now()
+		database.Connector.Create(chatReadTime)
+	} else {
+		//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
+		//set timestamp when this was last grabbed
+		currtime := time.Now()
+		database.Connector.Model(&entity.Groupchatreadtime{}).Where("fromaddr = ?", key).Where("nftaddr = ?", community).Update("readtimestamp_dtm", currtime)
+	}
+
+	var hasMessaged bool
+	if len(groupchat) > 0 {
+		hasMessaged = true
+	} else {
+		hasMessaged = false
+	}
 	landingData.Messaged = hasMessaged
 
 	//grab all the data for walletchat group
-	database.Connector.Where("nftaddr = ?", "walletchat").Find(&groupchat)
+	database.Connector.Where("nftaddr = ?", community).Find(&groupchat)
 	//make sure to get the name if it wasn't there (not there by default now)
 	var addrname entity.Addrnameitem
 	for i := 0; i < len(groupchat); i++ {

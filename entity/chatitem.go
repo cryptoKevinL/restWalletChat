@@ -54,9 +54,9 @@ type Groupchatitem struct {
 
 //secondary table to help only load new messages for each user (not reload whole chat history)
 type Groupchatreadtime struct {
-	Fromaddr          string    `json:"fromaddr"`
-	Lasttimestamp     time.Time `json:"lasttimestamp"`
-	Lasttimestamp_dtm time.Time `json:"lasttimestamp_dtm"`
+	Fromaddr string `json:"fromaddr"`
+	//Lasttimestamp     string    `json:"lasttimestamp"`
+	Readtimestamp_dtm time.Time `json:"readtimestamp_dtm"`
 	Nftaddr           string    `json:"nftaddr"`
 }
 
