@@ -70,6 +70,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 		var itemToInsert entity.Chatiteminbox
 		if dbQuery.RowsAffected > 0 {
+			itemToInsert.ID = vchatitem.ID
 			itemToInsert.Fromaddr = vchatitem.Fromaddr
 			itemToInsert.Toaddr = vchatitem.Toaddr
 			itemToInsert.Timestamp = vchatitem.Timestamp
@@ -102,33 +103,42 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
 
 	//now add last message from group chat this bookmark is for
-	var bookmarkchat entity.Groupchatitem
-	for i := 0; i < len(bookmarks); i++ {
-		bookmarkchat.Message = ""
-		database.Connector.Where("nftaddr = ?", bookmarks[i].Nftaddr).Find(&bookmarkchat)
+	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
+	for idx := 0; idx < len(bookmarks); idx++ {
+		//fmt.Printf("bookmarks: %#v\n", bookmarks[i])
+		//fmt.Printf("b\nftaddr: %#v\n", bookmarks[idx].Nftaddr)
+		dbQuery := database.Connector.Where("nftaddr = ?", bookmarks[idx].Nftaddr).Last(&gchat)
+		//fmt.Printf("dbQuery: %#v\n", dbQuery.Error)
+		if dbQuery.RowsAffected == 0 {
+			continue
+		}
+		//fmt.Printf("bookmarkchat: %#v\n", gchat)
+
+		var groupchat = gchat[0]
 
 		//get num unread messages
 		var chatCnt []entity.Groupchatitem
 		var chatReadTime entity.Groupchatreadtime
-		var dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatReadTime)
+		dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
 		//if no respsonse to this query, its the first time a user is reading the chat history, send it all
 		if dbQuery.RowsAffected == 0 {
 			//fmt.Printf("sending all values! \n")
-			database.Connector.Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
+			database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
 		} else {
-			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", bookmarkchat.Nftaddr).Find(&chatCnt)
+			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
 			//fmt.Printf("sending time based count \n")
 		}
 		//end get num unread messages
 
 		var returnItem entity.Chatiteminbox
-		returnItem.Message = bookmarkchat.Message
-		returnItem.Timestamp = bookmarkchat.Timestamp
-		returnItem.Timestamp_dtm = bookmarkchat.Timestamp_dtm
-		returnItem.Nftaddr = bookmarkchat.Nftaddr
-		returnItem.Fromaddr = bookmarkchat.Fromaddr
-		returnItem.Unreadcnt = len(chatCnt)
-		returnItem.Type = bookmarkchat.Type
+		returnItem.ID = groupchat.ID
+		returnItem.Message = groupchat.Message
+		returnItem.Timestamp = groupchat.Timestamp
+		returnItem.Timestamp_dtm = groupchat.Timestamp_dtm
+		returnItem.Nftaddr = groupchat.Nftaddr
+		returnItem.Fromaddr = groupchat.Fromaddr
+		//returnItem.Unreadcnt = len(chatCnt)
+		returnItem.Type = groupchat.Type
 		//retrofit old messages prior to setting Type
 		if returnItem.Type != entity.Message && returnItem.Type != entity.Welcome {
 			returnItem.Type = entity.Message
@@ -137,7 +147,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 		//get common name from nftaddress
 		var addrname entity.Addrnameitem
-		var result = database.Connector.Where("address = ?", bookmarkchat.Nftaddr).Find(&addrname)
+		var result = database.Connector.Where("address = ?", groupchat.Nftaddr).Find(&addrname)
 		if result.RowsAffected > 0 {
 			returnItem.Name = addrname.Name
 		}
@@ -581,6 +591,7 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 		//end get num unread messages
 
 		var returnItem entity.BookmarkReturnItem
+		returnItem.ID = chat.ID
 		returnItem.Lastmsg = chat.Message
 		returnItem.Lasttimestamp = chat.Timestamp
 		returnItem.Lasttimestamp_dtm = chat.Timestamp_dtm
@@ -1089,22 +1100,6 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 	return tweets
 }
 
-// Members    int              `json:"members"`
-// Logo       string           `json:"logo"`        // logo url, stored in backend
-// Verified   bool             `json:"is_verified"` // is this group verified? WalletChat's group is verified by default
-// Joined     bool             `json:"joined"`
-// Messaged   bool             `json:"has_messaged"` // has user messaged in this group chat before? if not show "Say hi" button
-// Messages   []LandingPageMsg `json:"messages"`
-// // messages: [
-// // 	{
-// // 		type: string, // [message, welcome], welcome-type message is auto-generated in the backend whenever a new user joins WalletChat
-// // 		message: string,
-// // 		timestamp: string,
-// // 		id: number // optional
-// // 	}, ...
-// // ],
-// Tweets TwitterTweetsData `json:"tweets"` // follow format of GET /get_twitter/{nftAddr}
-// Social []SocialMsg       `json:"social"`
 func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	community := vars["community"]
