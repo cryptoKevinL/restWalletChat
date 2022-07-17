@@ -16,6 +16,7 @@ const ( //type mapping just for bookkeeping(golang sucks for enums as well...)
 )
 
 type Chatitem struct {
+	ID            int
 	Fromaddr      string    `json:"fromaddr"`
 	Toaddr        string    `json:"toaddr"`
 	Timestamp     string    `json:"timestamp"`
@@ -29,6 +30,7 @@ type Chatitem struct {
 
 //for olivers view function
 type V_chatitem struct {
+	ID            int
 	Fromaddr      string    `json:"fromaddr"`
 	Toaddr        string    `json:"toaddr"`
 	Timestamp     string    `json:"timestamp"`
@@ -42,6 +44,7 @@ type V_chatitem struct {
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
 type Groupchatitem struct {
+	ID            int
 	Fromaddr      string    `json:"fromaddr"`
 	Timestamp     string    `json:"timestamp"`
 	Timestamp_dtm time.Time `json:"timestamp_dtm"`
@@ -54,34 +57,39 @@ type Groupchatitem struct {
 
 //secondary table to help only load new messages for each user (not reload whole chat history)
 type Groupchatreadtime struct {
-	Fromaddr string `json:"fromaddr"`
-	//Lasttimestamp     string    `json:"lasttimestamp"`
+	ID                int
+	Fromaddr          string    `json:"fromaddr"`
 	Readtimestamp_dtm time.Time `json:"readtimestamp_dtm"`
 	Nftaddr           string    `json:"nftaddr"`
 }
 
 //potentially use this to keep track of user logins for DAU metrics
 type Logintime struct {
+	ID        int
 	Address   string    `json:"address"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
 type Addrnameitem struct {
+	ID      int
 	Address string `json:"address"`
 	Name    string `json:"name"`
 }
 
 type Imageitem struct {
+	ID         int
 	Base64data string `json:"base64data"`
 	Name       string `json:"name"`
 }
 
 type Bookmarkitem struct {
+	ID         int
 	Walletaddr string `json:"walletaddr"`
 	Nftaddr    string `json:"nftaddr"`
 }
 
 type BookmarkReturnItem struct {
+	ID                int
 	Walletaddr        string    `json:"walletaddr"`
 	Nftaddr           string    `json:"nftaddr"`
 	Lastmsg           string    `json:"lastmsg"`
@@ -91,6 +99,7 @@ type BookmarkReturnItem struct {
 }
 
 type Nftsidebar struct {
+	ID       int
 	Fromaddr string `json:"fromaddr"`
 	Unread   int    `json:"unread"`
 	Nftaddr  string `json:"nftaddr"`
@@ -99,6 +108,7 @@ type Nftsidebar struct {
 
 //this is a return type only
 type Chatiteminbox struct {
+	ID            int
 	Fromaddr      string    `json:"fromaddr"`
 	Toaddr        string    `json:"toaddr"`
 	Timestamp     string    `json:"timestamp"`
