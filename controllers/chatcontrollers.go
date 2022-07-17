@@ -461,6 +461,12 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Chatitem
 	json.Unmarshal(requestBody, &chat)
 
+	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
+	var lastID entity.Chatitem
+	database.Connector.Last(&lastID)
+	chat.ID = lastID.ID + 1
+
+	//I think can remove this too since Oliver added a DB trigger
 	chat.Timestamp_dtm = time.Now()
 
 	database.Connector.Create(chat)
@@ -478,7 +484,14 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	//these will get overwritten as needed when returning data
 	chat.Contexttype = entity.Nft
 	chat.Type = entity.Message
+
+	//probably can removed now with DB trigger
 	chat.Timestamp_dtm = time.Now()
+
+	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
+	var lastID entity.Groupchatitem
+	database.Connector.Last(&lastID)
+	chat.ID = lastID.ID + 1
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -496,7 +509,14 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	if chat.Type != entity.Welcome {
 		chat.Type = entity.Message
 	}
+
+	//can remove now I think
 	chat.Timestamp_dtm = time.Now()
+
+	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
+	var lastID entity.Groupchatitem
+	database.Connector.Last(&lastID)
+	chat.ID = lastID.ID + 1
 
 	database.Connector.Create(chat)
 	w.Header().Set("Content-Type", "application/json")
@@ -521,6 +541,11 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(requestBody, &bookmark)
 
 	//fmt.Printf("Bookmark Item: %#v\n", chat)
+
+	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
+	var lastID entity.Bookmarkitem
+	database.Connector.Last(&lastID)
+	bookmark.ID = lastID.ID + 1
 
 	database.Connector.Create(bookmark)
 	w.Header().Set("Content-Type", "application/json")
@@ -618,6 +643,10 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	var imgname entity.Imageitem
 	json.Unmarshal(requestBody, &imgname)
 
+	var lastID entity.Imageitem
+	database.Connector.Last(&lastID)
+	imgname.ID = lastID.ID + 1
+
 	database.Connector.Create(imgname)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -660,6 +689,10 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrname entity.Addrnameitem
 	json.Unmarshal(requestBody, &addrname)
+
+	var lastID entity.Addrnameitem
+	database.Connector.Last(&lastID)
+	addrname.ID = lastID.ID + 1
 
 	database.Connector.Create(addrname)
 	w.Header().Set("Content-Type", "application/json")
@@ -718,6 +751,12 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		chatReadTime.Fromaddr = fromaddr
 		chatReadTime.Nftaddr = nftaddr
 		chatReadTime.Readtimestamp_dtm = time.Now()
+
+		//find fix for this
+		var lastID entity.Groupchatreadtime
+		database.Connector.Last(&lastID)
+		chatReadTime.ID = lastID.ID + 1
+
 		database.Connector.Create(chatReadTime)
 	} else {
 		//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
@@ -795,6 +834,11 @@ func CreateSettings(w http.ResponseWriter, r *http.Request) {
 	var settings entity.Settings
 	json.Unmarshal(requestBody, &settings)
 
+	//find fix for this
+	var lastID entity.Settings
+	database.Connector.Last(&lastID)
+	settings.ID = lastID.ID + 1
+
 	database.Connector.Create(settings)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -837,6 +881,11 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var comment entity.Comments
 	json.Unmarshal(requestBody, &comment)
+
+	//find fix for this
+	var lastID entity.Comments
+	database.Connector.Last(&lastID)
+	comment.ID = lastID.ID + 1
 
 	database.Connector.Create(comment)
 	w.Header().Set("Content-Type", "application/json")
@@ -1140,11 +1189,23 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
 		newgroupchatuser.Timestamp_dtm = time.Now()
 		newgroupchatuser.Timestamp = time.Now().Format(time.RFC3339)
+
+		//find fix for this (can add own trigger I guess...)
+		var lastID entity.Groupchatitem
+		database.Connector.Last(&lastID)
+		newgroupchatuser.ID = lastID.ID + 1
+
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
 
 		bookmark.Nftaddr = "walletchat"
 		bookmark.Walletaddr = key
+
+		//find fix for this (can add own trigger I guess...)
+		var lastID1 entity.Bookmarkitem
+		database.Connector.Last(&lastID)
+		bookmark.ID = lastID1.ID + 1
+
 		database.Connector.Create(bookmark)
 	}
 
@@ -1160,6 +1221,12 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		chatReadTime.Fromaddr = key
 		chatReadTime.Nftaddr = community
 		chatReadTime.Readtimestamp_dtm = time.Now()
+
+		//find fix for this (can add own trigger I guess...)
+		var lastID entity.Groupchatreadtime
+		database.Connector.Last(&lastID)
+		chatReadTime.ID = lastID.ID + 1
+
 		database.Connector.Create(chatReadTime)
 	} else {
 		//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
