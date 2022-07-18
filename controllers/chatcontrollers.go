@@ -1178,6 +1178,17 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	var bookmarks []entity.Bookmarkitem
 	var dbQuery = database.Connector.Where("nftaddr = ?", community).Where("walletaddr = ?", key).Find(&bookmarks)
 	if dbQuery.RowsAffected == 0 {
+		var bookmark entity.Bookmarkitem
+		bookmark.Nftaddr = "walletchat"
+		bookmark.Walletaddr = key
+
+		//find fix for this (can add own trigger I guess...)
+		var lastID1 entity.Bookmarkitem
+		database.Connector.Last(&lastID)
+		bookmark.ID = lastID1.ID + 1
+
+		database.Connector.Create(bookmark)
+
 		//by default everyone is joined to Walletchat
 		landingData.Joined = true
 		//create the welcome message, save it
@@ -1197,17 +1208,6 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
-
-		var bookmark entity.Bookmarkitem
-		bookmark.Nftaddr = "walletchat"
-		bookmark.Walletaddr = key
-
-		//find fix for this (can add own trigger I guess...)
-		var lastID1 entity.Bookmarkitem
-		database.Connector.Last(&lastID)
-		bookmark.ID = lastID1.ID + 1
-
-		database.Connector.Create(bookmark)
 	}
 
 	//check messages read for this user address because this GetWalletChat is being called
