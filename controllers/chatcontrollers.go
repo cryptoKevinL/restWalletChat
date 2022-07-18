@@ -1184,7 +1184,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 
 		//find fix for this (can add own trigger I guess...)
 		var lastID1 entity.Bookmarkitem
-		database.Connector.Last(&lastID)
+		database.Connector.Last(&lastID1)
 		bookmark.ID = lastID1.ID + 1
 
 		database.Connector.Create(bookmark)
