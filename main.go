@@ -22,6 +22,7 @@ func main() {
 func initaliseHandlers(router *mux.Router) {
 	//1-to-1 chats (both general and NFT related)
 	router.HandleFunc("/get_unread_cnt/{address}", controllers.GetUnreadMsgCntTotal).Methods("GET")
+	router.HandleFunc("/get_unread_cnt_by_type/{address}/{type}", controllers.GetUnreadMsgCntTotalByType).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{fromaddr}/{toaddr}", controllers.GetUnreadMsgCnt).Methods("GET")
 	router.HandleFunc("/get_unread_cnt/{address}/{nftaddr}/{nftid}", controllers.GetUnreadMsgCntNft).Methods("GET")
 	router.HandleFunc("/get_unread_cnt_nft/{address}", controllers.GetUnreadMsgCntNftAllByAddr).Methods("GET")

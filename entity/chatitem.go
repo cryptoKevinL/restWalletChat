@@ -9,6 +9,7 @@ const ( //context_type mapping just for bookkeeping(golang sucks for enums as we
 	Nft       string = "nft"
 	Community string = "community"
 	DM        string = "dm"
+	All       string = "all"
 )
 const ( //type mapping just for bookkeeping(golang sucks for enums as well...)
 	Welcome string = "welcome"

@@ -137,7 +137,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Timestamp_dtm = groupchat.Timestamp_dtm
 		returnItem.Nftaddr = groupchat.Nftaddr
 		returnItem.Fromaddr = groupchat.Fromaddr
-		//returnItem.Unreadcnt = len(chatCnt)
+		returnItem.Unreadcnt = len(chatCnt)
 		returnItem.Type = groupchat.Type
 		//retrofit old messages prior to setting Type
 		if returnItem.Type != entity.Message && returnItem.Type != entity.Welcome {
@@ -215,6 +215,62 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(len(chat))
+}
+
+//Get all unread messages TO a specific user, used for total count notification at top notification bar
+func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+	msgtype := vars["type"] //nft/community/DM/ALL
+
+	msgCntTotal := 0
+
+	var bookmarks []entity.Bookmarkitem
+	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
+
+	//now add last message from group chat this bookmark is for
+	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
+	if msgtype == entity.Nft || msgtype == entity.Community || msgtype == entity.All {
+		for idx := 0; idx < len(bookmarks); idx++ {
+			dbQuery := database.Connector.Where("nftaddr = ?", bookmarks[idx].Nftaddr).Last(&gchat)
+			if dbQuery.RowsAffected == 0 {
+				continue
+			}
+			var groupchat = gchat[0]
+
+			//get num unread messages
+			var chatCnt []entity.Groupchatitem
+			var chatReadTime entity.Groupchatreadtime
+			dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
+			//if no respsonse to this query, its the first time a user is reading the chat history
+			if dbQuery.RowsAffected == 0 {
+				database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+			} else {
+				database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+			}
+			//end get num unread messages
+
+			if strings.HasPrefix(groupchat.Nftaddr, "0x") {
+				if msgtype == entity.Nft || msgtype == entity.All {
+					msgCntTotal += len(chatCnt)
+				}
+			} else if msgtype == entity.Community || msgtype == entity.All {
+				if msgtype == entity.Community || msgtype == entity.All {
+					msgCntTotal += len(chatCnt)
+				}
+			}
+		}
+	}
+
+	if msgtype == entity.DM || msgtype == entity.All {
+		var chat []entity.Chatitem
+		database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
+		msgCntTotal += len(chat)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(msgCntTotal)
 }
 
 func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
