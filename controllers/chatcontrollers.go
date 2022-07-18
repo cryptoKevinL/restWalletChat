@@ -1175,11 +1175,13 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	landingData.Verified = true
 
 	//auto-join new users to WalletChat community (they can leave later)
-	var bookmark entity.Bookmarkitem
-	var dbQuery = database.Connector.Where("walletaddr = ?", community).Where("walletaddr = ?", key).Find(&bookmark)
+	var bookmarks []entity.Bookmarkitem
+	var dbQuery = database.Connector.Where("nftaddr = ?", community).Where("walletaddr = ?", key).Find(&bookmarks)
 	if dbQuery.RowsAffected == 0 {
 		//by default everyone is joined to Walletchat
 		landingData.Joined = true
+
+		var bookmark = bookmarks[0] //this shouldn't been needed, but think its an error
 
 		//create the welcome message, save it
 		var newgroupchatuser entity.Groupchatitem
