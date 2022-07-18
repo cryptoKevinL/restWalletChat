@@ -1180,9 +1180,6 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	if dbQuery.RowsAffected == 0 {
 		//by default everyone is joined to Walletchat
 		landingData.Joined = true
-
-		var bookmark = bookmarks[0] //this shouldn't been needed, but think its an error
-
 		//create the welcome message, save it
 		var newgroupchatuser entity.Groupchatitem
 		newgroupchatuser.Type = entity.Welcome
@@ -1201,6 +1198,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
 
+		var bookmark entity.Bookmarkitem
 		bookmark.Nftaddr = "walletchat"
 		bookmark.Walletaddr = key
 
