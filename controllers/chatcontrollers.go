@@ -255,14 +255,92 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 					msgCntTotal += len(chatCnt)
 				}
 			} else if msgtype == entity.Community || msgtype == entity.All {
-				if msgtype == entity.Community || msgtype == entity.All {
-					msgCntTotal += len(chatCnt)
-				}
+				msgCntTotal += len(chatCnt)
 			}
 		}
 	}
+}
 
-	if msgtype == entity.DM || msgtype == entity.All {
+//CreateGroupChatitem creates GroupChatitem
+func PutUnreadcnt(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	walletaddr := vars["address"]
+
+	requestBody, _ := ioutil.ReadAll(r.Body)
+	var config entity.Unreadcountitem
+	json.Unmarshal(requestBody, &config)
+
+	var findConfig entity.Unreadcountitem
+	var dbQuery = database.Connector.Where("walletaddr = ?", walletaddr).Find(&findConfig)
+
+	if dbQuery.RowsAffected == 0 {
+		config.Walletaddr = walletaddr
+		database.Connector.Create(config)
+	} else {
+		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("dm", config.Dm)
+		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("nft", config.Nft)
+		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("community", config.Community)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(true)
+}
+
+//Get all unread messages TO a specific user, used for total count notification at top notification bar
+func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["address"]
+
+	//get configured items from DB
+	var config entity.Unreadcountitem
+	var dbQuery = database.Connector.Where("walletaddr = ?", key).Find(&config)
+
+	if dbQuery.RowsAffected == 0 {
+		//create a config //this can be removed eventually once all accounts have a saved setting
+		config.Community = true
+		config.Dm = true
+		config.Nft = true
+		config.Walletaddr = key
+		database.Connector.Create(config)
+	}
+
+	msgCntTotal := 0
+
+	var bookmarks []entity.Bookmarkitem
+	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
+
+	//now add last message from group chat this bookmark is for
+	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
+	for idx := 0; idx < len(bookmarks); idx++ {
+		dbQuery := database.Connector.Where("nftaddr = ?", bookmarks[idx].Nftaddr).Last(&gchat)
+		if dbQuery.RowsAffected == 0 {
+			continue
+		}
+		var groupchat = gchat[0]
+
+		//get num unread messages
+		var chatCnt []entity.Groupchatitem
+		var chatReadTime entity.Groupchatreadtime
+		dbQuery = database.Connector.Where("fromaddr = ?", key).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatReadTime)
+		//if no respsonse to this query, its the first time a user is reading the chat history
+		if dbQuery.RowsAffected == 0 {
+			database.Connector.Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+		} else {
+			database.Connector.Where("timestamp_dtm > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", groupchat.Nftaddr).Find(&chatCnt)
+		}
+		//end get num unread messages
+
+		if strings.HasPrefix(groupchat.Nftaddr, "0x") {
+			if config.Nft {
+				msgCntTotal += len(chatCnt)
+			}
+		} else if config.Community {
+			msgCntTotal += len(chatCnt)
+		}
+	}
+
+	if config.Dm {
 		var chat []entity.Chatitem
 		database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
 		msgCntTotal += len(chat)

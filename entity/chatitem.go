@@ -16,6 +16,14 @@ const ( //type mapping just for bookkeeping(golang sucks for enums as well...)
 	Message string = "message"
 )
 
+type Unreadcountitem struct {
+	//ID         int
+	Walletaddr string `json:"walletaddr"`
+	Nft        bool   `json:"nft"`
+	Dm         bool   `json:"dm"`
+	Community  bool   `json:"community"`
+}
+
 type Chatitem struct {
 	ID            int
 	Fromaddr      string    `json:"fromaddr"`
