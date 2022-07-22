@@ -1,0 +1,11 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    email: walletchatextension@gmail.com
+    url: https://walletchat.fun
+  description: This is the WalletChat messagez
+  title: WalletChat API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
