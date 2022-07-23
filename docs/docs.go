@@ -18,7 +18,86 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/get_inbox/{address}": {
+            "get": {
+                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "inbox"
+                ],
+                "summary": "Get Inbox Summary With Last Message",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatiteminbox"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entity.Chatiteminbox": {
+            "type": "object",
+            "properties": {
+                "context_type": {
+                    "type": "string"
+                },
+                "fromaddr": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nftaddr": {
+                    "type": "string"
+                },
+                "nftid": {
+                    "type": "integer"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "sender_name": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "timestamp_dtm": {
+                    "type": "string"
+                },
+                "toaddr": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "unread": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

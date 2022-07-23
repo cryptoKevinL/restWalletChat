@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/cryptoKevinL/walletChatDocs"
+
 	"github.com/gorilla/mux"
 )
 
@@ -24,8 +26,16 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-//GetInboxByID returns the latest message for each unique conversation
+// GetInboxByOwner godoc
+// @Summary Get Inbox Summary With Last Message
+// @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} entity.Chatiteminbox
+// @Router /get_inbox/{address} [get]
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
+	//GetInboxByID returns the latest message for each unique conversation
 	vars := mux.Vars(r)
 	key := vars["address"] //owner of the inbox
 

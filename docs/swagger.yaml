@@ -1,4 +1,38 @@
 basePath: /
+definitions:
+  entity.Chatiteminbox:
+    properties:
+      context_type:
+        type: string
+      fromaddr:
+        type: string
+      id:
+        type: integer
+      logo:
+        type: string
+      message:
+        type: string
+      name:
+        type: string
+      nftaddr:
+        type: string
+      nftid:
+        type: integer
+      read:
+        type: boolean
+      sender_name:
+        type: string
+      timestamp:
+        type: string
+      timestamp_dtm:
+        type: string
+      toaddr:
+        type: string
+      type:
+        type: string
+      unread:
+        type: integer
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -7,5 +41,23 @@ info:
   description: This is the WalletChat messagez
   title: WalletChat API
   version: "1.0"
-paths: {}
+paths:
+  /get_inbox/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get Each 1-on-1 Conversation, NFT and Community Chat For Display
+        in Inbox
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatiteminbox'
+            type: array
+      summary: Get Inbox Summary With Last Message
+      tags:
+      - inbox
 swagger: "2.0"
