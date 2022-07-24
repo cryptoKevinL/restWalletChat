@@ -32,6 +32,15 @@ const docTemplate = `{
                     "inbox"
                 ],
                 "summary": "Get Inbox Summary With Last Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -44,9 +53,70 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/getall_chatitems": {
+            "get": {
+                "description": "Get Entire Chatitems table",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "inbox"
+                ],
+                "summary": "Get All Chat Items (legacy - not used currently)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "entity.Chatitem": {
+            "type": "object",
+            "properties": {
+                "fromaddr": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "nftaddr": {
+                    "type": "string"
+                },
+                "nftid": {
+                    "type": "integer"
+                },
+                "read": {
+                    "type": "boolean"
+                },
+                "sender_name": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "timestamp_dtm": {
+                    "type": "string"
+                },
+                "toaddr": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Chatiteminbox": {
             "type": "object",
             "properties": {
@@ -104,7 +174,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "WalletChat API",
 	Description:      "This is the WalletChat messagez",

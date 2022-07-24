@@ -32,6 +32,7 @@ func stringInSlice(a string, list []string) bool {
 // @Tags inbox
 // @Accept  json
 // @Produce  json
+// @Param address path string true "Wallet Address"
 // @Success 200 {array} entity.Chatiteminbox
 // @Router /get_inbox/{address} [get]
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
@@ -201,8 +202,14 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userInbox)
 }
 
-//*********chat info*********************
-//GetAllChatitems get all chat data
+// GetAllChatitems godoc
+// @Summary Get All Chat Items (legacy - not used currently)
+// @Description Get Entire Chatitems table
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} entity.Chatitem
+// @Router /getall_chatitems [get]
 func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
 	var chat []entity.Chatitem
 	database.Connector.Find(&chat)
@@ -1352,6 +1359,9 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 
 		//add it to the database
 		database.Connector.Create(newgroupchatuser)
+	} else {
+		//We don't have a way for users to get back to WC HQ if they leave (shouldn't need to use above block to re-welcome them)
+		landingData.Joined = true
 	}
 
 	//check messages read for this user address because this GetWalletChat is being called

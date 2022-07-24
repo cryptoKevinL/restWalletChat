@@ -1,5 +1,27 @@
-basePath: /
 definitions:
+  entity.Chatitem:
+    properties:
+      fromaddr:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      nftaddr:
+        type: string
+      nftid:
+        type: integer
+      read:
+        type: boolean
+      sender_name:
+        type: string
+      timestamp:
+        type: string
+      timestamp_dtm:
+        type: string
+      toaddr:
+        type: string
+    type: object
   entity.Chatiteminbox:
     properties:
       context_type:
@@ -48,6 +70,12 @@ paths:
       - application/json
       description: Get Each 1-on-1 Conversation, NFT and Community Chat For Display
         in Inbox
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -58,6 +86,23 @@ paths:
               $ref: '#/definitions/entity.Chatiteminbox'
             type: array
       summary: Get Inbox Summary With Last Message
+      tags:
+      - inbox
+  /getall_chatitems:
+    get:
+      consumes:
+      - application/json
+      description: Get Entire Chatitems table
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Get All Chat Items (legacy - not used currently)
       tags:
       - inbox
 swagger: "2.0"
