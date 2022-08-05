@@ -1317,9 +1317,9 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("Get WalletChat HQ: %#v\n", community)
 
 	//for now, the walletchat living room is all users by default
-	var settings []entity.Settings
-	database.Connector.Find(&settings)
-	landingData.Members = len(settings)
+	var members []entity.Bookmarkitem
+	database.Connector.Where("nftaddr = ?", community).Find(&members)
+	landingData.Members = len(members)
 
 	//name
 	landingData.Name = "WalletChat HQ"
