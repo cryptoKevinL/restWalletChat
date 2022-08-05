@@ -33,7 +33,7 @@ type Chatitem struct {
 	Msgread       bool      `json:"read"`
 	Message       string    `json:"message"`
 	Nftaddr       string    `json:"nftaddr"`
-	Nftid         int       `json:"nftid"`
+	Nftid         string    `json:"nftid"`
 	Name          string    `json:"sender_name"`
 }
 
@@ -112,7 +112,7 @@ type Nftsidebar struct {
 	Fromaddr string `json:"fromaddr"`
 	Unread   int    `json:"unread"`
 	Nftaddr  string `json:"nftaddr"`
-	Nftid    int    `json:"nftid"`
+	Nftid    string `json:"nftid"`
 }
 
 type Chatiteminbox struct {
@@ -124,7 +124,7 @@ type Chatiteminbox struct {
 	Msgread       bool      `json:"read"`
 	Message       string    `json:"message"`
 	Nftaddr       string    `json:"nftaddr"`
-	Nftid         int       `json:"nftid"`
+	Nftid         string    `json:"nftid"`
 	Unreadcnt     int       `json:"unread"`
 	Type          string    `json:"type"`
 	Contexttype   string    `json:"context_type"`

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
-	"strconv"
 	"strings"
 	"time"
 
@@ -432,8 +431,8 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 					Where("nftaddr = ?", uniqueNftAddr).
 					Where("msgread = ?", false).Find(&chatNftId)
 
-				if !stringInSlice(strconv.Itoa(nftid), uniquenftids) {
-					uniquenftids = append(uniquenftids, strconv.Itoa(nftid))
+				if !stringInSlice(nftid, uniquenftids) {
+					uniquenftids = append(uniquenftids, nftid)
 
 					var sbitem entity.Nftsidebar
 					sbitem.Fromaddr = senderAddr
@@ -543,9 +542,11 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat)
+	//fmt.Printf("Chat Items: %#v\n", chat)
 
 	var chat2 []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Where("nftaddr = ?", addr).Where("nftid = ?", id).Find(&chat2)
+	//fmt.Printf("Chat2 Items: %#v\n", chat2)
 
 	//TODO: should be a way to called a stored proc for this to sort in MySQL using timestamp
 	for _, chatmember := range chat2 {
@@ -1171,7 +1172,7 @@ func GetTwitterHandle(contractAddr string) string {
 
 	collection := result.Collection.TwitterUsername
 
-	//fmt.Printf("test: %#v\n", collection)
+	fmt.Printf("get twitter username: %#v\n", collection)
 
 	return collection
 }
@@ -1208,6 +1209,8 @@ func GetTwitterID(twitterHandle string) string {
 
 	twitterID := result.Data.ID
 
+	fmt.Printf("get twitter ID: %#v\n", twitterID)
+
 	return twitterID
 }
 
@@ -1228,20 +1231,24 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Println("Error fetching twitter: ", err)
 		log.Println("Error on response.\n[ERROR] -", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Println("Error fetching twitter bytes: ", err)
 		log.Println("Error while reading the response bytes:", err)
 	}
+
+	fmt.Println("body twitter: ", body)
 
 	var result TwitterTweetsData
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
-	//fmt.Println("length twitter: ", len(result.Data))
+	fmt.Println("length twitter: ", len(result.Data))
 
 	return result
 }
