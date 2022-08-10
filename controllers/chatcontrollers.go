@@ -1204,7 +1204,7 @@ func GetTwitterID(twitterHandle string) string {
 
 	twitterID := result.Data.ID
 
-	fmt.Printf("get twitter ID: %#v\n", twitterID)
+	//fmt.Printf("get twitter ID: %#v\n", twitterID)
 
 	return twitterID
 }
@@ -1243,7 +1243,7 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
 		fmt.Println("Can not unmarshal JSON")
 	}
-	fmt.Println("length twitter: ", len(result.Data))
+	//fmt.Println("length twitter: ", len(result.Data))
 
 	return result
 }
