@@ -1429,15 +1429,18 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	contract := vars["contract"]
 	wallet := vars["wallet"]
 
-	result := IsOwnerOfNFT(contract, wallet)
+	result := IsOwnerOfNFT(contract, wallet, "ethereum")
+	if !result {
+		result = IsOwnerOfNFT(contract, wallet, "polygon")
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }
 
-func IsOwnerOfNFT(contractAddr string, walletAddr string) bool {
+func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
-	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=ethereum&contract_address=" + contractAddr
+	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain + "&contract_address=" + contractAddr
 
 	req, _ := http.NewRequest("GET", url, nil)
 
