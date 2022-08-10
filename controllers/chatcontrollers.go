@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
 	"strings"
@@ -1141,16 +1142,10 @@ func GetTwitterCount(w http.ResponseWriter, r *http.Request) {
 func GetTwitterHandle(contractAddr string) string {
 	url := "https://api.opensea.io/api/v1/asset_contract/" + contractAddr
 
-	// Create a Bearer string by appending string access token
-	//bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
-	//bearer := "X-API-KEY: " + "33594256d2b0446d869ff5d3a7f9c152"
-
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("X-API-KEY", "33594256d2b0446d869ff5d3a7f9c152")
-
-	// add authorization header to the req
-	//req.Header.Add("Authorization", bearer)
+	osKey := os.Getenv("OPENSEA_API_KEY")
+	req.Header.Add("X-API-KEY", osKey)
 
 	// Send req using http Client
 	client := &http.Client{}
@@ -1181,7 +1176,7 @@ func GetTwitterID(twitterHandle string) string {
 	url := "https://api.twitter.com/2/users/by/username/" + twitterHandle
 
 	// Create a Bearer string by appending string access token
-	bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
+	bearer := "Bearer " + os.Getenv("TWITTER_BEARER")
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -1219,7 +1214,7 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 	url := "https://api.twitter.com/2/users/" + twitterID + "/tweets?media.fields=height,width,url,preview_image_url,type&tweet.fields=attachments,created_at&user.fields=profile_image_url,username&expansions=author_id,attachments.media_keys&exclude=retweets"
 
 	// Create a Bearer string by appending string access token
-	bearer := "Bearer " + "AAAAAAAAAAAAAAAAAAAAAAjRdgEAAAAAK2TFwi%2FmA5pzy1PWRkx8OJQcuko%3DH6G3XZWbJUpYZOW0FUmQvwFAPANhINMFi94UEMdaVwIiw9ne0e"
+	bearer := "Bearer " + os.Getenv("TWITTER_BEARER")
 
 	// Create a new request using http
 	req, _ := http.NewRequest("GET", url, nil)
@@ -1442,12 +1437,12 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 
 func IsOwnerOfNFT(contractAddr string, walletAddr string) bool {
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
-	url := "https://api.nftport.xyz/v0/accounts/${walletAddr}?chain=ethereum"
+	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=ethereum&contract_address=" + contractAddr
 
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", `${process.env.REACT_APP_NFTPORT_API_KEY}`)
+	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
 
 	// Send req using http Client
 	client := &http.Client{}
@@ -1462,16 +1457,25 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string) bool {
 		log.Println("Error while reading the response bytes:", err)
 	}
 
-	// var result OpenseaData - if we need to do more parsing we need to build an NFT port struct
-	// if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-	// 	fmt.Println("Can not unmarshal JSON")
-	// }
+	var result NFTPortOwnerOf
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
 
-	var result = strings.Contains(contractAddr, string(body))
+	//fmt.Printf("IsOwner: %#v\n", result.Total)
 
-	fmt.Printf("IsOwner: %#v\n", result)
+	return result.Total > 0
+}
 
-	return result
+type NFTPortOwnerOf struct {
+	Response string `json:"response"`
+	Nfts     []struct {
+		ContractAddress string `json:"contract_address"`
+		TokenID         string `json:"token_id"`
+		CreatorAddress  string `json:"creator_address"`
+	} `json:"nfts"`
+	Total        int         `json:"total"`
+	Continuation interface{} `json:"continuation"`
 }
 
 type User struct {
