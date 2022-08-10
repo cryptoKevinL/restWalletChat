@@ -1429,6 +1429,51 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(landingData)
 }
 
+func IsOwner(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	contract := vars["contract"]
+	wallet := vars["wallet"]
+
+	result := IsOwnerOfNFT(contract, wallet)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func IsOwnerOfNFT(contractAddr string, walletAddr string) bool {
+	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
+	url := "https://api.nftport.xyz/v0/accounts/${walletAddr}?chain=ethereum"
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", `${process.env.REACT_APP_NFTPORT_API_KEY}`)
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	// var result OpenseaData - if we need to do more parsing we need to build an NFT port struct
+	// if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+	// 	fmt.Println("Can not unmarshal JSON")
+	// }
+
+	var result = strings.Contains(contractAddr, string(body))
+
+	fmt.Printf("IsOwner: %#v\n", result)
+
+	return result
+}
+
 type User struct {
 	Username        string `json:"username"`
 	ProfileImageURL string `json:"profile_image_url"`
