@@ -29,10 +29,7 @@ func main() {
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	godotenv.Load(".env")
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
