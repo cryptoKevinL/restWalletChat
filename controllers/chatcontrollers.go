@@ -1237,7 +1237,7 @@ func GetTweetsFromAPI(twitterID string) TwitterTweetsData {
 		log.Println("Error while reading the response bytes:", err)
 	}
 
-	fmt.Println("body twitter: ", body)
+	//fmt.Println("body twitter: ", body)
 
 	var result TwitterTweetsData
 	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
