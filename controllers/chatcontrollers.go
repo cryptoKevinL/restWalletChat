@@ -117,10 +117,19 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
 	for idx := 0; idx < len(bookmarks); idx++ {
 		//fmt.Printf("bookmarks: %#v\n", bookmarks[i])
-		//fmt.Printf("b\nftaddr: %#v\n", bookmarks[idx].Nftaddr)
+		//fmt.Printf("\nnftaddr: %#v\n", bookmarks[idx].Nftaddr)
 		dbQuery := database.Connector.Where("nftaddr = ?", bookmarks[idx].Nftaddr).Last(&gchat)
 		//fmt.Printf("dbQuery: %#v\n", dbQuery.Error)
+
+		var returnItem entity.Chatiteminbox
 		if dbQuery.RowsAffected == 0 {
+			//if this chat is new/empty just return the basic info
+			returnItem.Nftaddr = bookmarks[idx].Nftaddr
+			returnItem.Contexttype = entity.Community
+			if strings.HasPrefix(returnItem.Nftaddr, "0x") {
+				returnItem.Contexttype = entity.Nft
+			}
+			userInbox = append(userInbox, returnItem)
 			continue
 		}
 		//fmt.Printf("bookmarkchat: %#v\n", gchat)
@@ -141,7 +150,6 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		}
 		//end get num unread messages
 
-		var returnItem entity.Chatiteminbox
 		returnItem.ID = groupchat.ID
 		returnItem.Message = groupchat.Message
 		returnItem.Timestamp = groupchat.Timestamp
@@ -1468,6 +1476,57 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 	//fmt.Printf("IsOwner: %#v\n", result.Total)
 
 	return result.Total > 0
+}
+
+func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	walletAddr := vars["wallet"]
+	AutoJoinCommunitiesByChain(walletAddr, "ethereum")
+	AutoJoinCommunitiesByChain(walletAddr, "polygon")
+}
+func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
+	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	var result NFTPortOwnerOf
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	//fmt.Printf("IsOwner: %#v\n", result.Total)
+	for _, nft := range result.Nfts {
+		//TODO: could be optimized, good enough for now
+		var bookmarkExists entity.Bookmarkitem
+		var dbResult = database.Connector.Where("nftaddr = ?", nft.ContractAddress).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
+		if dbResult.RowsAffected == 0 {
+			var bookmark entity.Bookmarkitem
+			//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
+			var lastID entity.Bookmarkitem
+			database.Connector.Last(&lastID)
+			bookmark.ID = lastID.ID + 1
+			bookmark.Nftaddr = nft.ContractAddress
+			bookmark.Walletaddr = walletAddr
+
+			database.Connector.Create(bookmark)
+		}
+	}
 }
 
 type NFTPortOwnerOf struct {

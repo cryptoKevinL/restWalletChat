@@ -107,6 +107,7 @@ func initaliseHandlers(router *mux.Router) {
 	//holder functions
 	//TODO: this would need a signature from holder to fully verify - ok for now
 	router.HandleFunc("/is_owner/{contract}/{wallet}", controllers.IsOwner).Methods("GET")
+	router.HandleFunc("/rejoin_all/{wallet}", controllers.AutoJoinCommunities).Methods("GET")
 }
 
 func initDB() {
