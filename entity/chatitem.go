@@ -95,6 +95,7 @@ type Bookmarkitem struct {
 	ID         int
 	Walletaddr string `json:"walletaddr"`
 	Nftaddr    string `json:"nftaddr"`
+	Chain      string `json:"chain"`
 }
 
 type BookmarkReturnItem struct {
@@ -131,4 +132,5 @@ type Chatiteminbox struct {
 	Sendername    string    `json:"sender_name"`
 	Name          string    `json:"name"`
 	LogoData      string    `json:"logo"`
+	Chain         string    `json:"chain"`
 }

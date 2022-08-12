@@ -128,6 +128,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			returnItem.Contexttype = entity.Community
 			if strings.HasPrefix(returnItem.Nftaddr, "0x") {
 				returnItem.Contexttype = entity.Nft
+				returnItem.Chain = bookmarks[idx].Chain
 			}
 			userInbox = append(userInbox, returnItem)
 			continue
@@ -158,6 +159,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		returnItem.Fromaddr = groupchat.Fromaddr
 		returnItem.Unreadcnt = len(chatCnt)
 		returnItem.Type = groupchat.Type
+		returnItem.Chain = bookmarks[idx].Chain
 		//retrofit old messages prior to setting Type
 		if returnItem.Type != entity.Message && returnItem.Type != entity.Welcome {
 			returnItem.Type = entity.Message
@@ -1523,6 +1525,7 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 			bookmark.ID = lastID.ID + 1
 			bookmark.Nftaddr = nft.ContractAddress
 			bookmark.Walletaddr = walletAddr
+			bookmark.Chain = chain
 
 			database.Connector.Create(bookmark)
 		}
