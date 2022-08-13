@@ -160,8 +160,8 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 	//every 100 calls to getInbox, check to see if user has new NFTs in the wallet which we
 	//should auto-join them to the community chat
-	//AutoJoinCommunitiesByChain(key, "ethereum")
-	//AutoJoinCommunitiesByChain(key, "polygon")
+	AutoJoinCommunitiesByChain(key, "ethereum")
+	AutoJoinCommunitiesByChain(key, "polygon")
 
 	//now add last message from group chat this bookmark is for
 	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
