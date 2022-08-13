@@ -710,6 +710,17 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	database.Connector.Last(&lastID)
 	bookmark.ID = lastID.ID + 1
 
+	bookmark.Chain = "none"
+	var result = IsOnChain(bookmark.Nftaddr, "ethereum")
+	if result {
+		bookmark.Chain = "ethereum"
+	} else {
+		var result = IsOnChain(bookmark.Nftaddr, "polygon")
+		if result {
+			bookmark.Chain = "polygon"
+		}
+	}
+
 	database.Connector.Create(bookmark)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -1342,8 +1353,9 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	var dbQuery = database.Connector.Where("nftaddr = ?", community).Where("walletaddr = ?", key).Find(&bookmarks)
 	if dbQuery.RowsAffected == 0 {
 		var bookmark entity.Bookmarkitem
-		bookmark.Nftaddr = "walletchat"
+		bookmark.Nftaddr = community
 		bookmark.Walletaddr = key
+		bookmark.Chain = "none"
 
 		//find fix for this (can add own trigger I guess...)
 		var lastID1 entity.Bookmarkitem
@@ -1480,6 +1492,60 @@ func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 	return result.Total > 0
 }
 
+func IsOnChain(contractAddr string, chain string) bool {
+	url := "https://api.nftport.xyz/v0/nfts/" + contractAddr + "?chain=" + chain
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	var result NFTPortNftContract
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	//fmt.Printf("Chain Response: %#v\n", result.Response)
+
+	var returnVal = false
+	if result.Response == "OK" {
+		returnVal = true
+	}
+	return returnVal
+}
+
+func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
+	var bookmarks []entity.Bookmarkitem
+	database.Connector.Find(&bookmarks)
+
+	for _, bookmark := range bookmarks {
+		if strings.HasPrefix(bookmark.Nftaddr, "0x") {
+			var result = IsOnChain(bookmark.Nftaddr, "ethereum")
+			if result {
+				database.Connector.Model(&entity.Bookmarkitem{}).Where("walletaddr = ?", bookmark.Walletaddr).Where("nftaddr = ?", bookmark.Nftaddr).Update("chain", "ethereum")
+			} else {
+				var result = IsOnChain(bookmark.Nftaddr, "polygon")
+				if result {
+					database.Connector.Model(&entity.Bookmarkitem{}).Where("walletaddr = ?", bookmark.Walletaddr).Where("nftaddr = ?", bookmark.Nftaddr).Update("chain", "polygon")
+				}
+			}
+		}
+	}
+}
+
 func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletAddr := vars["wallet"]
@@ -1541,6 +1607,28 @@ type NFTPortOwnerOf struct {
 	} `json:"nfts"`
 	Total        int         `json:"total"`
 	Continuation interface{} `json:"continuation"`
+}
+
+type NFTPortNftContract struct {
+	Response string `json:"response"`
+	Nfts     []struct {
+		Chain           string `json:"chain"`
+		ContractAddress string `json:"contract_address"`
+		TokenID         string `json:"token_id"`
+	} `json:"nfts"`
+	Contract struct {
+		Name     string `json:"name"`
+		Symbol   string `json:"symbol"`
+		Type     string `json:"type"`
+		Metadata struct {
+			Description        string `json:"description"`
+			ThumbnailURL       string `json:"thumbnail_url"`
+			CachedThumbnailURL string `json:"cached_thumbnail_url"`
+			BannerURL          string `json:"banner_url"`
+			CachedBannerURL    string `json:"cached_banner_url"`
+		} `json:"metadata"`
+	} `json:"contract"`
+	Total int `json:"total"`
 }
 
 type User struct {
