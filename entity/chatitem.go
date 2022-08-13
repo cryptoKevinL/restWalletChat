@@ -17,7 +17,7 @@ const ( //type mapping just for bookkeeping(golang sucks for enums as well...)
 )
 
 type Unreadcountitem struct {
-	//ID         int
+	//Id       int    `gorm:"primaryKey;autoIncrement"`
 	Walletaddr string `json:"walletaddr"`
 	Nft        bool   `json:"nft"`
 	Dm         bool   `json:"dm"`
@@ -25,7 +25,7 @@ type Unreadcountitem struct {
 }
 
 type Chatitem struct {
-	ID            int
+	Id            int       `gorm:"primary_key"`
 	Fromaddr      string    `json:"fromaddr"`
 	Toaddr        string    `json:"toaddr"`
 	Timestamp     string    `json:"timestamp"`
@@ -39,7 +39,7 @@ type Chatitem struct {
 
 //for olivers view function
 type V_chatitem struct {
-	ID            int
+	Id            int       `gorm:"primaryKey"`
 	Fromaddr      string    `json:"fromaddr"`
 	Toaddr        string    `json:"toaddr"`
 	Timestamp     string    `json:"timestamp"`
@@ -47,13 +47,13 @@ type V_chatitem struct {
 	Msgread       bool      `json:"read"`
 	Message       string    `json:"message"`
 	Nftaddr       string    `json:"nftaddr"`
-	Nftid         int       `json:"nftid"`
+	NftId         string    `json:"nftid"`
 	Name          string    `json:"sender_name"`
 }
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
 type Groupchatitem struct {
-	ID            int
+	Id            int       `gorm:"primary_key"`
 	Fromaddr      string    `json:"fromaddr"`
 	Timestamp     string    `json:"timestamp"`
 	Timestamp_dtm time.Time `json:"timestamp_dtm"`
@@ -66,7 +66,7 @@ type Groupchatitem struct {
 
 //secondary table to help only load new messages for each user (not reload whole chat history)
 type Groupchatreadtime struct {
-	ID                int
+	Id                int       `gorm:"primaryKey;autoIncrement"`
 	Fromaddr          string    `json:"fromaddr"`
 	Readtimestamp_dtm time.Time `json:"readtimestamp_dtm"`
 	Nftaddr           string    `json:"nftaddr"`
@@ -74,32 +74,32 @@ type Groupchatreadtime struct {
 
 //potentially use this to keep track of user logins for DAU metrics
 type Logintime struct {
-	ID        int
+	Id        int       `gorm:"primaryKey;autoIncrement"`
 	Address   string    `json:"address"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
 type Addrnameitem struct {
-	ID      int
+	Id      int    `gorm:"primaryKey;autoIncrement"`
 	Address string `json:"address"`
 	Name    string `json:"name"`
 }
 
 type Imageitem struct {
-	ID         int
+	Id         int    `gorm:"primaryKey;autoIncrement"`
 	Base64data string `json:"base64data"`
 	Name       string `json:"name"`
 }
 
 type Bookmarkitem struct {
-	ID         int
+	Id         int    `gorm:"primaryKey;autoIncrement"`
 	Walletaddr string `json:"walletaddr"`
 	Nftaddr    string `json:"nftaddr"`
 	Chain      string `json:"chain"`
 }
 
 type BookmarkReturnItem struct {
-	ID                int
+	Id                int       `gorm:"primaryKey;autoIncrement"`
 	Walletaddr        string    `json:"walletaddr"`
 	Nftaddr           string    `json:"nftaddr"`
 	Lastmsg           string    `json:"lastmsg"`
@@ -109,7 +109,7 @@ type BookmarkReturnItem struct {
 }
 
 type Nftsidebar struct {
-	ID       int
+	Id       int    `gorm:"primaryKey;autoIncrement"`
 	Fromaddr string `json:"fromaddr"`
 	Unread   int    `json:"unread"`
 	Nftaddr  string `json:"nftaddr"`
@@ -117,7 +117,7 @@ type Nftsidebar struct {
 }
 
 type Chatiteminbox struct {
-	ID            int
+	Id            int       `gorm:"primaryKey;autoIncrement"`
 	Fromaddr      string    `json:"fromaddr"`
 	Toaddr        string    `json:"toaddr"`
 	Timestamp     string    `json:"timestamp"`

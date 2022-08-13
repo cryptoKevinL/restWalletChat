@@ -26,6 +26,51 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
+type NFTPortOwnerOf struct {
+	Response string `json:"response"`
+	Nfts     []struct {
+		ContractAddress string `json:"contract_address"`
+		TokenID         string `json:"token_id"`
+		CreatorAddress  string `json:"creator_address"`
+	} `json:"nfts"`
+	Total        int         `json:"total"`
+	Continuation interface{} `json:"continuation"`
+}
+
+//auto-join to communities for newly acquired NFTs
+// func CheckForNewNFTs(walletAddr string) {
+// 	var bookmarks []entity.Bookmarkitem
+// 	database.Connector.Where("walletaddr = ?", walletAddr).Where("chain = ?", "ethereum").Find(&bookmarks)
+
+// 	var ownerNFTs = GetOwnerNFTs(walletAddr, "ethereum")
+// 	if len(ownerNFTs.Nfts) > len(bookmarks) {
+// 		//assume the last entry is the new NFT:
+// 		var bookmark entity.Bookmarkitem
+// 		bookmark.Nftaddr = ownerNFTs.Nfts[len(ownerNFTs.Nfts)-1].ContractAddress
+// 		bookmark.Walletaddr = walletAddr
+
+// 		fmt.Printf("Found New NFT!: %#v\n", bookmark.Nftaddr)
+
+// 		bookmark.Chain = "ethereum"
+// 		database.Connector.Create(bookmark)
+// 	}
+
+// 	database.Connector.Where("walletaddr = ?", walletAddr).Where("chain = ?", "polygon").Find(&bookmarks)
+// 	ownerNFTs = GetOwnerNFTs(walletAddr, "polygon")
+// 	if len(ownerNFTs.Nfts) > len(bookmarks) {
+// 		//assume the last entry is the new NFT
+// 		var bookmark entity.Bookmarkitem
+// 		bookmark.Nftaddr = ownerNFTs.Nfts[len(ownerNFTs.Nfts)-1].ContractAddress
+// 		bookmark.Walletaddr = walletAddr
+
+// 		fmt.Printf("Found New NFT!: %#v\n", bookmark.Nftaddr)
+
+// 		bookmark.Chain = "polygon"
+// 		database.Connector.Create(bookmark)
+// 	}
+// 	//end check for new NFTs
+// }
+
 // GetInboxByOwner godoc
 // @Summary Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
@@ -81,7 +126,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 		var itemToInsert entity.Chatiteminbox
 		if dbQuery.RowsAffected > 0 {
-			itemToInsert.ID = vchatitem.ID
+			itemToInsert.Id = vchatitem.Id
 			itemToInsert.Fromaddr = vchatitem.Fromaddr
 			itemToInsert.Toaddr = vchatitem.Toaddr
 			itemToInsert.Timestamp = vchatitem.Timestamp
@@ -112,6 +157,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//now get bookmarked/joined groups as well but fit it into the inbox return val type
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
+
+	//every 100 calls to getInbox, check to see if user has new NFTs in the wallet which we
+	//should auto-join them to the community chat
+	//AutoJoinCommunitiesByChain(key, "ethereum")
+	//AutoJoinCommunitiesByChain(key, "polygon")
 
 	//now add last message from group chat this bookmark is for
 	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
@@ -151,7 +201,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		}
 		//end get num unread messages
 
-		returnItem.ID = groupchat.ID
+		returnItem.Id = groupchat.Id
 		returnItem.Message = groupchat.Message
 		returnItem.Timestamp = groupchat.Timestamp
 		returnItem.Timestamp_dtm = groupchat.Timestamp_dtm
@@ -302,7 +352,7 @@ func PutUnreadcnt(w http.ResponseWriter, r *http.Request) {
 
 	if dbQuery.RowsAffected == 0 {
 		config.Walletaddr = walletaddr
-		database.Connector.Create(config)
+		database.Connector.Create(&config)
 	} else {
 		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("dm", config.Dm)
 		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("nft", config.Nft)
@@ -329,7 +379,7 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 		config.Dm = true
 		config.Nft = true
 		config.Walletaddr = key
-		database.Connector.Create(config)
+		database.Connector.Create(&config)
 	}
 
 	msgCntTotal := 0
@@ -624,15 +674,10 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Chatitem
 	json.Unmarshal(requestBody, &chat)
 
-	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
-	var lastID entity.Chatitem
-	database.Connector.Last(&lastID)
-	chat.ID = lastID.ID + 1
-
 	//I think can remove this too since Oliver added a DB trigger
 	chat.Timestamp_dtm = time.Now()
 
-	database.Connector.Create(chat)
+	database.Connector.Create(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(chat)
@@ -651,12 +696,7 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	//probably can removed now with DB trigger
 	chat.Timestamp_dtm = time.Now()
 
-	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
-	var lastID entity.Groupchatitem
-	database.Connector.Last(&lastID)
-	chat.ID = lastID.ID + 1
-
-	database.Connector.Create(chat)
+	database.Connector.Create(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(chat)
@@ -666,7 +706,9 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
-	json.Unmarshal(requestBody, &chat)
+	if err := json.Unmarshal(requestBody, &chat); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON in CreateCommunityChat")
+	}
 
 	//set type (could hack this in GET side but this is probably cleaner?)
 	if chat.Type != entity.Welcome {
@@ -676,12 +718,7 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	//can remove now I think
 	chat.Timestamp_dtm = time.Now()
 
-	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
-	var lastID entity.Groupchatitem
-	database.Connector.Last(&lastID)
-	chat.ID = lastID.ID + 1
-
-	database.Connector.Create(chat)
+	database.Connector.Create(&chat)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(chat)
@@ -705,11 +742,6 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Printf("Bookmark Item: %#v\n", chat)
 
-	//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
-	var lastID entity.Bookmarkitem
-	database.Connector.Last(&lastID)
-	bookmark.ID = lastID.ID + 1
-
 	bookmark.Chain = "none"
 	var result = IsOnChain(bookmark.Nftaddr, "ethereum")
 	if result {
@@ -721,7 +753,7 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	database.Connector.Create(bookmark)
+	database.Connector.Create(&bookmark)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(bookmark)
@@ -790,7 +822,7 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 		//end get num unread messages
 
 		var returnItem entity.BookmarkReturnItem
-		returnItem.ID = chat.ID
+		returnItem.Id = chat.Id
 		returnItem.Lastmsg = chat.Message
 		returnItem.Lasttimestamp = chat.Timestamp
 		returnItem.Lasttimestamp_dtm = chat.Timestamp_dtm
@@ -817,11 +849,7 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	var imgname entity.Imageitem
 	json.Unmarshal(requestBody, &imgname)
 
-	var lastID entity.Imageitem
-	database.Connector.Last(&lastID)
-	imgname.ID = lastID.ID + 1
-
-	database.Connector.Create(imgname)
+	database.Connector.Create(&imgname)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(imgname)
@@ -864,11 +892,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	var addrname entity.Addrnameitem
 	json.Unmarshal(requestBody, &addrname)
 
-	var lastID entity.Addrnameitem
-	database.Connector.Last(&lastID)
-	addrname.ID = lastID.ID + 1
-
-	database.Connector.Create(addrname)
+	database.Connector.Create(&addrname)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(addrname)
@@ -926,12 +950,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 		chatReadTime.Nftaddr = nftaddr
 		chatReadTime.Readtimestamp_dtm = time.Now()
 
-		//find fix for this
-		var lastID entity.Groupchatreadtime
-		database.Connector.Last(&lastID)
-		chatReadTime.ID = lastID.ID + 1
-
-		database.Connector.Create(chatReadTime)
+		database.Connector.Create(&chatReadTime)
 	} else {
 		//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
 		//set timestamp when this was last grabbed
@@ -1008,12 +1027,7 @@ func CreateSettings(w http.ResponseWriter, r *http.Request) {
 	var settings entity.Settings
 	json.Unmarshal(requestBody, &settings)
 
-	//find fix for this
-	var lastID entity.Settings
-	database.Connector.Last(&lastID)
-	settings.ID = lastID.ID + 1
-
-	database.Connector.Create(settings)
+	database.Connector.Create(&settings)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(settings)
@@ -1056,12 +1070,7 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 	var comment entity.Comments
 	json.Unmarshal(requestBody, &comment)
 
-	//find fix for this
-	var lastID entity.Comments
-	database.Connector.Last(&lastID)
-	comment.ID = lastID.ID + 1
-
-	database.Connector.Create(comment)
+	database.Connector.Create(&comment)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(comment)
@@ -1223,7 +1232,7 @@ func GetTwitterID(twitterHandle string) string {
 		fmt.Println("Can not unmarshal JSON")
 	}
 
-	twitterID := result.Data.ID
+	twitterID := result.Data.Id
 
 	//fmt.Printf("get twitter ID: %#v\n", twitterID)
 
@@ -1357,12 +1366,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		bookmark.Walletaddr = key
 		bookmark.Chain = "none"
 
-		//find fix for this (can add own trigger I guess...)
-		var lastID1 entity.Bookmarkitem
-		database.Connector.Last(&lastID1)
-		bookmark.ID = lastID1.ID + 1
-
-		database.Connector.Create(bookmark)
+		database.Connector.Create(&bookmark)
 
 		//by default everyone is joined to Walletchat
 		landingData.Joined = true
@@ -1376,13 +1380,8 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Timestamp_dtm = time.Now()
 		newgroupchatuser.Timestamp = time.Now().Format(time.RFC3339)
 
-		//find fix for this (can add own trigger I guess...)
-		var lastID entity.Groupchatitem
-		database.Connector.Last(&lastID)
-		newgroupchatuser.ID = lastID.ID + 1
-
 		//add it to the database
-		database.Connector.Create(newgroupchatuser)
+		database.Connector.Create(&newgroupchatuser)
 	} else {
 		//We don't have a way for users to get back to WC HQ if they leave (shouldn't need to use above block to re-welcome them)
 		landingData.Joined = true
@@ -1401,12 +1400,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		chatReadTime.Nftaddr = community
 		chatReadTime.Readtimestamp_dtm = time.Now()
 
-		//find fix for this (can add own trigger I guess...)
-		var lastID entity.Groupchatreadtime
-		database.Connector.Last(&lastID)
-		chatReadTime.ID = lastID.ID + 1
-
-		database.Connector.Create(chatReadTime)
+		database.Connector.Create(&chatReadTime)
 	} else {
 		//database.Connector.Where("timestamp > ?", chatReadTime.Readtimestamp_dtm).Where("nftaddr = ?", nftaddr).Find(&chat) //mana requests all data for now
 		//set timestamp when this was last grabbed
@@ -1458,6 +1452,38 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+func GetOwnerNFTs(walletAddr string, chain string) NFTPortOwnerOf {
+	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
+	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	var result NFTPortOwnerOf
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	//fmt.Printf("IsOwner: %#v\n", result.Total)
+
+	return result
 }
 
 func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
@@ -1527,6 +1553,7 @@ func IsOnChain(contractAddr string, chain string) bool {
 	return returnVal
 }
 
+//this was just used to fix up users info after adding new column
 func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Find(&bookmarks)
@@ -1585,28 +1612,14 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 		var dbResult = database.Connector.Where("nftaddr = ?", nft.ContractAddress).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
 		if dbResult.RowsAffected == 0 {
 			var bookmark entity.Bookmarkitem
-			//this needs to be fixed, shouldn't be necessary (or we need a create vs. return struct)
-			var lastID entity.Bookmarkitem
-			database.Connector.Last(&lastID)
-			bookmark.ID = lastID.ID + 1
+
 			bookmark.Nftaddr = nft.ContractAddress
 			bookmark.Walletaddr = walletAddr
 			bookmark.Chain = chain
 
-			database.Connector.Create(bookmark)
+			database.Connector.Create(&bookmark)
 		}
 	}
-}
-
-type NFTPortOwnerOf struct {
-	Response string `json:"response"`
-	Nfts     []struct {
-		ContractAddress string `json:"contract_address"`
-		TokenID         string `json:"token_id"`
-		CreatorAddress  string `json:"creator_address"`
-	} `json:"nfts"`
-	Total        int         `json:"total"`
-	Continuation interface{} `json:"continuation"`
 }
 
 type NFTPortNftContract struct {
@@ -1696,7 +1709,7 @@ type TweetType struct {
 
 type TwitterIdResp struct {
 	Data struct {
-		ID       string `json:"id"`
+		Id       string `json:"id"`
 		Name     string `json:"name"`
 		Username string `json:"username"`
 	} `json:"data"`
