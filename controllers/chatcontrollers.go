@@ -1607,6 +1607,7 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 		var bookmarkExists entity.Bookmarkitem
 		var dbResult = database.Connector.Where("nftaddr = ?", nft.ContractAddress).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
 		if dbResult.RowsAffected == 0 {
+			fmt.Println("Found new NFT: " + nft.ContractAddress)
 			var bookmark entity.Bookmarkitem
 
 			bookmark.Nftaddr = nft.ContractAddress
