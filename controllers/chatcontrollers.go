@@ -338,7 +338,6 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//CreateGroupChatitem creates GroupChatitem
 func PutUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletaddr := vars["address"]
@@ -375,14 +374,12 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 
 	if dbQuery.RowsAffected == 0 {
 		//create a config //this can be removed eventually once all accounts have a saved setting
-		config.Community = true
-		config.Dm = true
-		config.Nft = true
+		config.Community = 0
+		config.Dm = 0
+		config.Nft = 0
 		config.Walletaddr = key
 		database.Connector.Create(&config)
 	}
-
-	msgCntTotal := 0
 
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
@@ -409,23 +406,19 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 		//end get num unread messages
 
 		if strings.HasPrefix(groupchat.Nftaddr, "0x") {
-			if config.Nft {
-				msgCntTotal += len(chatCnt)
-			}
-		} else if config.Community {
-			msgCntTotal += len(chatCnt)
+			config.Nft = len(chatCnt)
+		} else {
+			config.Community = len(chatCnt)
 		}
 	}
 
-	if config.Dm {
-		var chat []entity.Chatitem
-		database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
-		msgCntTotal += len(chat)
-	}
+	var chat []entity.Chatitem
+	database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
+	config.Dm = len(chat)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(msgCntTotal)
+	json.NewEncoder(w).Encode(config)
 }
 
 func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
