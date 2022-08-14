@@ -86,7 +86,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"] //owner of the inbox
 
-	fmt.Printf("GetInboxByOwner: %#v\n", key)
+	//fmt.Printf("GetInboxByOwner: %#v\n", key)
 
 	//get all items that relate to passed in owner/address
 	var chat []entity.Chatitem
@@ -1621,15 +1621,15 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 func AutoJoinPoapChats(walletAddr string) {
 	//https://documentation.poap.tech/reference/getactionsscan-5
 	var poapInfo []POAPInfoByAddress = getPoapInfoByAddress(walletAddr)
-	fmt.Printf("AutoJoinPoapChats: %#v\n", poapInfo)
+	//fmt.Printf("AutoJoinPoapChats: %#v\n", poapInfo)
 	for _, poap := range poapInfo {
 		var bookmarkExists entity.Bookmarkitem
 
 		var poapAddr = "POAP_" + strconv.Itoa(poap.Event.ID)
-		fmt.Printf("POAP Event: %#v\n", poapAddr)
+		//fmt.Printf("POAP Event: %#v\n", poapAddr)
 		var dbResult = database.Connector.Where("nftaddr = ?", poapAddr).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
 		if dbResult.RowsAffected == 0 {
-			fmt.Printf("POAP is new for user: %#v\n", walletAddr)
+			//fmt.Printf("POAP is new for user: %#v\n", walletAddr)
 			var bookmark entity.Bookmarkitem
 
 			bookmark.Nftaddr = poapAddr
@@ -1675,7 +1675,7 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 		fmt.Println("Can not unmarshal JSON")
 	}
 
-	fmt.Printf("returning: %#v\n", result)
+	//fmt.Printf("returning: %#v\n", result)
 
 	return result
 }
