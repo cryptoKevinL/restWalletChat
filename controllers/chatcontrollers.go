@@ -9,6 +9,7 @@ import (
 	"os"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
+	"strconv"
 	"strings"
 	"time"
 
@@ -85,7 +86,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"] //owner of the inbox
 
-	//fmt.Printf("GetInboxByOwner: %#v\n", key)
+	fmt.Printf("GetInboxByOwner: %#v\n", key)
 
 	//get all items that relate to passed in owner/address
 	var chat []entity.Chatitem
@@ -158,10 +159,11 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
 
-	//every 100 calls to getInbox, check to see if user has new NFTs in the wallet which we
+	//TODO: need to throttle these 2 calls to auto-join?
 	//should auto-join them to the community chat
 	AutoJoinCommunitiesByChain(key, "ethereum")
 	AutoJoinCommunitiesByChain(key, "polygon")
+	AutoJoinPoapChats(key)
 
 	//now add last message from group chat this bookmark is for
 	var gchat []entity.Groupchatitem //even though I use this in a Last() function I need to store as an array, or subsequenct DB queries fail!
@@ -1571,6 +1573,7 @@ func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	walletAddr := vars["wallet"]
 	AutoJoinCommunitiesByChain(walletAddr, "ethereum")
 	AutoJoinCommunitiesByChain(walletAddr, "polygon")
+	AutoJoinPoapChats(walletAddr)
 }
 func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
@@ -1613,6 +1616,90 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 			database.Connector.Create(&bookmark)
 		}
 	}
+}
+
+func AutoJoinPoapChats(walletAddr string) {
+	//https://documentation.poap.tech/reference/getactionsscan-5
+	var poapInfo []POAPInfoByAddress = getPoapInfoByAddress(walletAddr)
+	fmt.Printf("AutoJoinPoapChats: %#v\n", poapInfo)
+	for _, poap := range poapInfo {
+		var bookmarkExists entity.Bookmarkitem
+
+		var poapAddr = "POAP_" + strconv.Itoa(poap.Event.ID)
+		fmt.Printf("POAP Event: %#v\n", poapAddr)
+		var dbResult = database.Connector.Where("nftaddr = ?", poapAddr).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
+		if dbResult.RowsAffected == 0 {
+			fmt.Printf("POAP is new for user: %#v\n", walletAddr)
+			var bookmark entity.Bookmarkitem
+
+			bookmark.Nftaddr = poapAddr
+			bookmark.Walletaddr = walletAddr
+			bookmark.Chain = poap.Chain
+
+			database.Connector.Create(&bookmark)
+		}
+	}
+}
+
+func GetPoapsByAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	walletAddr := vars["wallet"]
+
+	result := getPoapInfoByAddress(walletAddr)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
+	url := "https://api.poap.tech/actions/scan/" + walletAddr
+
+	// Create a new request using http
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("X-API-KEY", os.Getenv("POAP_API_KEY"))
+
+	// Send req using http Client
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println("Error on response.\n[ERROR] -", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Error while reading the response bytes:", err)
+	}
+
+	var result []POAPInfoByAddress
+	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+		fmt.Println("Can not unmarshal JSON")
+	}
+
+	fmt.Printf("returning: %#v\n", result)
+
+	return result
+}
+
+type POAPInfoByAddress struct {
+	Event struct {
+		ID          int    `json:"id"`
+		FancyID     string `json:"fancy_id"`
+		Name        string `json:"name"`
+		EventURL    string `json:"event_url"`
+		ImageURL    string `json:"image_url"`
+		Country     string `json:"country"`
+		City        string `json:"city"`
+		Description string `json:"description"`
+		Year        int    `json:"year"`
+		StartDate   string `json:"start_date"`
+		EndDate     string `json:"end_date"`
+		ExpiryDate  string `json:"expiry_date"`
+		Supply      int    `json:"supply"`
+	} `json:"event"`
+	TokenID string `json:"tokenId"`
+	Owner   string `json:"owner"`
+	Chain   string `json:"chain"`
+	Created string `json:"created"`
 }
 
 type NFTPortNftContract struct {

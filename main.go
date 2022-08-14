@@ -109,6 +109,9 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/is_owner/{contract}/{wallet}", controllers.IsOwner).Methods("GET")
 	router.HandleFunc("/rejoin_all/{wallet}", controllers.AutoJoinCommunities).Methods("GET")
 	router.HandleFunc("/backfill_all_bookmarks", controllers.FixUpBookmarks).Methods("GET")
+
+	//POAP related stuff (some could be called client side directly but this protects the API key)
+	router.HandleFunc("/get_poaps/{wallet}", controllers.GetPoapsByAddr).Methods("GET")
 }
 
 func initDB() {
