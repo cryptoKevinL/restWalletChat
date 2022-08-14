@@ -338,30 +338,30 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PutUnreadcnt(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	walletaddr := vars["address"]
+// func PutUnreadcnt(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+// 	walletaddr := vars["address"]
 
-	requestBody, _ := ioutil.ReadAll(r.Body)
-	var config entity.Unreadcountitem
-	json.Unmarshal(requestBody, &config)
+// 	requestBody, _ := ioutil.ReadAll(r.Body)
+// 	var config entity.Unreadcountitem
+// 	json.Unmarshal(requestBody, &config)
 
-	var findConfig entity.Unreadcountitem
-	var dbQuery = database.Connector.Where("walletaddr = ?", walletaddr).Find(&findConfig)
+// 	var findConfig entity.Unreadcountitem
+// 	var dbQuery = database.Connector.Where("walletaddr = ?", walletaddr).Find(&findConfig)
 
-	if dbQuery.RowsAffected == 0 {
-		config.Walletaddr = walletaddr
-		database.Connector.Create(&config)
-	} else {
-		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("dm", config.Dm)
-		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("nft", config.Nft)
-		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("community", config.Community)
-	}
+// 	if dbQuery.RowsAffected == 0 {
+// 		config.Walletaddr = walletaddr
+// 		database.Connector.Create(&config)
+// 	} else {
+// 		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("dm", config.Dm)
+// 		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("nft", config.Nft)
+// 		database.Connector.Model(&entity.Unreadcountitem{}).Where("walletaddr = ?", walletaddr).Update("community", config.Community)
+// 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(true)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusCreated)
+// 	json.NewEncoder(w).Encode(true)
+// }
 
 //Get all unread messages TO a specific user, used for total count notification at top notification bar
 func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
@@ -370,16 +370,16 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 
 	//get configured items from DB
 	var config entity.Unreadcountitem
-	var dbQuery = database.Connector.Where("walletaddr = ?", key).Find(&config)
+	// var dbQuery = database.Connector.Where("walletaddr = ?", key).Find(&config)
 
-	if dbQuery.RowsAffected == 0 {
-		//create a config //this can be removed eventually once all accounts have a saved setting
-		config.Community = 0
-		config.Dm = 0
-		config.Nft = 0
-		config.Walletaddr = key
-		database.Connector.Create(&config)
-	}
+	// if dbQuery.RowsAffected == 0 {
+	// 	//create a config //this can be removed eventually once all accounts have a saved setting
+	// 	config.Community = 0
+	// 	config.Dm = 0
+	// 	config.Nft = 0
+	// 	config.Walletaddr = key
+	// 	database.Connector.Create(&config)
+	// }
 
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)

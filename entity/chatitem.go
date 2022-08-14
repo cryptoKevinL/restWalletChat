@@ -18,10 +18,10 @@ const ( //type mapping just for bookkeeping(golang sucks for enums as well...)
 
 type Unreadcountitem struct {
 	//Id       int    `gorm:"primaryKey;autoIncrement"`
-	Walletaddr string `json:"walletaddr"`
-	Nft        int    `json:"nft"`
-	Dm         int    `json:"dm"`
-	Community  int    `json:"community"`
+	//Walletaddr string `json:"walletaddr"`
+	Nft       int `json:"nft"`
+	Dm        int `json:"dm"`
+	Community int `json:"community"`
 }
 
 type Chatitem struct {

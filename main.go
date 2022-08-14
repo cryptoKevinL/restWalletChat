@@ -59,7 +59,7 @@ func initaliseHandlers(router *mux.Router) {
 
 	//unreadcnt per week4 requirements
 	router.HandleFunc("/unreadcount/{address}", controllers.GetUnreadcnt).Methods("GET")
-	router.HandleFunc("/unreadcount/{address}", controllers.PutUnreadcnt).Methods("PUT")
+	//router.HandleFunc("/unreadcount/{address}", controllers.PutUnreadcnt).Methods("PUT")
 
 	//group chat
 	router.HandleFunc("/create_groupchatitem", controllers.CreateGroupChatitem).Methods("POST")
