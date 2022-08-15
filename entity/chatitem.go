@@ -91,6 +91,14 @@ type Imageitem struct {
 	Name       string `json:"name"`
 }
 
+//we have to keep track if a user has manually unjoined, if they did don't auto-join them again
+type Userunjoined struct {
+	Id         int    `gorm:"primaryKey;autoIncrement"`
+	Walletaddr string `json:"walletaddr"`
+	Nftaddr    string `json:"nftaddr"`
+	Unjoined   bool   `json:"unjoined"`
+}
+
 type Bookmarkitem struct {
 	Id         int    `gorm:"primaryKey;autoIncrement"`
 	Walletaddr string `json:"walletaddr"`

@@ -766,6 +766,22 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 		returnval = true
 	}
 
+	//set the fact the user has manually unjoined this NFT
+	var tempUserUnjoined entity.Userunjoined
+	var checkUser = database.Connector.Where("nftaddr = ?", bookmark.Nftaddr).Where("walletaddr = ?", bookmark.Walletaddr).Find(&tempUserUnjoined)
+
+	if checkUser.RowsAffected > 0 {
+		database.Connector.Model(&entity.Userunjoined{}).
+			Where("walletaddr = ?", bookmark.Walletaddr).
+			Where("nftaddr = ?", bookmark.Nftaddr).
+			Update("unjoined", true)
+	} else {
+		tempUserUnjoined.Nftaddr = bookmark.Nftaddr
+		tempUserUnjoined.Walletaddr = bookmark.Walletaddr
+		tempUserUnjoined.Unjoined = true
+		database.Connector.Create(&tempUserUnjoined)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(returnval)
@@ -1576,6 +1592,7 @@ func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	AutoJoinPoapChats(walletAddr)
 }
 func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
+	//TODO: OS is more accurate
 	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
 
 	req, _ := http.NewRequest("GET", url, nil)
@@ -1606,15 +1623,26 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 		//TODO: could be optimized, good enough for now
 		var bookmarkExists entity.Bookmarkitem
 		var dbResult = database.Connector.Where("nftaddr = ?", nft.ContractAddress).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
+
 		if dbResult.RowsAffected == 0 {
-			fmt.Println("Found new NFT: " + nft.ContractAddress)
-			var bookmark entity.Bookmarkitem
+			//check if the user already manually unjoined, if so don't auto rejoin them
+			var userUnjoined entity.Userunjoined
+			var dbUnjoined = database.Connector.Where("nftaddr = ?", nft.ContractAddress).Where("walletaddr = ?", walletAddr).Find(&userUnjoined)
+			userAlreadyUnjoined := false
+			if dbUnjoined.RowsAffected > 0 {
+				userAlreadyUnjoined = userUnjoined.Unjoined
+			}
 
-			bookmark.Nftaddr = nft.ContractAddress
-			bookmark.Walletaddr = walletAddr
-			bookmark.Chain = chain
+			if !userAlreadyUnjoined {
+				fmt.Println("Found new NFT: " + nft.ContractAddress)
+				var bookmark entity.Bookmarkitem
 
-			database.Connector.Create(&bookmark)
+				bookmark.Nftaddr = nft.ContractAddress
+				bookmark.Walletaddr = walletAddr
+				bookmark.Chain = chain
+
+				database.Connector.Create(&bookmark)
+			}
 		}
 	}
 }
@@ -1629,15 +1657,26 @@ func AutoJoinPoapChats(walletAddr string) {
 		var poapAddr = "POAP_" + strconv.Itoa(poap.Event.ID)
 		//fmt.Printf("POAP Event: %#v\n", poapAddr)
 		var dbResult = database.Connector.Where("nftaddr = ?", poapAddr).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
+
 		if dbResult.RowsAffected == 0 {
-			//fmt.Printf("POAP is new for user: %#v\n", walletAddr)
-			var bookmark entity.Bookmarkitem
+			//check if the user already manually unjoined, if so don't auto rejoin them
+			var userUnjoined entity.Userunjoined
+			var dbUnjoined = database.Connector.Where("nftaddr = ?", poapAddr).Where("walletaddr = ?", walletAddr).Find(&userUnjoined)
+			userAlreadyUnjoined := false
+			if dbUnjoined.RowsAffected > 0 {
+				userAlreadyUnjoined = userUnjoined.Unjoined
+			}
 
-			bookmark.Nftaddr = poapAddr
-			bookmark.Walletaddr = walletAddr
-			bookmark.Chain = poap.Chain
+			if !userAlreadyUnjoined {
+				fmt.Printf("POAP is new for user: %#v\n", walletAddr)
+				var bookmark entity.Bookmarkitem
 
-			database.Connector.Create(&bookmark)
+				bookmark.Nftaddr = poapAddr
+				bookmark.Walletaddr = walletAddr
+				bookmark.Chain = poap.Chain
+
+				database.Connector.Create(&bookmark)
+			}
 		}
 	}
 }
