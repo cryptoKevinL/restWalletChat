@@ -27,10 +27,9 @@ import (
 // @host localhost:8080
 // @BasePath
 func main() {
+	godotenv.Load(".env")
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
-
-	godotenv.Load(".env")
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
