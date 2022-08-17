@@ -112,6 +112,12 @@ func initaliseHandlers(router *mux.Router) {
 
 	//POAP related stuff (some could be called client side directly but this protects the API key)
 	router.HandleFunc("/get_poaps/{wallet}", controllers.GetPoapsByAddr).Methods("GET")
+
+	//IPFS helpers so we can protect the API key
+	//Someday we could also cache recent data here in some smart way to do this in batches
+	//and since we keep re-reading same data currently for polling updates to UI, this could help
+	router.HandleFunc("/get_ipfs/{cid}", controllers.GetPoapsByAddr).Methods("GET")
+	router.HandleFunc("/post_ipfs", controllers.GetPoapsByAddr).Methods("POST")
 }
 
 func initDB() {
@@ -119,7 +125,7 @@ func initDB() {
 		database.Config{
 			User:       "doadmin",
 			Password:   "AVNS_7q8_Jqll_0sA9Fi",
-			ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
+			ServerName: "db-ipfs-nyc3-18174-do-user-11094376-0.b.db.ondigitalocean.com:25060",
 			DB:         "walletchat",
 		}
 		// database.Config{
