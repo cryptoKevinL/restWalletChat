@@ -182,6 +182,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 				returnItem.Contexttype = entity.Nft
 				returnItem.Chain = bookmarks[idx].Chain
 			}
+			if strings.HasPrefix(returnItem.Nftaddr, "POAP_") {
+				returnItem.Contexttype = entity.Nft
+				returnItem.Chain = bookmarks[idx].Chain
+			}
 			userInbox = append(userInbox, returnItem)
 			continue
 		}
@@ -233,6 +237,9 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 
 		//until we fix up old tables, we can hack this to double check
 		if strings.HasPrefix(returnItem.Nftaddr, "0x") {
+			returnItem.Contexttype = entity.Nft
+		}
+		if strings.HasPrefix(returnItem.Nftaddr, "POAP_") {
 			returnItem.Contexttype = entity.Nft
 		}
 
@@ -1474,7 +1481,7 @@ func GetOwnerNFTs(walletAddr string, chain string) NFTPortOwnerOf {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", os.Getenv("NFTPORT_API_KEY"))
 
-	// Send req using http Client
+	// Send req using http Clien
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
