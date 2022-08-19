@@ -182,7 +182,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 				returnItem.Contexttype = entity.Nft
 				returnItem.Chain = bookmarks[idx].Chain
 			}
-			if strings.HasPrefix(returnItem.Nftaddr, "POAP_") {
+			if strings.HasPrefix(returnItem.Nftaddr, "paop_") {
 				returnItem.Contexttype = entity.Nft
 				returnItem.Chain = bookmarks[idx].Chain
 			}
@@ -239,7 +239,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(returnItem.Nftaddr, "0x") {
 			returnItem.Contexttype = entity.Nft
 		}
-		if strings.HasPrefix(returnItem.Nftaddr, "POAP_") {
+		if strings.HasPrefix(returnItem.Nftaddr, "poap_") {
 			returnItem.Contexttype = entity.Nft
 		}
 
