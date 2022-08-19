@@ -1661,7 +1661,7 @@ func AutoJoinPoapChats(walletAddr string) {
 	for _, poap := range poapInfo {
 		var bookmarkExists entity.Bookmarkitem
 
-		var poapAddr = "POAP_" + strconv.Itoa(poap.Event.ID)
+		var poapAddr = "poap_" + strconv.Itoa(poap.Event.ID)
 		//fmt.Printf("POAP Event: %#v\n", poapAddr)
 		var dbResult = database.Connector.Where("nftaddr = ?", poapAddr).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
 
