@@ -745,6 +745,12 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("Bookmark Item: %#v\n", chat)
 
 	bookmark.Chain = "none"
+
+	//0x check is a cheap hack right now since NFTPort.xyz is rate limiting us a lot
+	if strings.HasPrefix(bookmark.Nftaddr, "0x") {
+		bookmark.Chain = "ethereum"
+	}
+
 	var result = IsOnChain(bookmark.Nftaddr, "ethereum")
 	if result {
 		bookmark.Chain = "ethereum"
@@ -1394,8 +1400,9 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Contexttype = entity.Community
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
-		//Make this go to IPFS as well
 		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
+		//const cid = await postIpfsData(newgroupchatuser.Message)
+		//newgroupchatuser.Message.message = cid
 		newgroupchatuser.Timestamp_dtm = time.Now()
 		newgroupchatuser.Timestamp = time.Now().Format(time.RFC3339)
 
