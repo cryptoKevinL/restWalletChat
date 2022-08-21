@@ -750,6 +750,10 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(bookmark.Nftaddr, "0x") {
 		bookmark.Chain = "ethereum"
 	}
+	if strings.HasPrefix(bookmark.Nftaddr, "poap_") {
+		bookmark.Chain = "xdai"
+	}
+	//end hack for limiting NFTport API
 
 	var result = IsOnChain(bookmark.Nftaddr, "ethereum")
 	if result {
