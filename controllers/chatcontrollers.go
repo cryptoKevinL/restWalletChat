@@ -1394,6 +1394,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Contexttype = entity.Community
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
+		//Make this go to IPFS as well
 		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
 		newgroupchatuser.Timestamp_dtm = time.Now()
 		newgroupchatuser.Timestamp = time.Now().Format(time.RFC3339)
@@ -1661,7 +1662,7 @@ func AutoJoinPoapChats(walletAddr string) {
 	for _, poap := range poapInfo {
 		var bookmarkExists entity.Bookmarkitem
 
-		var poapAddr = "POAP_" + strconv.Itoa(poap.Event.ID)
+		var poapAddr = "poap_" + strconv.Itoa(poap.Event.ID)
 		//fmt.Printf("POAP Event: %#v\n", poapAddr)
 		var dbResult = database.Connector.Where("nftaddr = ?", poapAddr).Where("walletaddr = ?", walletAddr).Find(&bookmarkExists)
 
