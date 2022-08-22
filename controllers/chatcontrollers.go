@@ -743,6 +743,7 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(requestBody, &bookmark)
 
 	//fmt.Printf("Bookmark Item: %#v\n", chat)
+	bookmark.Chain = "none"
 	//0x check is a cheap hack right now since NFTPort.xyz is rate limiting us a lot
 	if strings.HasPrefix(bookmark.Nftaddr, "0x") {
 		bookmark.Chain = "ethereum"
@@ -751,8 +752,6 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 		bookmark.Chain = "xdai"
 	}
 	//end hack for limiting NFTport API
-
-	bookmark.Chain = "none"
 	var result = IsOnChain(bookmark.Nftaddr, "ethereum")
 	if result {
 		bookmark.Chain = "ethereum"
