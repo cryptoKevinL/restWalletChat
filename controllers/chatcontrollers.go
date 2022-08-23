@@ -38,40 +38,6 @@ type NFTPortOwnerOf struct {
 	Continuation interface{} `json:"continuation"`
 }
 
-//auto-join to communities for newly acquired NFTs
-// func CheckForNewNFTs(walletAddr string) {
-// 	var bookmarks []entity.Bookmarkitem
-// 	database.Connector.Where("walletaddr = ?", walletAddr).Where("chain = ?", "ethereum").Find(&bookmarks)
-
-// 	var ownerNFTs = GetOwnerNFTs(walletAddr, "ethereum")
-// 	if len(ownerNFTs.Nfts) > len(bookmarks) {
-// 		//assume the last entry is the new NFT:
-// 		var bookmark entity.Bookmarkitem
-// 		bookmark.Nftaddr = ownerNFTs.Nfts[len(ownerNFTs.Nfts)-1].ContractAddress
-// 		bookmark.Walletaddr = walletAddr
-
-// 		fmt.Printf("Found New NFT!: %#v\n", bookmark.Nftaddr)
-
-// 		bookmark.Chain = "ethereum"
-// 		database.Connector.Create(bookmark)
-// 	}
-
-// 	database.Connector.Where("walletaddr = ?", walletAddr).Where("chain = ?", "polygon").Find(&bookmarks)
-// 	ownerNFTs = GetOwnerNFTs(walletAddr, "polygon")
-// 	if len(ownerNFTs.Nfts) > len(bookmarks) {
-// 		//assume the last entry is the new NFT
-// 		var bookmark entity.Bookmarkitem
-// 		bookmark.Nftaddr = ownerNFTs.Nfts[len(ownerNFTs.Nfts)-1].ContractAddress
-// 		bookmark.Walletaddr = walletAddr
-
-// 		fmt.Printf("Found New NFT!: %#v\n", bookmark.Nftaddr)
-
-// 		bookmark.Chain = "polygon"
-// 		database.Connector.Create(bookmark)
-// 	}
-// 	//end check for new NFTs
-// }
-
 // GetInboxByOwner godoc
 // @Summary Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
@@ -288,7 +254,15 @@ func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//Get all unread messages TO a specific user, used for total count notification at top notification bar
+// GetUnreadMsgCntTotal godoc
+// @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
+// @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Success 200 int
+// @Router /get_unread_cnt/{address} [get]
 func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -303,7 +277,16 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(chat))
 }
 
-//Get all unread messages TO a specific user, used for total count notification at top notification bar
+// GetUnreadMsgCntTotalByType godoc
+// @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
+// @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox (>_<)
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Param type path string true "Message Type - nft|community|dm|all"
+// @Success 200 int
+// @Router /get_unread_cnt_by_type/{address}/{type} [get]
 func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -372,7 +355,15 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 // 	json.NewEncoder(w).Encode(true)
 // }
 
-//Get all unread messages TO a specific user, used for total count notification at top notification bar
+// GetUnreadcnt godoc
+// @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
+// @Description Get Unread count just given an address
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Success 200 int
+// @Router /unreadcount/{address} [get]
 func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -430,6 +421,17 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(config)
 }
 
+// GetUnreadMsgCntNft godoc
+// @Summary Get all unread messages for a specific NFT context
+// @Description Get Unread count for specifc NFT context given a wallet address and specific NFT
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Param nftaddr path string true "NFT Contract Address"
+// @Param nftid path string true "NFT ID"
+// @Success 200 int
+// @Router /get_unread_cnt/{address}/{nftaddr}/{nftid} [get]
 func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -444,6 +446,15 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(chat))
 }
 
+// GetUnreadMsgCntNft godoc
+// @Summary Get all unread messages for all NFT related chats for given user
+// @Description Get Unread count for all NFT contexts given a wallet address (>_<)
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Success 200 int
+// @Router /get_unread_cnt_nft/{address} [get]
 func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -514,7 +525,16 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(nftretval)
 }
 
-//unread count per conversation
+// GetUnreadMsgCnt godoc
+// @Summary Get all unread messages between two addresses
+// @Description Get Unread count for DMs (>_<)
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param toaddr path string true "TO: Wallet Address"
+// @Param from path string true "FROM: Wallet Address"
+// @Success 200 int
+// @Router /get_unread_cnt/{fromaddr}/{toaddr} [get]
 func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	to := vars["toaddr"]
@@ -528,7 +548,15 @@ func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(chat))
 }
 
-//GetChatFromAddressToOwner returns all chat items from user to owner
+// GetChatFromAddress godoc
+// @Summary Get Chat Item For Given Wallet Address
+// @Description Get all Chat Items for DMs for a given wallet address (>_<)
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param toaddr path string true "Wallet Address"
+// @Success 200 {array} entity.Chatitem
+// @Router /getall_chatitems/{address} [get]
 func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -539,6 +567,15 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// GetNftChatFromAddress godoc
+// @Summary Get NFT Related Chat Items For Given Wallet Address
+// @Description Get ALL NFT context items for a given wallet address (>_<)
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param toaddr path string true "Wallet Address"
+// @Success 200 {array} entity.Chatitem
+// @Router /getnft_chatitems/{address} [get]
 func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -550,7 +587,16 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//return both directions of this chat
+// GetChatFromAddressToAddr godoc
+// @Summary Get Chat Data Between Two Addresses
+// @Description Get chat data between the given two addresses, TO and FROM and interchangable here
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param toaddr path string true "TO: Wallet Address"
+// @Param from path string true "FROM: Wallet Address"
+// @Success 200 {array} entity.Chatitem
+// @Router /getall_chatitems/{fromaddr}/{toaddr} [get]
 func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
@@ -584,6 +630,16 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// GetChatNftContext godoc
+// @Summary Get NFT Related Chat Items For Given NFT Contract and ID
+// @Description Get ALL NFT context items for a given wallet address (>_<)
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param nftaddr path string true "NFT Contract Address"
+// @Param nftid path string true "NFT ID"
+// @Success 200 {array} entity.Chatitem
+// @Router /getnft_chatitems/{nftaddr}/{nftid} [get]
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["nftaddr"]
@@ -596,6 +652,18 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// GetChatNftContext godoc
+// @Summary Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)
+// @Description Get ALL NFT context items for a specifc NFT context convo between two wallets
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param nftaddr path string true "NFT Contract Address"
+// @Param nftid path string true "NFT ID"
+// @Param toaddr path string true "TO: Wallet Address"
+// @Param from path string true "FROM: Wallet Address"
+// @Success 200 {array} entity.Chatitem
+// @Router /getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid} [get]
 func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
@@ -635,6 +703,17 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// GetChatNftAllItemsFromAddr godoc
+// @Summary Get NFT Related Chat Items For Given NFT Contract and ID, relating to one wallet
+// @Description Get all specified NFT contract and ID items for a given wallet address (>_<)
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Param nftaddr path string true "NFT Contract Address"
+// @Param nftid path string true "NFT ID"
+// @Success 200 {array} entity.Chatitem
+// @Router /getnft_chatitems/{address}/{nftaddr}/{nftid} [get]
 func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletaddr := vars["address"]
