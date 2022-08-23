@@ -261,7 +261,7 @@ func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
-// @Success 200 int
+// @Success 200 {integer} int
 // @Router /get_unread_cnt/{address} [get]
 func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -285,7 +285,7 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param address path string true "Wallet Address"
 // @Param type path string true "Message Type - nft|community|dm|all"
-// @Success 200 int
+// @Success 200 {integer} int
 // @Router /get_unread_cnt_by_type/{address}/{type} [get]
 func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -362,7 +362,7 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
-// @Success 200 int
+// @Success 200 {integer} int
 // @Router /unreadcount/{address} [get]
 func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -430,7 +430,7 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 // @Param address path string true "Wallet Address"
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
-// @Success 200 int
+// @Success 200 {integer} int
 // @Router /get_unread_cnt/{address}/{nftaddr}/{nftid} [get]
 func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -453,7 +453,7 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
-// @Success 200 int
+// @Success 200 {integer} int
 // @Router /get_unread_cnt_nft/{address} [get]
 func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -533,7 +533,7 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param toaddr path string true "TO: Wallet Address"
 // @Param from path string true "FROM: Wallet Address"
-// @Success 200 int
+// @Success 200 {integer} int
 // @Router /get_unread_cnt/{fromaddr}/{toaddr} [get]
 func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

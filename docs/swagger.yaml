@@ -10,7 +10,7 @@ definitions:
       nftaddr:
         type: string
       nftid:
-        type: integer
+        type: string
       read:
         type: boolean
       sender_name:
@@ -24,6 +24,8 @@ definitions:
     type: object
   entity.Chatiteminbox:
     properties:
+      chain:
+        type: string
       context_type:
         type: string
       fromaddr:
@@ -39,7 +41,7 @@ definitions:
       nftaddr:
         type: string
       nftid:
-        type: integer
+        type: string
       read:
         type: boolean
       sender_name:
@@ -88,6 +90,136 @@ paths:
       summary: Get Inbox Summary With Last Message
       tags:
       - inbox
+  /get_unread_cnt/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get Each 1-on-1 Conversation, NFT and Community Chat For Display
+        in Inbox
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Get all unread messages TO a specific user, used for total count notification
+        at top notification bar
+      tags:
+      - inbox
+  /get_unread_cnt/{address}/{nftaddr}/{nftid}:
+    get:
+      consumes:
+      - application/json
+      description: Get Unread count for specifc NFT context given a wallet address
+        and specific NFT
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: NFT Contract Address
+        in: path
+        name: nftaddr
+        required: true
+        type: string
+      - description: NFT ID
+        in: path
+        name: nftid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Get all unread messages for a specific NFT context
+      tags:
+      - inbox
+  /get_unread_cnt/{fromaddr}/{toaddr}:
+    get:
+      consumes:
+      - application/json
+      description: Get Unread count for DMs (>_<)
+      parameters:
+      - description: 'TO: Wallet Address'
+        in: path
+        name: toaddr
+        required: true
+        type: string
+      - description: 'FROM: Wallet Address'
+        in: path
+        name: from
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Get all unread messages between two addresses
+      tags:
+      - inbox
+  /get_unread_cnt_by_type/{address}/{type}:
+    get:
+      consumes:
+      - application/json
+      description: Get Each 1-on-1 Conversation, NFT and Community Chat For Display
+        in Inbox (>_<)
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: Message Type - nft|community|dm|all
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Get all unread messages TO a specific user, used for total count notification
+        at top notification bar
+      tags:
+      - inbox
+  /get_unread_cnt_nft/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get Unread count for all NFT contexts given a wallet address (>_<)
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Get all unread messages for all NFT related chats for given user
+      tags:
+      - inbox
   /getall_chatitems:
     get:
       consumes:
@@ -103,6 +235,206 @@ paths:
               $ref: '#/definitions/entity.Chatitem'
             type: array
       summary: Get All Chat Items (legacy - not used currently)
+      tags:
+      - inbox
+  /getall_chatitems/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get all Chat Items for DMs for a given wallet address (>_<)
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: toaddr
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Get Chat Item For Given Wallet Address
+      tags:
+      - inbox
+  /getall_chatitems/{fromaddr}/{toaddr}:
+    get:
+      consumes:
+      - application/json
+      description: Get chat data between the given two addresses, TO and FROM and
+        interchangable here
+      parameters:
+      - description: 'TO: Wallet Address'
+        in: path
+        name: toaddr
+        required: true
+        type: string
+      - description: 'FROM: Wallet Address'
+        in: path
+        name: from
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Get Chat Data Between Two Addresses
+      tags:
+      - inbox
+  /getnft_chatitems/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get ALL NFT context items for a given wallet address (>_<)
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: toaddr
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Get NFT Related Chat Items For Given Wallet Address
+      tags:
+      - inbox
+  /getnft_chatitems/{address}/{nftaddr}/{nftid}:
+    get:
+      consumes:
+      - application/json
+      description: Get all specified NFT contract and ID items for a given wallet
+        address (>_<)
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      - description: NFT Contract Address
+        in: path
+        name: nftaddr
+        required: true
+        type: string
+      - description: NFT ID
+        in: path
+        name: nftid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Get NFT Related Chat Items For Given NFT Contract and ID, relating
+        to one wallet
+      tags:
+      - inbox
+  /getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid}:
+    get:
+      consumes:
+      - application/json
+      description: Get ALL NFT context items for a specifc NFT context convo between
+        two wallets
+      parameters:
+      - description: NFT Contract Address
+        in: path
+        name: nftaddr
+        required: true
+        type: string
+      - description: NFT ID
+        in: path
+        name: nftid
+        required: true
+        type: string
+      - description: 'TO: Wallet Address'
+        in: path
+        name: toaddr
+        required: true
+        type: string
+      - description: 'FROM: Wallet Address'
+        in: path
+        name: from
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Get NFT Related Chat Items For Given NFT Contract and ID, between two
+        wallet addresses (TO and FROM are interchangable)
+      tags:
+      - inbox
+  /getnft_chatitems/{nftaddr}/{nftid}:
+    get:
+      consumes:
+      - application/json
+      description: Get ALL NFT context items for a given wallet address (>_<)
+      parameters:
+      - description: NFT Contract Address
+        in: path
+        name: nftaddr
+        required: true
+        type: string
+      - description: NFT ID
+        in: path
+        name: nftid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Get NFT Related Chat Items For Given NFT Contract and ID
+      tags:
+      - inbox
+  /unreadcount/{address}:
+    get:
+      consumes:
+      - application/json
+      description: Get Unread count just given an address
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Get all unread messages TO a specific user, used for total count notification
+        at top notification bar
       tags:
       - inbox
 swagger: "2.0"
