@@ -4,8 +4,6 @@ go 1.14
 
 require (
 	github.com/cryptoKevinL/walletChatDocs v0.0.0-20220823072852-e8b82d5a44a3
-	github.com/go-openapi/spec v0.20.7 // indirect
-	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/jinzhu/gorm v1.9.16
