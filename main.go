@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"rest-go-demo/controllers"
 	"rest-go-demo/database"
 
@@ -26,10 +27,9 @@ import (
 // @host localhost:8080
 // @BasePath
 func main() {
+	godotenv.Load(".env")
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
-
-	godotenv.Load(".env")
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
@@ -118,8 +118,8 @@ func initDB() {
 	config :=
 		database.Config{
 			User:       "doadmin",
-			Password:   "AVNS_7q8_Jqll_0sA9Fi",
-			ServerName: "db-mysql-nyc3-11937-do-user-11094376-0.b.db.ondigitalocean.com:25060",
+			Password:   os.Getenv("DB_PASSWORD"),
+			ServerName: os.Getenv("DB_URL"),
 			DB:         "walletchat",
 		}
 		// database.Config{
