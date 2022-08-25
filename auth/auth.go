@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"net/http"
 	"regexp"
+	"rest-go-demo/database"
 	"strings"
 	"sync"
 	"time"
@@ -22,8 +23,8 @@ import (
 )
 
 var (
-	ErrUserNotExists  = errors.New("AuthUser does not exist")
-	ErrUserExists     = errors.New("AuthUser already exists")
+	ErrUserNotExists  = errors.New("Authuser does not exist")
+	ErrUserExists     = errors.New("Authuser already exists")
 	ErrInvalidAddress = errors.New("invalid address")
 	ErrInvalidNonce   = errors.New("invalid nonce")
 	ErrMissingSig     = errors.New("signature is missing")
@@ -60,7 +61,7 @@ func (j *JwtHmacProvider) CreateStandard(subject string) (string, error) {
 func (j *JwtHmacProvider) Verify(tokenString string) (*jwt.RegisteredClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		return j.hmacSecret, nil
 	})
@@ -73,48 +74,42 @@ func (j *JwtHmacProvider) Verify(tokenString string) (*jwt.RegisteredClaims, err
 	return nil, ErrAuthError
 }
 
-type AuthUser struct {
+type Authuser struct {
 	Address string
 	Nonce   string
 }
 
-type MemStorage struct {
-	lock  sync.RWMutex
-	users map[string]AuthUser
-}
+func CreateIfNotExists(u Authuser) error {
+	var checkUser Authuser
+	dbQuery := database.Connector.Where("address = ?", u.Address).Find(&checkUser)
 
-func (m *MemStorage) CreateIfNotExists(u AuthUser) error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	if _, exists := m.users[u.Address]; exists {
+	if dbQuery.RowsAffected > 0 {
 		return ErrUserExists
 	}
-	m.users[u.Address] = u
+
+	//create the item in the database
+	database.Connector.Create(&u)
 	return nil
 }
 
-func (m *MemStorage) Get(address string) (AuthUser, error) {
-	m.lock.RLock()
-	defer m.lock.RUnlock()
-	u, exists := m.users[address]
-	if !exists {
-		return u, ErrUserNotExists
+func Get(address string) (Authuser, error) {
+	var checkUser Authuser
+	dbQuery := database.Connector.Where("address = ?", address).Find(&checkUser)
+
+	if dbQuery.RowsAffected == 0 {
+		return checkUser, ErrUserNotExists
 	}
-	return u, nil
+
+	return checkUser, nil
 }
 
-func (m *MemStorage) Update(AuthUser AuthUser) error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	m.users[AuthUser.Address] = AuthUser
+func Update(user Authuser) error {
+
+	database.Connector.Model(&Authuser{}).
+		Where("address = ?", user.Address).
+		Update("nonce", user.Nonce)
+
 	return nil
-}
-
-func NewMemStorage() *MemStorage {
-	ans := MemStorage{
-		users: make(map[string]AuthUser),
-	}
-	return &ans
 }
 
 // ============================================================================
@@ -135,7 +130,7 @@ func (p RegisterPayload) Validate() error {
 	return nil
 }
 
-func RegisterHandler(storage *MemStorage) http.HandlerFunc {
+func RegisterHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestBody, _ := ioutil.ReadAll(r.Body)
 		var p RegisterPayload
@@ -151,11 +146,11 @@ func RegisterHandler(storage *MemStorage) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		u := AuthUser{
+		u := Authuser{
 			Address: strings.ToLower(p.Address), // let's only store lower case
 			Nonce:   nonce,
 		}
-		if err := storage.CreateIfNotExists(u); err != nil {
+		if err := CreateIfNotExists(u); err != nil {
 			switch errors.Is(err, ErrUserExists) {
 			case true:
 				w.WriteHeader(http.StatusConflict)
@@ -168,7 +163,7 @@ func RegisterHandler(storage *MemStorage) http.HandlerFunc {
 	}
 }
 
-func UserNonceHandler(storage *MemStorage) http.HandlerFunc {
+func UserNonceHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		address := vars["address"]
@@ -177,7 +172,7 @@ func UserNonceHandler(storage *MemStorage) http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		AuthUser, err := storage.Get(strings.ToLower(address))
+		Authuser, err := Get(strings.ToLower(address))
 		if err != nil {
 			switch errors.Is(err, ErrUserNotExists) {
 			case true:
@@ -190,7 +185,7 @@ func UserNonceHandler(storage *MemStorage) http.HandlerFunc {
 		resp := struct {
 			Nonce string
 		}{
-			Nonce: AuthUser.Nonce,
+			Nonce: Authuser.Nonce,
 		}
 		renderJson(r, w, http.StatusOK, resp)
 	}
@@ -215,7 +210,7 @@ func (s SigninPayload) Validate() error {
 	return nil
 }
 
-func SigninHandler(storage *MemStorage, jwtProvider *JwtHmacProvider) http.HandlerFunc {
+func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var p SigninPayload
 		requestBody, _ := ioutil.ReadAll(r.Body)
@@ -227,7 +222,7 @@ func SigninHandler(storage *MemStorage, jwtProvider *JwtHmacProvider) http.Handl
 			return
 		}
 		address := strings.ToLower(p.Address)
-		AuthUser, err := Authenticate(storage, address, p.Nonce, p.Sig)
+		Authuser, err := Authenticate(address, p.Nonce, p.Sig)
 		switch err {
 		case nil:
 		case ErrAuthError:
@@ -237,7 +232,7 @@ func SigninHandler(storage *MemStorage, jwtProvider *JwtHmacProvider) http.Handl
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		signedToken, err := jwtProvider.CreateStandard(AuthUser.Address)
+		signedToken, err := jwtProvider.CreateStandard(Authuser.Address)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -253,12 +248,12 @@ func SigninHandler(storage *MemStorage, jwtProvider *JwtHmacProvider) http.Handl
 
 func WelcomeHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		AuthUser := getUserFromReqContext(r)
-		fmt.Println("getting AuthUser: ", AuthUser)
+		Authuser := getUserFromReqContext(r)
+		fmt.Println("getting Authuser: ", Authuser)
 		resp := struct {
 			Msg string `json:"msg"`
 		}{
-			Msg: "Congrats " + AuthUser.Address + " you made it",
+			Msg: "Congrats " + Authuser.Address + " you made it",
 		}
 		renderJson(r, w, http.StatusOK, resp)
 	}
@@ -266,13 +261,13 @@ func WelcomeHandler() http.HandlerFunc {
 
 // ============================================================================
 
-func getUserFromReqContext(r *http.Request) AuthUser {
+func getUserFromReqContext(r *http.Request) Authuser {
 	ctx := r.Context()
-	key := ctx.Value("AuthUser").(AuthUser)
+	key := ctx.Value("Authuser").(Authuser)
 	return key
 }
 
-func AuthMiddleware(storage *MemStorage, jwtProvider *JwtHmacProvider) func(next http.Handler) http.Handler {
+func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			headerValue := r.Header.Get("Authorization")
@@ -293,7 +288,7 @@ func AuthMiddleware(storage *MemStorage, jwtProvider *JwtHmacProvider) func(next
 				return
 			}
 
-			AuthUser, err := storage.Get(claims.Subject)
+			Authuser, err := Get(claims.Subject)
 			if err != nil {
 				if errors.Is(err, ErrUserNotExists) {
 					w.WriteHeader(http.StatusUnauthorized)
@@ -303,20 +298,20 @@ func AuthMiddleware(storage *MemStorage, jwtProvider *JwtHmacProvider) func(next
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "AuthUser", AuthUser)
+			ctx := context.WithValue(r.Context(), "Authuser", Authuser)
 			next.ServeHTTP(w, r.WithContext(ctx))
 
 		})
 	}
 }
 
-func Authenticate(storage *MemStorage, address string, nonce string, sigHex string) (AuthUser, error) {
-	AuthUser, err := storage.Get(address)
+func Authenticate(address string, nonce string, sigHex string) (Authuser, error) {
+	Authuser, err := Get(address)
 	if err != nil {
-		return AuthUser, err
+		return Authuser, err
 	}
-	if AuthUser.Nonce != nonce {
-		return AuthUser, ErrAuthError
+	if Authuser.Nonce != nonce {
+		return Authuser, ErrAuthError
 	}
 
 	sig := hexutil.MustDecode(sigHex)
@@ -326,23 +321,23 @@ func Authenticate(storage *MemStorage, address string, nonce string, sigHex stri
 	msg := accounts.TextHash([]byte(nonce))
 	recovered, err := crypto.SigToPub(msg, sig)
 	if err != nil {
-		return AuthUser, err
+		return Authuser, err
 	}
 	recoveredAddr := crypto.PubkeyToAddress(*recovered)
 
-	if AuthUser.Address != strings.ToLower(recoveredAddr.Hex()) {
-		return AuthUser, ErrAuthError
+	if Authuser.Address != strings.ToLower(recoveredAddr.Hex()) {
+		return Authuser, ErrAuthError
 	}
 
 	// update the nonce here so that the signature cannot be resused
 	nonce, err = GetNonce()
 	if err != nil {
-		return AuthUser, err
+		return Authuser, err
 	}
-	AuthUser.Nonce = nonce
-	storage.Update(AuthUser)
+	Authuser.Nonce = nonce
+	Update(Authuser)
 
-	return AuthUser, nil
+	return Authuser, nil
 }
 
 var (
@@ -360,10 +355,6 @@ func GetNonce() (string, error) {
 		return "", err
 	}
 	return n.Text(10), nil
-}
-
-func bindReqBody(r *http.Request, obj any) error {
-	return json.NewDecoder(r.Body).Decode(obj)
 }
 
 func renderJson(r *http.Request, w http.ResponseWriter, statusCode int, res interface{}) {

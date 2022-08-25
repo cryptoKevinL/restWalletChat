@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"rest-go-demo/auth"
 	"rest-go-demo/controllers"
 	"rest-go-demo/database"
@@ -32,13 +33,10 @@ import (
 // @host localhost:8080
 // @BasePath
 func main() {
+	godotenv.Load(".env")
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
 
-	godotenv.Load(".env")
-
-	// initialization of storage
-	storage := auth.NewMemStorage()
 	jwtProvider := auth.NewJwtHmacProvider(
 		"read something from env here maybe",
 		"awesome-metamask-login",
@@ -49,12 +47,12 @@ func main() {
 	//  Just allow all for the reference implementation
 	router.Use(cors.AllowAll().Handler)
 
-	router.HandleFunc("/register", auth.RegisterHandler(storage)).Methods("POST")
-	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler(storage)).Methods("GET")
-	router.HandleFunc("/signin", auth.SigninHandler(storage, jwtProvider)).Methods("POST")
+	router.HandleFunc("/register", auth.RegisterHandler()).Methods("POST")
+	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler()).Methods("GET")
+	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
-	wsRouter.Use(auth.AuthMiddleware(storage, jwtProvider))
+	wsRouter.Use(auth.AuthMiddleware(jwtProvider))
 	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
