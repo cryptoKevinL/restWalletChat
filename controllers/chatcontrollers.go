@@ -406,9 +406,9 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 		//end get num unread messages
 
 		if strings.HasPrefix(groupchat.Nftaddr, "0x") {
-			config.Nft = len(chatCnt)
+			config.Nft += len(chatCnt)
 		} else {
-			config.Community = len(chatCnt)
+			config.Community += len(chatCnt)
 		}
 	}
 
