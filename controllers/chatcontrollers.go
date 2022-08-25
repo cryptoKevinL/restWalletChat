@@ -749,7 +749,14 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//CreateChatitem creates Chatitem
+// CreateChatitem godoc
+// @Summary Create Chat Item
+// @Description Post Chat Item Data
+// @Tags inbox
+// @Accept  json
+// @Produce  json
+// @Success 200 {array} entity.Chatitem
+// @Router /CreateChatitem [post]
 func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
