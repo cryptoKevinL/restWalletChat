@@ -759,10 +759,17 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	//I think can remove this too since Oliver added a DB trigger
 	chat.Timestamp_dtm = time.Now()
 
-	database.Connector.Create(&chat)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(chat)
+	dbQuery := database.Connector.Create(&chat)
+	if dbQuery.RowsAffected == 0 {
+		fmt.Println(dbQuery.Error)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		//json.NewEncoder(w).Encode(chat)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(chat)
+	}
 }
 
 // CreateGroupChatitem godoc
@@ -828,7 +835,7 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
-// @Param message body entity.Groupchatitem true "Get Group Chat Data Data By Address"
+// @Param message path string true "Get Group Chat Data Data By Address"
 // @Success 200 {array} entity.Groupchatitem
 // @Router /get_groupchatitems/{address} [get]
 func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
