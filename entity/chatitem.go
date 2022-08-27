@@ -26,12 +26,12 @@ type Unreadcountitem struct {
 
 type Chatitem struct {
 	Id            int       `gorm:"primary_key"`
-	Fromaddr      string    `json:"fromaddr"`
-	Toaddr        string    `json:"toaddr"`
+	Fromaddr      string    `json:"fromaddr" validate:"required"`
+	Toaddr        string    `json:"toaddr" validate:"required"`
 	Timestamp     string    `json:"timestamp"`
 	Timestamp_dtm time.Time `json:"timestamp_dtm"`
 	Msgread       bool      `json:"read"`
-	Message       string    `json:"message"`
+	Message       string    `json:"message" validate:"required"`
 	Nftaddr       string    `json:"nftaddr"`
 	Nftid         string    `json:"nftid"`
 	Name          string    `json:"sender_name"`

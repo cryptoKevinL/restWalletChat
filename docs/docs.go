@@ -848,6 +848,11 @@ const docTemplate = `{
         },
         "entity.Chatitem": {
             "type": "object",
+            "required": [
+                "fromaddr",
+                "message",
+                "toaddr"
+            ],
             "properties": {
                 "fromaddr": {
                     "type": "string"
