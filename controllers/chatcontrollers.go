@@ -758,7 +758,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 
 	//added this because from API doc it was throwing error w/o this
 	//TODO: we should sort out if we really need this as an input or output only
-	chat.Timestamp = time.Now().Format(time.RFC3339)
+	chat.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 	//I think can remove this too since Oliver added a DB trigger
 	chat.Timestamp_dtm = time.Now()
 
@@ -1555,7 +1555,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Nftaddr = community
 		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
 		newgroupchatuser.Timestamp_dtm = time.Now()
-		newgroupchatuser.Timestamp = time.Now().Format(time.RFC3339)
+		newgroupchatuser.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 
 		//add it to the database
 		database.Connector.Create(&newgroupchatuser)
