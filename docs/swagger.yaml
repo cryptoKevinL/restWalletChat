@@ -57,7 +57,7 @@ definitions:
       unread:
         type: integer
     type: object
-host: localhost:8080
+host: restwalletchat-app-sey3k.ondigitalocean.app
 info:
   contact:
     email: walletchatextension@gmail.com
@@ -66,6 +66,31 @@ info:
   title: WalletChat API
   version: "1.0"
 paths:
+  /create_chatitem:
+    post:
+      consumes:
+      - application/json
+      description: For DMs, CreateChatItem is used to store the message in the backed
+        database
+      parameters:
+      - description: Direct Message Chat Data
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Chatitem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      summary: Create/Insert DM chat message (1-to-1 messaging)
+      tags:
+      - DM
   /get_inbox/{address}:
     get:
       consumes:

@@ -24,7 +24,7 @@ import (
 // @contact.url https://walletchat.fun
 // @contact.email walletchatextension@gmail.com
 
-// @host localhost:8080
+// @host restwalletchat-app-sey3k.ondigitalocean.app
 // @BasePath
 func main() {
 	godotenv.Load(".env")

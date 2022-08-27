@@ -19,6 +19,43 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/create_chatitem": {
+            "post": {
+                "description": "For DMs, CreateChatItem is used to store the message in the backed database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DM"
+                ],
+                "summary": "Create/Insert DM chat message (1-to-1 messaging)",
+                "parameters": [
+                    {
+                        "description": "Direct Message Chat Data",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Chatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/get_inbox/{address}": {
             "get": {
                 "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
@@ -655,7 +692,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "restwalletchat-app-sey3k.ondigitalocean.app",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "WalletChat API",

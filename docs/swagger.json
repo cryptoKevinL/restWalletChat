@@ -9,8 +9,45 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "restwalletchat-app-sey3k.ondigitalocean.app",
     "paths": {
+        "/create_chatitem": {
+            "post": {
+                "description": "For DMs, CreateChatItem is used to store the message in the backed database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DM"
+                ],
+                "summary": "Create/Insert DM chat message (1-to-1 messaging)",
+                "parameters": [
+                    {
+                        "description": "Direct Message Chat Data",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Chatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/get_inbox/{address}": {
             "get": {
                 "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",

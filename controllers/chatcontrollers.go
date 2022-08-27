@@ -749,7 +749,15 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//CreateChatitem creates Chatitem
+// CreateChatitem godoc
+// @Summary Create/Insert DM chat message (1-to-1 messaging)
+// @Description For DMs, CreateChatItem is used to store the message in the backed database
+// @Tags DM
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Chatitem true "Direct Message Chat Data"
+// @Success 200 {array} entity.Chatitem
+// @Router /create_chatitem [post]
 func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem

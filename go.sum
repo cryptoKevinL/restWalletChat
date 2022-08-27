@@ -26,6 +26,8 @@ github.com/cryptoKevinL/walletChatDocs v0.0.0-20220823072852-e8b82d5a44a3 h1:B6k
 github.com/cryptoKevinL/walletChatDocs v0.0.0-20220823072852-e8b82d5a44a3/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
 github.com/cryptoKevinL/walletChatDocs v0.0.0-20220826053249-7274303e258e h1:kmmjv3rBqW8NO7tLfBhBkJoXcdIgAXEn5ESHkuf7kRw=
 github.com/cryptoKevinL/walletChatDocs v0.0.0-20220826053249-7274303e258e/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220826062613-46ae3dd8d187 h1:TrDupQhLm5Khp/z4TY5NlcbzKwN9px64xhUsptx63jk=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220826062613-46ae3dd8d187/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/denisenkom/go-mssqldb v0.0.0-20191124224453-732737034ffd h1:83Wprp6ROGeiHFAP8WJdI2RoxALQYgdllERc3N5N2DM=
