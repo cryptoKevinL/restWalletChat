@@ -56,6 +56,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/create_bookmark": {
+            "post": {
+                "description": "Bookmarks keep an NFT/Community group chat in the sidebar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Join an NFT or Community group chat",
+                "parameters": [
+                    {
+                        "description": "Add Bookmark from Community Group Chat",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Bookmarkitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/create_chatitem": {
             "post": {
                 "description": "For DMs, CreateChatItem is used to store the message in the backed database",
@@ -130,6 +167,117 @@ const docTemplate = `{
                 }
             }
         },
+        "/delete_bookmark": {
+            "post": {
+                "description": "Bookmarks keep an NFT/Community group chat in the sidebar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Leave an NFT or Community group chat",
+                "parameters": [
+                    {
+                        "description": "Remove Bookmark from Community Group Chat",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Bookmarkitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/get_bookmarks/{address}/": {
+            "get": {
+                "description": "This used for UI purposes, checking if a user/wallet has bookmarked a community.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Check if a wallet address has bookmarked/joined given NFT contract",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/get_bookmarks/{walletaddr}/{nftaddr}": {
+            "get": {
+                "description": "This used for UI purposes, checking if a user/wallet has bookmarked a community.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Check if a wallet address has bookmarked/joined given NFT contract",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "walletaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "bool"
+                        }
+                    }
+                }
+            }
+        },
         "/get_groupchatitems/{address}": {
             "get": {
                 "description": "Community Chat Data",
@@ -145,13 +293,11 @@ const docTemplate = `{
                 "summary": "GetGroupChatItems gets group chat data for a given address",
                 "parameters": [
                     {
+                        "type": "string",
                         "description": "Get Group Chat Data Data By Address",
                         "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Groupchatitem"
-                        }
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -683,6 +829,23 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "entity.Bookmarkitem": {
+            "type": "object",
+            "properties": {
+                "chain": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nftaddr": {
+                    "type": "string"
+                },
+                "walletaddr": {
+                    "type": "string"
+                }
+            }
+        },
         "entity.Chatitem": {
             "type": "object",
             "properties": {

@@ -1,4 +1,15 @@
 definitions:
+  entity.Bookmarkitem:
+    properties:
+      chain:
+        type: string
+      id:
+        type: integer
+      nftaddr:
+        type: string
+      walletaddr:
+        type: string
+    type: object
   entity.Chatitem:
     properties:
       fromaddr:
@@ -112,6 +123,30 @@ paths:
         (likely could be consolidated)
       tags:
       - GroupChat
+  /create_bookmark:
+    post:
+      consumes:
+      - application/json
+      description: Bookmarks keep an NFT/Community group chat in the sidebar
+      parameters:
+      - description: Add Bookmark from Community Group Chat
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Bookmarkitem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Bookmarkitem'
+            type: array
+      summary: Join an NFT or Community group chat
+      tags:
+      - GroupChat
   /create_chatitem:
     post:
       consumes:
@@ -161,6 +196,81 @@ paths:
       summary: Create/Insert chat message for Community/NFT/Group Messaging
       tags:
       - GroupChat
+  /delete_bookmark:
+    post:
+      consumes:
+      - application/json
+      description: Bookmarks keep an NFT/Community group chat in the sidebar
+      parameters:
+      - description: Remove Bookmark from Community Group Chat
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Bookmarkitem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Bookmarkitem'
+            type: array
+      summary: Leave an NFT or Community group chat
+      tags:
+      - GroupChat
+  /get_bookmarks/{address}/:
+    get:
+      consumes:
+      - application/json
+      description: This used for UI purposes, checking if a user/wallet has bookmarked
+        a community.
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Bookmarkitem'
+            type: array
+      summary: Check if a wallet address has bookmarked/joined given NFT contract
+      tags:
+      - GroupChat
+  /get_bookmarks/{walletaddr}/{nftaddr}:
+    get:
+      consumes:
+      - application/json
+      description: This used for UI purposes, checking if a user/wallet has bookmarked
+        a community.
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: walletaddr
+        required: true
+        type: string
+      - description: NFT Contract Address
+        in: path
+        name: nftaddr
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: bool
+      summary: Check if a wallet address has bookmarked/joined given NFT contract
+      tags:
+      - GroupChat
   /get_groupchatitems/{address}:
     get:
       consumes:
@@ -168,11 +278,10 @@ paths:
       description: Community Chat Data
       parameters:
       - description: Get Group Chat Data Data By Address
-        in: body
+        in: path
         name: message
         required: true
-        schema:
-          $ref: '#/definitions/entity.Groupchatitem'
+        type: string
       produces:
       - application/json
       responses:

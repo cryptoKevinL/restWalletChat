@@ -756,6 +756,9 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Chatitem
 	json.Unmarshal(requestBody, &chat)
 
+	//added this because from API doc it was throwing error w/o this
+	//TODO: we should sort out if we really need this as an input or output only
+	chat.Timestamp = time.Now().Format(time.RFC3339)
 	//I think can remove this too since Oliver added a DB trigger
 	chat.Timestamp_dtm = time.Now()
 
@@ -764,7 +767,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(dbQuery.Error)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		//json.NewEncoder(w).Encode(chat)
+		json.NewEncoder(w).Encode(dbQuery.Error)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -849,6 +852,15 @@ func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// CreateBookmarkItem godoc
+// @Summary Join an NFT or Community group chat
+// @Description Bookmarks keep an NFT/Community group chat in the sidebar
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Bookmarkitem true "Add Bookmark from Community Group Chat"
+// @Success 200 {array} entity.Bookmarkitem
+// @Router /create_bookmark [post]
 func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var bookmark entity.Bookmarkitem
@@ -880,6 +892,15 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bookmark)
 }
 
+// DeleteBookmarkItem godoc
+// @Summary Leave an NFT or Community group chat
+// @Description Bookmarks keep an NFT/Community group chat in the sidebar
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Bookmarkitem true "Remove Bookmark from Community Group Chat"
+// @Success 200 {array} entity.Bookmarkitem
+// @Router /delete_bookmark [post]
 func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var bookmark entity.Bookmarkitem
@@ -913,6 +934,16 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(returnval)
 }
 
+// IsBookmarkItem godoc
+// @Summary Check if a wallet address has bookmarked/joined given NFT contract
+// @Description This used for UI purposes, checking if a user/wallet has bookmarked a community.
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param walletaddr path string true "Wallet Address"
+// @Param nftaddr path string true "NFT Contract Address"
+// @Success 200 {bool} bool
+// @Router /get_bookmarks/{walletaddr}/{nftaddr} [get]
 func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletaddr := vars["walletaddr"]
@@ -931,6 +962,15 @@ func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(returnval)
 }
 
+// GetBookmarkItems godoc
+// @Summary Check if a wallet address has bookmarked/joined given NFT contract
+// @Description This used for UI purposes, checking if a user/wallet has bookmarked a community.
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Success 200 {array} entity.Bookmarkitem
+// @Router /get_bookmarks/{address}/ [get]
 func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
