@@ -25,16 +25,16 @@ type Unreadcountitem struct {
 }
 
 type Chatitem struct {
-	Id            int       `gorm:"primary_key"`
-	Fromaddr      string    `json:"fromaddr" validate:"required"`
-	Toaddr        string    `json:"toaddr" validate:"required"`
-	Timestamp     string    `json:"timestamp"`
-	Timestamp_dtm time.Time `json:"timestamp_dtm"`
-	Msgread       bool      `json:"read"`
-	Message       string    `json:"message" validate:"required"`
-	Nftaddr       string    `json:"nftaddr"`
-	Nftid         string    `json:"nftid"`
-	Name          string    `json:"sender_name"`
+	Id            int       `gorm:"primary_key"`                 //AUTO-GENERATED (PRIMARY KEY)
+	Fromaddr      string    `json:"fromaddr" binding:"required"` //*** REQUIRED INPUT ***
+	Toaddr        string    `json:"toaddr" validate:"required"`  //*** REQUIRED INPUT ***
+	Timestamp     string    `json:"timestamp"`                   //AUTO-SET BY REST API
+	Timestamp_dtm time.Time `json:"timestamp_dtm"`               //USED FOR SORTING WHEN TIME FORMAT NEEDED
+	Msgread       bool      `json:"read"`                        //DEFAULT FALSE
+	Message       string    `json:"message" validate:"required"` //*** REQUIRED INPUT ***
+	Nftaddr       string    `json:"nftaddr"`                     //ONLY USED FOR NFT DM CONTEXT
+	Nftid         string    `json:"nftid"`                       //ONLY USED FOR NFT DM CONTEXT
+	Name          string    `json:"sender_name"`                 //AUTO-SET BY BACKED FOR RETURN VALUE
 }
 
 //for olivers view function

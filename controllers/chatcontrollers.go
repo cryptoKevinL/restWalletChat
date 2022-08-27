@@ -743,7 +743,7 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateChatitem godoc
-// @Summary Create/Insert DM chat message (1-to-1 messaging)
+// @Summary Create/Insert DM Chat Message (1-to-1 messaging)
 // @Description For DMs, CreateChatItem is used to store the message in the backed database
 // @Tags DMs
 // @Accept  json

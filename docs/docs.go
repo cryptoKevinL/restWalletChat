@@ -105,7 +105,7 @@ const docTemplate = `{
                 "tags": [
                     "DMs"
                 ],
-                "summary": "Create/Insert DM chat message (1-to-1 messaging)",
+                "summary": "Create/Insert DM Chat Message (1-to-1 messaging)",
                 "parameters": [
                     {
                         "description": "Direct Message Chat Data",
@@ -855,33 +855,43 @@ const docTemplate = `{
             ],
             "properties": {
                 "fromaddr": {
+                    "description": "*** REQUIRED INPUT ***",
                     "type": "string"
                 },
                 "id": {
+                    "description": "AUTO-GENERATED (PRIMARY KEY)",
                     "type": "integer"
                 },
                 "message": {
+                    "description": "*** REQUIRED INPUT ***",
                     "type": "string"
                 },
                 "nftaddr": {
+                    "description": "ONLY USED FOR NFT DM CONTEXT",
                     "type": "string"
                 },
                 "nftid": {
+                    "description": "ONLY USED FOR NFT DM CONTEXT",
                     "type": "string"
                 },
                 "read": {
+                    "description": "DEFAULT FALSE",
                     "type": "boolean"
                 },
                 "sender_name": {
+                    "description": "AUTO-SET BY BACKED FOR RETURN VALUE",
                     "type": "string"
                 },
                 "timestamp": {
+                    "description": "AUTO-SET BY REST API",
                     "type": "string"
                 },
                 "timestamp_dtm": {
+                    "description": "USED FOR SORTING WHEN TIME FORMAT NEEDED",
                     "type": "string"
                 },
                 "toaddr": {
+                    "description": "*** REQUIRED INPUT ***",
                     "type": "string"
                 }
             }
