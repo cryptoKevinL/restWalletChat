@@ -41,7 +41,7 @@ type NFTPortOwnerOf struct {
 // GetInboxByOwner godoc
 // @Summary Get Inbox Summary With Last Message
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
-// @Tags inbox
+// @Tags Inbox
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
@@ -237,27 +237,20 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userInbox)
 }
 
-// GetAllChatitems godoc
-// @Summary Get All Chat Items (legacy - not used currently)
-// @Description Get Entire Chatitems table
-// @Tags inbox
-// @Accept  json
-// @Produce  json
-// @Success 200 {array} entity.Chatitem
-// @Router /getall_chatitems [get]
-func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
-	var chat []entity.Chatitem
-	database.Connector.Find(&chat)
+//removed since this will take FOREVER and its not used
+// func GetAllChatitems(w http.ResponseWriter, r *http.Request) {
+// 	var chat []entity.Chatitem
+// 	database.Connector.Find(&chat)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(chat)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusOK)
+// 	json.NewEncoder(w).Encode(chat)
+// }
 
 // GetUnreadMsgCntTotal godoc
 // @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
 // @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
-// @Tags inbox
+// @Tags Inbox
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
@@ -279,8 +272,8 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 
 // GetUnreadMsgCntTotalByType godoc
 // @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
-// @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox (>_<)
-// @Tags inbox
+// @Description Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox
+// @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
@@ -358,7 +351,7 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 // GetUnreadcnt godoc
 // @Summary Get all unread messages TO a specific user, used for total count notification at top notification bar
 // @Description Get Unread count just given an address
-// @Tags inbox
+// @Tags Inbox
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
@@ -424,7 +417,7 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 // GetUnreadMsgCntNft godoc
 // @Summary Get all unread messages for a specific NFT context
 // @Description Get Unread count for specifc NFT context given a wallet address and specific NFT
-// @Tags inbox
+// @Tags NFT
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
@@ -448,8 +441,8 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 
 // GetUnreadMsgCntNft godoc
 // @Summary Get all unread messages for all NFT related chats for given user
-// @Description Get Unread count for all NFT contexts given a wallet address (>_<)
-// @Tags inbox
+// @Description Get Unread count for all NFT contexts given a wallet address
+// @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
@@ -527,8 +520,8 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 
 // GetUnreadMsgCnt godoc
 // @Summary Get all unread messages between two addresses
-// @Description Get Unread count for DMs (>_<)
-// @Tags inbox
+// @Description Get Unread count for DMs
+// @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
 // @Param toaddr path string true "TO: Wallet Address"
@@ -550,8 +543,8 @@ func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 
 // GetChatFromAddress godoc
 // @Summary Get Chat Item For Given Wallet Address
-// @Description Get all Chat Items for DMs for a given wallet address (>_<)
-// @Tags inbox
+// @Description Get all Chat Items for DMs for a given wallet address
+// @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
 // @Param toaddr path string true "Wallet Address"
@@ -569,8 +562,8 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 
 // GetNftChatFromAddress godoc
 // @Summary Get NFT Related Chat Items For Given Wallet Address
-// @Description Get ALL NFT context items for a given wallet address (>_<)
-// @Tags inbox
+// @Description Get ALL NFT context items for a given wallet address
+// @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
 // @Param toaddr path string true "Wallet Address"
@@ -590,7 +583,7 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 // GetChatFromAddressToAddr godoc
 // @Summary Get Chat Data Between Two Addresses
 // @Description Get chat data between the given two addresses, TO and FROM and interchangable here
-// @Tags inbox
+// @Tags DMs
 // @Accept  json
 // @Produce  json
 // @Param toaddr path string true "TO: Wallet Address"
@@ -632,8 +625,8 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 
 // GetChatNftContext godoc
 // @Summary Get NFT Related Chat Items For Given NFT Contract and ID
-// @Description Get ALL NFT context items for a given wallet address (>_<)
-// @Tags inbox
+// @Description Get ALL NFT context items for a given wallet address
+// @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
 // @Param nftaddr path string true "NFT Contract Address"
@@ -655,7 +648,7 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 // GetChatNftContext godoc
 // @Summary Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)
 // @Description Get ALL NFT context items for a specifc NFT context convo between two wallets
-// @Tags inbox
+// @Tags NFT
 // @Accept  json
 // @Produce  json
 // @Param nftaddr path string true "NFT Contract Address"
@@ -705,8 +698,8 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 
 // GetChatNftAllItemsFromAddr godoc
 // @Summary Get NFT Related Chat Items For Given NFT Contract and ID, relating to one wallet
-// @Description Get all specified NFT contract and ID items for a given wallet address (>_<)
-// @Tags inbox
+// @Description Get all specified NFT contract and ID items for a given wallet address
+// @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
 // @Param address path string true "Wallet Address"
@@ -752,7 +745,7 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 // CreateChatitem godoc
 // @Summary Create/Insert DM chat message (1-to-1 messaging)
 // @Description For DMs, CreateChatItem is used to store the message in the backed database
-// @Tags DM
+// @Tags DMs
 // @Accept  json
 // @Produce  json
 // @Param message body entity.Chatitem true "Direct Message Chat Data"
@@ -772,7 +765,15 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//CreateGroupChatitem creates GroupChatitem
+// CreateGroupChatitem godoc
+// @Summary Create/Insert chat message for Community/NFT/Group Messaging
+// @Description Currently used for all messages outside of DMs
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Groupchatitem true "Group Message Chat Data"
+// @Success 200 {array} entity.Groupchatitem
+// @Router /create_groupchatitem [post]
 func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
@@ -791,7 +792,15 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
-//CreateGroupChatitem creates GroupChatitem just with community tag (don't really need this separate anymore)
+// CreateCommunityChatitem godoc
+// @Summary CreateCommunityChatitem creates GroupChatitem just with community tag (likely could be consolidated)
+// @Description Community Chat Data
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Groupchatitem true "Community Message Chat Data"
+// @Success 200 {array} entity.Groupchatitem
+// @Router /community [post]
 func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
@@ -813,6 +822,15 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// GetGroupChatItems godoc
+// @Summary GetGroupChatItems gets group chat data for a given address
+// @Description Community Chat Data
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Groupchatitem true "Get Group Chat Data Data By Address"
+// @Success 200 {array} entity.Groupchatitem
+// @Router /get_groupchatitems/{address} [get]
 func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]

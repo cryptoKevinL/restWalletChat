@@ -19,6 +19,43 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/community": {
+            "post": {
+                "description": "Community Chat Data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "CreateCommunityChatitem creates GroupChatitem just with community tag (likely could be consolidated)",
+                "parameters": [
+                    {
+                        "description": "Community Message Chat Data",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Groupchatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Groupchatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/create_chatitem": {
             "post": {
                 "description": "For DMs, CreateChatItem is used to store the message in the backed database",
@@ -29,7 +66,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "DM"
+                    "DMs"
                 ],
                 "summary": "Create/Insert DM chat message (1-to-1 messaging)",
                 "parameters": [
@@ -56,6 +93,80 @@ const docTemplate = `{
                 }
             }
         },
+        "/create_groupchatitem": {
+            "post": {
+                "description": "Currently used for all messages outside of DMs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Create/Insert chat message for Community/NFT/Group Messaging",
+                "parameters": [
+                    {
+                        "description": "Group Message Chat Data",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Groupchatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Groupchatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/get_groupchatitems/{address}": {
+            "get": {
+                "description": "Community Chat Data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "GetGroupChatItems gets group chat data for a given address",
+                "parameters": [
+                    {
+                        "description": "Get Group Chat Data Data By Address",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Groupchatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Groupchatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/get_inbox/{address}": {
             "get": {
                 "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
@@ -66,7 +177,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Inbox"
                 ],
                 "summary": "Get Inbox Summary With Last Message",
                 "parameters": [
@@ -101,7 +212,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Inbox"
                 ],
                 "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
                 "parameters": [
@@ -133,7 +244,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "NFT"
                 ],
                 "summary": "Get all unread messages for a specific NFT context",
                 "parameters": [
@@ -171,7 +282,7 @@ const docTemplate = `{
         },
         "/get_unread_cnt/{fromaddr}/{toaddr}": {
             "get": {
-                "description": "Get Unread count for DMs (\u003e_\u003c)",
+                "description": "Get Unread count for DMs",
                 "consumes": [
                     "application/json"
                 ],
@@ -179,7 +290,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Unused/Legacy"
                 ],
                 "summary": "Get all unread messages between two addresses",
                 "parameters": [
@@ -210,7 +321,7 @@ const docTemplate = `{
         },
         "/get_unread_cnt_by_type/{address}/{type}": {
             "get": {
-                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox (\u003e_\u003c)",
+                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
                 "consumes": [
                     "application/json"
                 ],
@@ -218,7 +329,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Unused/Legacy"
                 ],
                 "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
                 "parameters": [
@@ -249,7 +360,7 @@ const docTemplate = `{
         },
         "/get_unread_cnt_nft/{address}": {
             "get": {
-                "description": "Get Unread count for all NFT contexts given a wallet address (\u003e_\u003c)",
+                "description": "Get Unread count for all NFT contexts given a wallet address",
                 "consumes": [
                     "application/json"
                 ],
@@ -257,7 +368,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Unused/Legacy"
                 ],
                 "summary": "Get all unread messages for all NFT related chats for given user",
                 "parameters": [
@@ -279,35 +390,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/getall_chatitems": {
-            "get": {
-                "description": "Get Entire Chatitems table",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inbox"
-                ],
-                "summary": "Get All Chat Items (legacy - not used currently)",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/getall_chatitems/{address}": {
             "get": {
-                "description": "Get all Chat Items for DMs for a given wallet address (\u003e_\u003c)",
+                "description": "Get all Chat Items for DMs for a given wallet address",
                 "consumes": [
                     "application/json"
                 ],
@@ -315,7 +400,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Unused/Legacy"
                 ],
                 "summary": "Get Chat Item For Given Wallet Address",
                 "parameters": [
@@ -350,7 +435,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "DMs"
                 ],
                 "summary": "Get Chat Data Between Two Addresses",
                 "parameters": [
@@ -384,7 +469,7 @@ const docTemplate = `{
         },
         "/getnft_chatitems/{address}": {
             "get": {
-                "description": "Get ALL NFT context items for a given wallet address (\u003e_\u003c)",
+                "description": "Get ALL NFT context items for a given wallet address",
                 "consumes": [
                     "application/json"
                 ],
@@ -392,7 +477,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Unused/Legacy"
                 ],
                 "summary": "Get NFT Related Chat Items For Given Wallet Address",
                 "parameters": [
@@ -419,7 +504,7 @@ const docTemplate = `{
         },
         "/getnft_chatitems/{address}/{nftaddr}/{nftid}": {
             "get": {
-                "description": "Get all specified NFT contract and ID items for a given wallet address (\u003e_\u003c)",
+                "description": "Get all specified NFT contract and ID items for a given wallet address",
                 "consumes": [
                     "application/json"
                 ],
@@ -427,7 +512,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Unused/Legacy"
                 ],
                 "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, relating to one wallet",
                 "parameters": [
@@ -476,7 +561,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "NFT"
                 ],
                 "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)",
                 "parameters": [
@@ -524,7 +609,7 @@ const docTemplate = `{
         },
         "/getnft_chatitems/{nftaddr}/{nftid}": {
             "get": {
-                "description": "Get ALL NFT context items for a given wallet address (\u003e_\u003c)",
+                "description": "Get ALL NFT context items for a given wallet address",
                 "consumes": [
                     "application/json"
                 ],
@@ -532,7 +617,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Unused/Legacy"
                 ],
                 "summary": "Get NFT Related Chat Items For Given NFT Contract and ID",
                 "parameters": [
@@ -574,7 +659,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "inbox"
+                    "Inbox"
                 ],
                 "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
                 "parameters": [
@@ -683,6 +768,38 @@ const docTemplate = `{
                 },
                 "unread": {
                     "type": "integer"
+                }
+            }
+        },
+        "entity.Groupchatitem": {
+            "type": "object",
+            "properties": {
+                "context_type": {
+                    "type": "string"
+                },
+                "fromaddr": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "nftaddr": {
+                    "type": "string"
+                },
+                "sender_name": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "timestamp_dtm": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         }
