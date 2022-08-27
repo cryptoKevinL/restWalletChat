@@ -897,6 +897,7 @@ const docTemplate = `{
             }
         },
         "entity.Chatiteminbox": {
+            "description": "Used as Return Data Struct Only",
             "type": "object",
             "properties": {
                 "chain": {

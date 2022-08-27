@@ -124,6 +124,8 @@ type Nftsidebar struct {
 	Nftid    string `json:"nftid"`
 }
 
+// Chatiteminbox entity info
+// @Description Used as Return Data Struct Only
 type Chatiteminbox struct {
 	Id            int       `gorm:"primaryKey;autoIncrement"`
 	Fromaddr      string    `json:"fromaddr"`

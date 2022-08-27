@@ -48,6 +48,7 @@ definitions:
     - toaddr
     type: object
   entity.Chatiteminbox:
+    description: Used as Return Data Struct Only
     properties:
       chain:
         type: string
