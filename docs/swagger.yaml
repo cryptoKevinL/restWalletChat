@@ -381,7 +381,7 @@ paths:
             type: array
       summary: Comments are used within an NFT community chat
       tags:
-      - Common
+      - NFT
   /create_groupchatitem:
     post:
       consumes:
@@ -481,7 +481,8 @@ paths:
       responses:
         "204":
           description: No Content
-      summary: Get Public Comments for given NFT Contract and ID
+      summary: Delete Public Comments for given FROM wallet address, NFT Contract
+        and ID
       tags:
       - NFT
   /delete_settings/{address}:
@@ -502,29 +503,6 @@ paths:
         "204":
           description: No Content
       summary: Delete Settings Info
-      tags:
-      - Unused/Legacy
-    get:
-      consumes:
-      - application/json
-      description: 'TODO: Need to protect this with JWT in addition to other API calls
-        needed to use FROM addr from the JWT'
-      parameters:
-      - description: Wallet Address
-        in: path
-        name: address
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.Settings'
-            type: array
-      summary: Get Settings Info
       tags:
       - Unused/Legacy
   /deleteall_chatitems/{fromaddr}/{toaddr}:
@@ -635,7 +613,7 @@ paths:
       - application/json
       description: Community Chat Data
       parameters:
-      - description: Get Group Chat Data Data By NFT Address
+      - description: Get Group Chat Data By NFT Address
         in: path
         name: message
         required: true
@@ -649,9 +627,9 @@ paths:
             items:
               $ref: '#/definitions/entity.Groupchatitem'
             type: array
-      summary: GetGroupChatItems gets group chat data for a given address
+      summary: GetGroupChatItems gets group chat data for a given NFT address
       tags:
-      - GroupChat
+      - NFT
   /get_groupchatitems/{address}/{useraddress}:
     get:
       consumes:
@@ -680,7 +658,7 @@ paths:
             type: array
       summary: Get group chat items, given a wallt FROM address and NFT Contract Address
       tags:
-      - Common
+      - NFT
   /get_groupchatitems_unreadcnt/{address}/{useraddress}:
     get:
       consumes:
@@ -729,6 +707,30 @@ paths:
       summary: Get Inbox Summary With Last Message
       tags:
       - Inbox
+  /get_settings/{address}:
+    get:
+      consumes:
+      - application/json
+      description: 'TODO: Need to protect this with JWT in addition to other API calls
+        needed to use FROM addr from the JWT'
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Settings'
+            type: array
+      summary: Get Settings Info
+      tags:
+      - Unused/Legacy
   /get_unread_cnt/{address}:
     get:
       consumes:
@@ -1138,7 +1140,7 @@ paths:
             type: array
       summary: Check if given wallet address owns an NFT from given contract address
       tags:
-      - common
+      - Common
   /name:
     post:
       consumes:

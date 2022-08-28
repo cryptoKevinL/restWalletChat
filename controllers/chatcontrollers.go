@@ -833,12 +833,12 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetGroupChatItems godoc
-// @Summary GetGroupChatItems gets group chat data for a given address
+// @Summary GetGroupChatItems gets group chat data for a given NFT address
 // @Description Community Chat Data
-// @Tags GroupChat
+// @Tags NFT
 // @Accept  json
 // @Produce  json
-// @Param message path string true "Get Group Chat Data Data By NFT Address"
+// @Param message path string true "Get Group Chat Data By NFT Address"
 // @Success 200 {array} entity.Groupchatitem
 // @Router /get_groupchatitems/{address} [get]
 func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
@@ -1162,7 +1162,7 @@ func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // GetGroupChatItemsByAddr godoc
 // @Summary Get group chat items, given a wallt FROM address and NFT Contract Address
 // @Description Get all group chat items for a given wallet (useraddress) for a given NFT Contract Address (TODO: fix up var names)
-// @Tags Common
+// @Tags NFT
 // @Accept  json
 // @Produce  json
 // @Param address path string true "NFT Address"
@@ -1375,7 +1375,7 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 // CreateComments godoc
 // @Summary Comments are used within an NFT community chat
 // @Description Comments are meant to be public, someday having an up/downvote method for auto-moderation
-// @Tags Common
+// @Tags NFT
 // @Accept  json
 // @Produce  json
 // @Param message body entity.Comments true "create struct"
@@ -1404,8 +1404,8 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 // 	json.NewEncoder(w).Encode(comment)
 // }
 
-// GetComments godoc
-// @Summary Get Public Comments for given NFT Contract and ID
+// DeleteComments godoc
+// @Summary Delete Public Comments for given FROM wallet address, NFT Contract and ID
 // @Description NFTs have a public comment section
 // @Tags NFT
 // @Accept  json
@@ -1799,7 +1799,7 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 // IsOwner godoc
 // @Summary Check if given wallet address owns an NFT from given contract address
 // @Description API user could check this directly via any third party service like NFTPort, Moralis as well
-// @Tags common
+// @Tags Common
 // @Accept  json
 // @Produce  json
 // @Param contract path string true "NFT Contract Address"

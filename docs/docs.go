@@ -182,7 +182,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Common"
+                    "NFT"
                 ],
                 "summary": "Comments are used within an NFT community chat",
                 "parameters": [
@@ -332,7 +332,7 @@ const docTemplate = `{
                 "tags": [
                     "NFT"
                 ],
-                "summary": "Get Public Comments for given NFT Contract and ID",
+                "summary": "Delete Public Comments for given FROM wallet address, NFT Contract and ID",
                 "parameters": [
                     {
                         "type": "string",
@@ -364,39 +364,6 @@ const docTemplate = `{
             }
         },
         "/delete_settings/{address}": {
-            "get": {
-                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get Settings Info",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Settings"
-                            }
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
                 "consumes": [
@@ -584,13 +551,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "GroupChat"
+                    "NFT"
                 ],
-                "summary": "GetGroupChatItems gets group chat data for a given address",
+                "summary": "GetGroupChatItems gets group chat data for a given NFT address",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Get Group Chat Data Data By NFT Address",
+                        "description": "Get Group Chat Data By NFT Address",
                         "name": "message",
                         "in": "path",
                         "required": true
@@ -619,7 +586,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Common"
+                    "NFT"
                 ],
                 "summary": "Get group chat items, given a wallt FROM address and NFT Contract Address",
                 "parameters": [
@@ -712,6 +679,41 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/entity.Chatiteminbox"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/get_settings/{address}": {
+            "get": {
+                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get Settings Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Settings"
                             }
                         }
                     }
@@ -1282,7 +1284,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "common"
+                    "Common"
                 ],
                 "summary": "Check if given wallet address owns an NFT from given contract address",
                 "parameters": [
