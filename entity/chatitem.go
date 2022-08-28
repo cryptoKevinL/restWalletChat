@@ -2,6 +2,12 @@ package entity
 
 import "time"
 
+//*** VARIABLE NAMING INFO DUE TO GORM FUNCTIONALITY ***
+//CamelCase is not used for variable names due to GORM auto functionality.
+//A struct named ChatItem would go into the database as chat_items - the case auto-adds _ chars
+//table names within a database have an 's' auto-added to them
+//...(Chatitem struct here will have a table named Chatitems in the DB)
+
 //rename the type in GET /inbox to context_type: [nft, community, dm] and
 //retain variable name type in message objects in communities to be [welcome, message] instead of [communitymsg, communitywelcome]
 // string mapping

@@ -17,8 +17,25 @@ import (
 )
 
 // @title WalletChat API
-// @version 1.0
-// @description This is the WalletChat messagez
+// @version 0.0
+// @description Wecome to the WalletChat API Documentation
+// @description
+// @description Please make note that some JSON data structures are shared for both input/output.
+// @description Required input parameters will have a red * next to them in the data type outline at
+// @description the bottom of the page, along with a comment.  This means when executing API functionality
+// @description from this API page, some fields may need to be removed from the JSON struct before submitting.
+// @description Please email the developers with any issues.
+// @description Some JSON data structures are output only, and will be marked as such as well.
+// @description
+// @description v0 of the API does not include encryption or authentication.  Please as you are given access
+// @description to this page, do not abuse this system and impersonate others, or submit offensive material.
+// @description developers monitor this data daily.
+// @description
+// @description v1 will include encyrption for DMs, private keys will be stored locally on client PCs
+// @description with no way for us to recover any data which is encrypted.
+// @description
+// @description v1 will also include basic JWT Authentication, however some more work to make this fully secure
+// @description will be needed and included in v2.
 
 // @wallet_chat API Support via Twitter
 // @contact.url https://walletchat.fun
@@ -51,7 +68,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/getnft_chatitems/{nftaddr}/{nftid}", controllers.GetChatNftContext).Methods("GET")
 	router.HandleFunc("/getnft_chatitems/{address}", controllers.GetNftChatFromAddress).Methods("GET")
 	router.HandleFunc("/update_chatitem/{fromaddr}/{toaddr}", controllers.UpdateChatitemByOwner).Methods("PUT")
-	router.HandleFunc("/deleteall_chatitems/{address}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
+	router.HandleFunc("/deleteall_chatitems/{fromaddr}/{toaddr}", controllers.DeleteAllChatitemsToAddressByOwner).Methods("DELETE")
 	router.HandleFunc("/get_inbox/{address}", controllers.GetInboxByOwner).Methods("GET")
 	router.HandleFunc("/create_chatitem", controllers.CreateChatitem).Methods("POST")
 	//router.HandleFunc("/create_chatitem_tmp", controllers.CreateChatitemTmp).Methods("POST")
@@ -68,7 +85,8 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_groupchatitems_unreadcnt/{address}/{useraddress}", controllers.GetGroupChatItemsByAddrLen).Methods("GET")
 
 	//group chat
-	router.HandleFunc("/community/{community}/{address}", controllers.GetWalletChat).Methods("GET") //TODO: make common
+	//TODO: we need a create community API call, which provides twitter/discord handles, welcome message, Title/Name (see hardcoded items in GetCommunityChat)
+	router.HandleFunc("/community/{community}/{address}", controllers.GetCommunityChat).Methods("GET") //TODO: make common
 	router.HandleFunc("/community", controllers.CreateCommunityChatitem).Methods("POST")
 
 	//bookmarks
@@ -95,7 +113,7 @@ func initaliseHandlers(router *mux.Router) {
 
 	//comments on a specific NFT
 	router.HandleFunc("/create_comments", controllers.CreateComments).Methods("POST")
-	router.HandleFunc("/get_comments", controllers.GetAllComments).Methods("GET")
+	//router.HandleFunc("/get_comments", controllers.GetAllComments).Methods("GET") //doubt we will need this
 	router.HandleFunc("/get_comments/{nftaddr}/{nftid}", controllers.GetComments).Methods("GET")
 	router.HandleFunc("/delete_comments/{fromaddr}/{nftaddr}/{nftid}", controllers.DeleteComments).Methods("DELETE")
 
@@ -108,7 +126,7 @@ func initaliseHandlers(router *mux.Router) {
 	//TODO: this would need a signature from holder to fully verify - ok for now
 	router.HandleFunc("/is_owner/{contract}/{wallet}", controllers.IsOwner).Methods("GET")
 	router.HandleFunc("/rejoin_all/{wallet}", controllers.AutoJoinCommunities).Methods("GET")
-	router.HandleFunc("/backfill_all_bookmarks", controllers.FixUpBookmarks).Methods("GET")
+	router.HandleFunc("/backfill_all_bookmarks", controllers.FixUpBookmarks).Methods("GET") //just meant for internal use - not for external use
 
 	//POAP related stuff (some could be called client side directly but this protects the API key)
 	router.HandleFunc("/get_poaps/{wallet}", controllers.GetPoapsByAddr).Methods("GET")

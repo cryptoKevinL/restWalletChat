@@ -838,7 +838,7 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
-// @Param message path string true "Get Group Chat Data Data By Address"
+// @Param message path string true "Get Group Chat Data Data By NFT Address"
 // @Success 200 {array} entity.Groupchatitem
 // @Router /get_groupchatitems/{address} [get]
 func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
@@ -1021,6 +1021,15 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(returnItems)
 }
 
+// CreateImageItem godoc
+// @Summary Store Image in DB for later user
+// @Description Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Imageitem true "Profile Thumbnail Pic"
+// @Success 200 {array} entity.Bookmarkitem
+// @Router /image [post]
 func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imgname entity.Imageitem
@@ -1032,6 +1041,15 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(imgname)
 }
 
+// UpdateImageItem godoc
+// @Summary Store Image in DB for later user (update existing photo)
+// @Description Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Imageitem true "Profile Thumbnail Pic"
+// @Success 200 {array} entity.Bookmarkitem
+// @Router /image [put]
 func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imgname entity.Imageitem
@@ -1051,6 +1069,15 @@ func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(returnval)
 }
 
+// GetImageItem godoc
+// @Summary Get Thumbnail Image Data
+// @Description Retreive image data for use with user/community/nft group dislayed icon
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param name path string true "Common Name Mapped to User/Community"
+// @Success 200 {array} entity.Imageitem
+// @Router /image/{name} [get]
 func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
@@ -1063,7 +1090,15 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(imgname)
 }
 
-//give a common name to a user address, or NFT collection
+// CreateAddrNameItem godoc
+// @Summary give a common name to a user address, or NFT collection
+// @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Addrnameitem true "Address and Name to map together"
+// @Success 200 {array} entity.Bookmarkitem
+// @Router /name [post]
 func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrname entity.Addrnameitem
@@ -1075,6 +1110,15 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(addrname)
 }
 
+// GetAddrNameItem godoc
+// @Summary get the common name which has been mapped to an address
+// @Description get the given a common name (Kevin.eth, BillyTheKid, etc) what has already been mapped to an Address
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Get Name for given address"
+// @Success 200 {array} entity.Addrnameitem
+// @Router /name/{name} [get]
 func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
@@ -1087,6 +1131,15 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(addrname)
 }
 
+// CreateAddrNameItem godoc
+// @Summary give a common name to a user address, or NFT collection (update exiting)
+// @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Addrnameitem true "Address and Name to map together"
+// @Success 200 {array} entity.Bookmarkitem
+// @Router /name [put]
 func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrname entity.Addrnameitem
@@ -1106,6 +1159,16 @@ func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(returnval)
 }
 
+// GetGroupChatItemsByAddr godoc
+// @Summary Get group chat items, given a wallt FROM address and NFT Contract Address
+// @Description Get all group chat items for a given wallet (useraddress) for a given NFT Contract Address (TODO: fix up var names)
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param address path string true "NFT Address"
+// @Param useraddress path string true "FROM: wallet address"
+// @Success 200 {array} entity.Groupchatitem
+// @Router /get_groupchatitems/{address}/{useraddress} [get]
 func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
@@ -1141,6 +1204,17 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// GetGroupChatItemsByAddrLen godoc
+// @Summary Get Unread Groupchat Items (TODO: cleanup naming convention here)
+// @Description For group chat unread counts, currently the database stores a timestamp for each time a user enters a group chat.
+// @Description We though in the design it would be impractical to keep a read/unread count copy per user per message, but if this
+// @Description method doesn't proof to be fine grained enough, we could add a boolean relational table of read messgages per user.
+// @Tags Common
+// @Accept  json
+// @Produce plain
+// @Param name path string true "Common Name Mapped to User/Community"
+// @Success 200 {integer} int
+// @Router /get_groupchatitems_unreadcnt/{address}/{useraddress} [get]
 func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
@@ -1163,7 +1237,17 @@ func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(chat))
 }
 
-//UpdateInboxByOwner updates person with respective owner address
+// CreateAddrNameItem godoc
+// @Summary Update Message Read Status of a given DM chat message
+// @Description Currently this only update the message read/unread status.  It could update the entire JSON struct
+// @Description upon request, however we only needed this functionality currently and it saved re-encryption of the data.
+// @Description TODO: TO/FROM address in the URL is not needed/not used anymore.
+// @Tags DMs
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Chatitem true "chat item JSON struct to update msg read status"
+// @Success 200 {array} entity.Chatitem
+// @Router /update_chatitem/{fromaddr}/{toaddr} [put]
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
@@ -1188,6 +1272,16 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// DeleteAllChatitemsToAddressByOwner godoc
+// @Summary Delete All Chat Items (DMs) between FROM and TO given addresses
+// @Description TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT
+// @Tags Unused/Legacy
+// @Accept  json
+// @Produce  json
+// @Param toaddr path string true "TO: Address"
+// @Param fromaddr path string true "FROM: Address"
+// @Success 204
+// @Router /deleteall_chatitems/{fromaddr}/{toaddr} [delete]
 func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	to := vars["toaddr"]
@@ -1199,6 +1293,15 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// CreateSettings godoc
+// @Summary Settings hold a user address and the public key used for encryption.
+// @Description Currently this only updates the public key, could be expanded as needed.
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Settings true "update struct"
+// @Success 200 {array} entity.Settings
+// @Router /create_settings [post]
 func CreateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settings entity.Settings
@@ -1210,6 +1313,15 @@ func CreateSettings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(settings)
 }
 
+// UpdateSettings godoc
+// @Summary Settings hold a user address and the public key used for encryption.
+// @Description Currently this only updates the public key, could be expanded as needed.
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Settings true "update struct"
+// @Success 200 {array} entity.Settings
+// @Router /update_settings [put]
 func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settings entity.Settings
@@ -1222,6 +1334,15 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(settings)
 }
 
+// DeleteSettings godoc
+// @Summary Delete Settings Info
+// @Description TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT
+// @Tags Unused/Legacy
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Success 204
+// @Router /delete_settings/{address} [delete]
 func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -1232,6 +1353,15 @@ func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// GetSettings godoc
+// @Summary Get Settings Info
+// @Description TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT
+// @Tags Unused/Legacy
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Success 200 {array} entity.Settings
+// @Router /get_settings/{address} [get]
 func GetSettings(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -1242,6 +1372,15 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(settings)
 }
 
+// CreateComments godoc
+// @Summary Comments are used within an NFT community chat
+// @Description Comments are meant to be public, someday having an up/downvote method for auto-moderation
+// @Tags Common
+// @Accept  json
+// @Produce  json
+// @Param message body entity.Comments true "create struct"
+// @Success 200 {array} entity.Comments
+// @Router /create_comments [post]
 func CreateComments(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var comment entity.Comments
@@ -1265,6 +1404,17 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 // 	json.NewEncoder(w).Encode(comment)
 // }
 
+// GetComments godoc
+// @Summary Get Public Comments for given NFT Contract and ID
+// @Description NFTs have a public comment section
+// @Tags NFT
+// @Accept  json
+// @Produce  json
+// @Param address path string true "FROM Wallet Address"
+// @Param nftaddr path string true "NFT Contract Address"
+// @Param nftid path string true "NFT ID"
+// @Success 204
+// @Router /delete_comments/{fromaddr}/{nftaddr}/{nftid} [delete]
 func DeleteComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fromaddr := vars["address"]
@@ -1277,6 +1427,15 @@ func DeleteComments(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// GetComments godoc
+// @Summary Get Public Comments for given NFT Contract and ID
+// @Description NFTs have a public comment section
+// @Tags NFT
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Success 200 {array} entity.Comments
+// @Router /get_comments/{nftaddr}/{nftid} [get]
 func GetComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]
@@ -1289,6 +1448,16 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(comment)
 }
 
+// GetCommentsCount godoc
+// @Summary Get Public Comments Count for given NFT Contract and ID
+// @Description NFTs have a public comment section
+// @Tags NFT
+// @Accept  json
+// @Produce  json
+// @Param nftaddr path string true "NFT Contract Address"
+// @Param nftid path string true "NFT ID"
+// @Success 200 {integer} int
+// @Router /get_comments/{nftaddr}/{nftid} [get]
 func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]
@@ -1300,24 +1469,24 @@ func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(len(comment))
 }
 
-func GetAllComments(w http.ResponseWriter, r *http.Request) {
-	var comment []entity.Comments
-	database.Connector.Find(&comment)
+// func GetAllComments(w http.ResponseWriter, r *http.Request) {
+// 	var comment []entity.Comments
+// 	database.Connector.Find(&comment)
 
-	//make sure to get the name if it wasn't there (not there by default now)
-	var addrname entity.Addrnameitem
-	for i := 0; i < len(comment); i++ {
-		var result = database.Connector.Where("address = ?", comment[i].Fromaddr).Find(&addrname)
-		if result.RowsAffected > 0 {
-			comment[i].Name = addrname.Name
-		}
-	}
-	//end of adding names for fromaddr
+// 	//make sure to get the name if it wasn't there (not there by default now)
+// 	var addrname entity.Addrnameitem
+// 	for i := 0; i < len(comment); i++ {
+// 		var result = database.Connector.Where("address = ?", comment[i].Fromaddr).Find(&addrname)
+// 		if result.RowsAffected > 0 {
+// 			comment[i].Name = addrname.Name
+// 		}
+// 	}
+// 	//end of adding names for fromaddr
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(comment)
-}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusOK)
+// 	json.NewEncoder(w).Encode(comment)
+// }
 
 func GetTwitter(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -1509,7 +1678,17 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 	return tweets
 }
 
-func GetWalletChat(w http.ResponseWriter, r *http.Request) {
+// GetCommunityChat godoc
+// @Summary Get Community Chat Landing Page Info
+// @Description TODO: need a creation API for communities, which includes specificied welcome message text, Twitter handle, page title
+// @Tags GroupChat
+// @Accept  json
+// @Produce  json
+// @Param address path string true "Wallet Address"
+// @Param address path string true "Wallet Address"
+// @Success 200 {array} LandingPageItems
+// @Router /community/{community}/{address} [get]
+func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	community := vars["community"]
 	key := vars["address"]
@@ -1524,7 +1703,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	landingData.Members = len(members)
 
 	//name
-	landingData.Name = "WalletChat HQ"
+	landingData.Name = "WalletChat HQ" //TODO this should come from a table which stores info set in in a CREATE community chat table
 
 	//logo base64 data (url requires other changes)
 	var imgname entity.Imageitem
@@ -1553,7 +1732,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		newgroupchatuser.Contexttype = entity.Community
 		newgroupchatuser.Fromaddr = key
 		newgroupchatuser.Nftaddr = community
-		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!"
+		newgroupchatuser.Message = "Welcome " + key + " to Wallet Chat HQ!" //TODO end of this message should come from a table which stores info set in in a CREATE community chat table
 		newgroupchatuser.Timestamp_dtm = time.Now()
 		newgroupchatuser.Timestamp = time.Now().Format("2006-01-02T15:04:05.000Z")
 
@@ -1564,7 +1743,7 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 		landingData.Joined = true
 	}
 
-	//check messages read for this user address because this GetWalletChat is being called
+	//check messages read for this user address because this GetCommunityChat is being called
 	//separately each time (I thought it would be filled from bookmarks)
 	var groupchat []entity.Groupchatitem
 	database.Connector.Where("nftaddr = ?", community).Where("fromaddr = ?", key).Find(&groupchat)
@@ -1606,17 +1785,27 @@ func GetWalletChat(w http.ResponseWriter, r *http.Request) {
 	//social data
 	var twitterSocial SocialMsg
 	twitterSocial.Type = "twitter"
-	twitterSocial.Username = "@wallet_chat"
+	twitterSocial.Username = "@wallet_chat" //TODO this should come from a table which stores info set in in a CREATE community chat table
 	landingData.Social = append(landingData.Social, twitterSocial)
 	var discordSocial SocialMsg
 	discordSocial.Type = "discord"
-	discordSocial.Username = "WalletChat"
+	discordSocial.Username = "WalletChat" //TODO this should come from a table which stores info set in in a CREATE community chat table
 	landingData.Social = append(landingData.Social, discordSocial)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(landingData)
 }
 
+// IsOwner godoc
+// @Summary Check if given wallet address owns an NFT from given contract address
+// @Description API user could check this directly via any third party service like NFTPort, Moralis as well
+// @Tags common
+// @Accept  json
+// @Produce  json
+// @Param contract path string true "NFT Contract Address"
+// @Param wallet path string true "Wallet Address"
+// @Success 200 {array} LandingPageItems
+// @Router /is_owner/{contract}/{wallet} [get]
 func IsOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contract := vars["contract"]
@@ -1631,6 +1820,7 @@ func IsOwner(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
+//internal
 func GetOwnerNFTs(walletAddr string, chain string) NFTPortOwnerOf {
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
 	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
@@ -1663,6 +1853,7 @@ func GetOwnerNFTs(walletAddr string, chain string) NFTPortOwnerOf {
 	return result
 }
 
+//internal use
 func IsOwnerOfNFT(contractAddr string, walletAddr string, chain string) bool {
 	//url := "https://eth-mainnet.alchemyapi.io/v2/${process.env.REACT_APP_ALCHEMY_API_KEY}/getOwnersForToken" + contractAddr
 	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain + "&contract_address=" + contractAddr
@@ -1731,6 +1922,7 @@ func IsOnChain(contractAddr string, chain string) bool {
 }
 
 //this was just used to fix up users info after adding new column
+//not intended for extenal calls
 func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Find(&bookmarks)
@@ -1750,6 +1942,7 @@ func FixUpBookmarks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//internal use only
 func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletAddr := vars["wallet"]
@@ -1757,6 +1950,8 @@ func AutoJoinCommunities(w http.ResponseWriter, r *http.Request) {
 	AutoJoinCommunitiesByChain(walletAddr, "polygon")
 	AutoJoinPoapChats(walletAddr)
 }
+
+//internal use only
 func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 	//TODO: OS is more accurate
 	url := "https://api.nftport.xyz/v0/accounts/" + walletAddr + "?chain=" + chain
@@ -1813,6 +2008,7 @@ func AutoJoinCommunitiesByChain(walletAddr string, chain string) {
 	}
 }
 
+//internal use only
 func AutoJoinPoapChats(walletAddr string) {
 	//https://documentation.poap.tech/reference/getactionsscan-5
 	var poapInfo []POAPInfoByAddress = getPoapInfoByAddress(walletAddr)
@@ -1856,6 +2052,8 @@ func GetPoapsByAddr(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
 }
+
+//internal use only
 func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 	url := "https://api.poap.tech/actions/scan/" + walletAddr
 

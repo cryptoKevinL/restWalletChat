@@ -38,6 +38,14 @@ github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827035246-14b55cd397a9 h1:UaW
 github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827035246-14b55cd397a9/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
 github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827044314-bfc8e6cb713f h1:iozfXgk2QdQMifvHBQ+3oljmvc7jNBM7HlSaPUBe2zE=
 github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827044314-bfc8e6cb713f/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827050325-1621170bc9d9 h1:5WTr68PAPxeuw51OIovwMd09I8SFLwMpS/1Je50vm0s=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827050325-1621170bc9d9/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827161536-3f328b602210 h1:BocExjvPzbLwQ3uoxN/UJ4xxN1LpLhgKBGlwr3a/J/Y=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220827161536-3f328b602210/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220828222707-4d000cb65910 h1:T637RzEXP0oa06cgztLy9cmUoqyMPOKcNjgUcrTb6GY=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220828222707-4d000cb65910/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220828224821-e8c78928129b h1:7p4HCxz35i4Ki1P410+xmNFWyDO8hR8XakpSIFbhSAM=
+github.com/cryptoKevinL/walletChatDocs v0.0.0-20220828224821-e8c78928129b/go.mod h1:N7P+avZRKtOVOblih12xRpFE38T+NACbWRkqlJrpEds=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/denisenkom/go-mssqldb v0.0.0-20191124224453-732737034ffd h1:83Wprp6ROGeiHFAP8WJdI2RoxALQYgdllERc3N5N2DM=
