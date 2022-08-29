@@ -744,7 +744,10 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 
 // CreateChatitem godoc
 // @Summary Create/Insert DM Chat Message (1-to-1 messaging)
-// @Description For DMs, CreateChatItem is used to store the message in the backed database
+// @Description For DMs, Chatitem data struct is used to store each message and associated info.
+// @Description REQUIRED: fromaddr, toaddr, message (see data struct section at bottom of page for more detailed info on each paramter)
+// @Description Other fields are generally filled in by the backed REST API and used as return parameters
+// @Description ID is auto generated and should never be used as input.
 // @Tags DMs
 // @Accept  json
 // @Produce  json

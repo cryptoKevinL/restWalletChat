@@ -336,8 +336,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: For DMs, CreateChatItem is used to store the message in the backed
-        database
+      description: |-
+        For DMs, Chatitem data struct is used to store each message and associated info.
+        REQUIRED: fromaddr, toaddr, message (see data struct section at bottom of page for more detailed info on each paramter)
+        Other fields are generally filled in by the backed REST API and used as return parameters
+        ID is auto generated and should never be used as input.
       parameters:
       - description: Direct Message Chat Data
         in: body

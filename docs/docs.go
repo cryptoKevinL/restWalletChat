@@ -137,7 +137,7 @@ const docTemplate = `{
         },
         "/create_chatitem": {
             "post": {
-                "description": "For DMs, CreateChatItem is used to store the message in the backed database",
+                "description": "For DMs, Chatitem data struct is used to store each message and associated info.\nREQUIRED: fromaddr, toaddr, message (see data struct section at bottom of page for more detailed info on each paramter)\nOther fields are generally filled in by the backed REST API and used as return parameters\nID is auto generated and should never be used as input.",
                 "consumes": [
                     "application/json"
                 ],
