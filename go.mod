@@ -10,6 +10,12 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+<<<<<<< Updated upstream
+=======
+	github.com/rs/cors v1.8.2
+	github.com/sendgrid/rest v2.6.9+incompatible // indirect
+	github.com/sendgrid/sendgrid-go v3.11.1+incompatible
+>>>>>>> Stashed changes
 	github.com/swaggo/http-swagger v1.3.0 // indirect
 	github.com/swaggo/http-swagger/example/go-chi v0.0.0-20220611072802-7af1c17f1a0f // indirect
 	github.com/swaggo/swag v1.8.4

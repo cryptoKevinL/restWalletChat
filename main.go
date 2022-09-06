@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,14 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //Required for MySQL dialect
+<<<<<<< Updated upstream
+=======
+
+	"time"
+
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+>>>>>>> Stashed changes
 )
 
 // @title WalletChat API
@@ -45,13 +54,49 @@ import (
 // @BasePath
 func main() {
 	godotenv.Load(".env")
+
+	from := mail.NewEmail("WalletChat", "walletchatextension@gmail.com")
+	subject := "Message Waiting In WalletChat"
+	to := mail.NewEmail("xrpMaxi", "savemynft@gmail.com")
+	plainTextContent := "You have message from vitalik.eth waiting in WalletChat, please login via the app direct to read!"
+	htmlContent := "<strong>You have message from vitalik.eth waiting in WalletChat, please login via the app direct to read!</strong>"
+	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+	response, err := client.Send(message)
+	if err != nil {
+		log.Println(err)
+	} else {
+		fmt.Println(response.StatusCode)
+		fmt.Println(response.Body)
+		fmt.Println(response.Headers)
+	}
+
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
 
 	router := mux.NewRouter().StrictSlash(true)
+<<<<<<< Updated upstream
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	initaliseHandlers(router)
 	log.Fatal(http.ListenAndServe(":8080", router))
+=======
+
+	router.HandleFunc("/register", auth.RegisterHandler()).Methods("POST")
+	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler()).Methods("GET")
+	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
+
+	wsRouter := router.PathPrefix("/v1").Subrouter()
+	wsRouter.Use(auth.AuthMiddleware(jwtProvider))
+	wsRouter.HandleFunc("/welcome", auth.WelcomeHandler()).Methods("GET")
+	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	initaliseHandlers(wsRouter)
+
+	// cors.AllowAll() setup the middleware with default options being
+	// all origins accepted with simple methods (GET, POST). See
+	// documentation below for more options.
+	handler := cors.AllowAll().Handler(router)
+	log.Fatal(http.ListenAndServe(":8080", handler))
+>>>>>>> Stashed changes
 }
 
 func initaliseHandlers(router *mux.Router) {
