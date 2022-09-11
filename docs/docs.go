@@ -514,6 +514,41 @@ const docTemplate = `{
                 "tags": [
                     "NFT"
                 ],
+                "summary": "Get Public Comments for given NFT Contract and ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Comments"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/get_comments_cnt/{nftaddr}/{nftid}": {
+            "get": {
+                "description": "NFTs have a public comment section",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
                 "summary": "Get Public Comments Count for given NFT Contract and ID",
                 "parameters": [
                     {
@@ -1423,6 +1458,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/register": {
+            "post": {
+                "description": "This is a one-time operation, maybe could be combined into the nonce-generating call.  Basically places a wallet address\ninto the database for further use.  Only the \"address\" field is needed for input here in the AuthUser struct.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register Wallet Address for the first time, one-time operation",
+                "parameters": [
+                    {
+                        "description": "address input in json format",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.Authuser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/signin": {
+            "post": {
+                "description": "Every call the to API after this signin should present the JWT Bearer token for authenticated access.\nUpon request we can change the timeout to greater than 24 hours, or setup an addtional dedicated API for\nan agreed upon development and maintenance cost",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Sign In with signed nonce value, currently JWT token returned should be valid for 24 hours",
+                "parameters": [
+                    {
+                        "description": "json input containing signed nonce",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/auth.SigninPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
         "/unreadcount/{address}": {
             "get": {
                 "description": "Get Unread count just given an address",
@@ -1528,9 +1631,66 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/{address}/nonce": {
+            "get": {
+                "description": "As part of the login process, we need a user to sign a nonce genrated from the API, to prove the user in fact\nthe owner of the wallet they are siging in from.  JWT currently set to 24 hour validity (could change this upon request)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "If the current wallet doesn't have a valid local JWT, need to request a new nonce to sign",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "wallet address to get nonce to sign",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": ""
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "auth.Authuser": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "nonce": {
+                    "type": "string"
+                }
+            }
+        },
+        "auth.SigninPayload": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "nonce": {
+                    "type": "string"
+                },
+                "sig": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.Attachments": {
             "type": "object",
             "properties": {
@@ -1874,12 +2034,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.0",
+	Version:          "1.0",
 	Host:             "restwalletchat-app-sey3k.ondigitalocean.app",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "WalletChat API",
-	Description:      "Wecome to the WalletChat API Documentation\n\nPlease make note that some JSON data structures are shared for both input/output.\nRequired input parameters will have a red * next to them in the data type outline at\nthe bottom of the page, along with a comment.  This means when executing API functionality\nfrom this API page, some fields may need to be removed from the JSON struct before submitting.\nPlease email the developers with any issues.\nSome JSON data structures are output only, and will be marked as such as well.\n\nv0 of the API does not include encryption or authentication.  Please as you are given access\nto this page, do not abuse this system and impersonate others, or submit offensive material.\ndevelopers monitor this data daily.\n\nv1 will include encyrption for DMs, private keys will be stored locally on client PCs\nwith no way for us to recover any data which is encrypted.\n\nv1 will also include basic JWT Authentication, however some more work to make this fully secure\nwill be needed and included in v2.",
+	Description:      "Wecome to the WalletChat API Documentation\n\nPlease make note that some JSON data structures are shared for both input/output.\nRequired input parameters will have a red * next to them in the data type outline at\nthe bottom of the page, along with a comment.  This means when executing API functionality\nfrom this API page, some fields may need to be removed from the JSON struct before submitting.\nPlease email the developers with any issues.\nSome JSON data structures are output only, and will be marked as such as well.\n\nv0 of the API does not include encryption or authentication.  Please as you are given access\nto this page, do not abuse this system and impersonate others, or submit offensive material.\ndevelopers monitor this data daily.\n\nv1 will include basic JWT Authentication, however some additional work is in progress to make this fully secure.\nexcept for AUTH functions, all endpoints must prefix /v1 and include \"Bearer: <JWT>\" in all reqests\"\n\nv2 will include encyrption for DMs, private keys will be stored locally on client PCs\nwith no way for us to recover any data which is encrypted.\n",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

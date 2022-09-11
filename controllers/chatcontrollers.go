@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/cryptoKevinL/walletChatDocs"
+	_ "rest-go-demo/docs"
 
 	"github.com/gorilla/mux"
 )
@@ -357,20 +357,7 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 // @Param address path string true "Wallet Address"
 // @Success 200 {integer} int
 // @Router /unreadcount/{address} [get]
-
-// func enableCors(w *http.ResponseWriter) {
-// 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-// 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
-// 	(*w).Header().Set("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT")
-// 	(*w).Header().Set("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Authorization, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
-// 	//fmt.Println("allowing origin cors")
-// }
-
 func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
-	// enableCors(&w)
-	// if (*r).Method == "OPTIONS" {
-	// 	return
-	// }
 	vars := mux.Vars(r)
 	key := vars["address"]
 
@@ -1473,7 +1460,7 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Success 200 {integer} int
-// @Router /get_comments/{nftaddr}/{nftid} [get]
+// @Router /get_comments_cnt/{nftaddr}/{nftid} [get]
 func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]

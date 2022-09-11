@@ -1,4 +1,20 @@
 definitions:
+  auth.Authuser:
+    properties:
+      address:
+        type: string
+      nonce:
+        type: string
+    type: object
+  auth.SigninPayload:
+    properties:
+      address:
+        type: string
+      nonce:
+        type: string
+      sig:
+        type: string
+    type: object
   controllers.Attachments:
     properties:
       media_keys:
@@ -232,7 +248,7 @@ info:
   contact:
     email: walletchatextension@gmail.com
     url: https://walletchat.fun
-  description: |-
+  description: |
     Wecome to the WalletChat API Documentation
 
     Please make note that some JSON data structures are shared for both input/output.
@@ -246,13 +262,13 @@ info:
     to this page, do not abuse this system and impersonate others, or submit offensive material.
     developers monitor this data daily.
 
-    v1 will include encyrption for DMs, private keys will be stored locally on client PCs
-    with no way for us to recover any data which is encrypted.
+    v1 will include basic JWT Authentication, however some additional work is in progress to make this fully secure.
+    except for AUTH functions, all endpoints must prefix /v1 and include "Bearer: <JWT>" in all reqests"
 
-    v1 will also include basic JWT Authentication, however some more work to make this fully secure
-    will be needed and included in v2.
+    v2 will include encyrption for DMs, private keys will be stored locally on client PCs
+    with no way for us to recover any data which is encrypted.
   title: WalletChat API
-  version: "0.0"
+  version: "1.0"
 paths:
   /community:
     post:
@@ -585,6 +601,29 @@ paths:
       tags:
       - GroupChat
   /get_comments/{nftaddr}/{nftid}:
+    get:
+      consumes:
+      - application/json
+      description: NFTs have a public comment section
+      parameters:
+      - description: Wallet Address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Comments'
+            type: array
+      summary: Get Public Comments for given NFT Contract and ID
+      tags:
+      - NFT
+  /get_comments_cnt/{nftaddr}/{nftid}:
     get:
       consumes:
       - application/json
@@ -1215,6 +1254,56 @@ paths:
       summary: get the common name which has been mapped to an address
       tags:
       - Common
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        This is a one-time operation, maybe could be combined into the nonce-generating call.  Basically places a wallet address
+        into the database for further use.  Only the "address" field is needed for input here in the AuthUser struct.
+      parameters:
+      - description: address input in json format
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/auth.Authuser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Register Wallet Address for the first time, one-time operation
+      tags:
+      - Auth
+  /signin:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Every call the to API after this signin should present the JWT Bearer token for authenticated access.
+        Upon request we can change the timeout to greater than 24 hours, or setup an addtional dedicated API for
+        an agreed upon development and maintenance cost
+      parameters:
+      - description: json input containing signed nonce
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/auth.SigninPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Sign In with signed nonce value, currently JWT token returned should
+        be valid for 24 hours
+      tags:
+      - Auth
   /unreadcount/{address}:
     get:
       consumes:
@@ -1289,4 +1378,28 @@ paths:
       summary: Settings hold a user address and the public key used for encryption.
       tags:
       - Common
+  /users/{address}/nonce:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        As part of the login process, we need a user to sign a nonce genrated from the API, to prove the user in fact
+        the owner of the wallet they are siging in from.  JWT currently set to 24 hour validity (could change this upon request)
+      parameters:
+      - description: wallet address to get nonce to sign
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: ""
+      summary: If the current wallet doesn't have a valid local JWT, need to request
+        a new nonce to sign
+      tags:
+      - Auth
 swagger: "2.0"
