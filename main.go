@@ -50,7 +50,7 @@ func main() {
 	log.Println("Starting the HTTP server on port 8080")
 
 	router := mux.NewRouter().StrictSlash(true)
-	router.PathPrefix("/docs/v0").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 	initaliseHandlers(router)
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
