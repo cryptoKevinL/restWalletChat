@@ -65,7 +65,7 @@ func main() {
 	router.HandleFunc("/register", auth.RegisterHandler()).Methods("POST")
 	router.HandleFunc("/users/{address}/nonce", auth.UserNonceHandler()).Methods("GET")
 	router.HandleFunc("/signin", auth.SigninHandler(jwtProvider)).Methods("POST")
-	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	router.PathPrefix("/docs").Handler(httpSwagger.WrapHandler)
 
 	wsRouter := router.PathPrefix("/v1").Subrouter()
 
