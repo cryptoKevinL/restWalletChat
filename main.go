@@ -34,7 +34,7 @@ import (
 // @description
 // @description v1 will include basic JWT Authentication, however some additional work is in progress to make this fully secure.
 // @description except for AUTH functions, all endpoints must prefix /v1 and include "Bearer: " in all reqests"
-
+// @description
 // @description v2 will include encyrption for DMs, private keys will be stored locally on client PCs
 // @description with no way for us to recover any data which is encrypted.
 
