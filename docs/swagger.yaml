@@ -227,12 +227,28 @@ definitions:
       walletaddr:
         type: string
     type: object
-host: restwalletchat-app-sey3k.ondigitalocean.app
+host: api.v0.walletchat.fun
 info:
   contact:
     email: walletchatextension@gmail.com
     url: https://walletchat.fun
   description: |-
+    Wecome to the WalletChat API Documentation
+
+    Please make note that some JSON data structures are shared for both input/output.
+    Required input parameters will have a red * next to them in the data type outline at
+    the bottom of the page, along with a comment.  This means when executing API functionality
+    from this API page, some fields may need to be removed from the JSON struct before submitting.
+    Please email the developers with any issues.
+    Some JSON data structures are output only, and will be marked as such as well.
+
+    v0 of the API does not include encryption or authentication, nor does it need /v0 to be called.
+    Please as you are given access to this page, do not abuse this system and impersonate others, or submit offensive material.
+    Developers monitor this data daily.
+
+    v1 will include basic JWT Authentication, however some additional work is in progress to make this fully secure.
+    except for AUTH functions, all endpoints must prefix /v1 and include Bearer: <JWT> in all requests
+
     v2 will include encyrption for DMs, private keys will be stored locally on client PCs
     with no way for us to recover any data which is encrypted.
   title: WalletChat API

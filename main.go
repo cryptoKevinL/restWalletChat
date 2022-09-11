@@ -28,12 +28,12 @@ import (
 // @description Please email the developers with any issues.
 // @description Some JSON data structures are output only, and will be marked as such as well.
 // @description
-// @description v0 of the API does not include encryption or authentication.  Please as you are given access
-// @description to this page, do not abuse this system and impersonate others, or submit offensive material.
-// @description developers monitor this data daily.
+// @description v0 of the API does not include encryption or authentication, nor does it need /v0 to be called.
+// @description Please as you are given access to this page, do not abuse this system and impersonate others, or submit offensive material.
+// @description Developers monitor this data daily.
 // @description
 // @description v1 will include basic JWT Authentication, however some additional work is in progress to make this fully secure.
-// @description except for AUTH functions, all endpoints must prefix /v1 and include "Bearer: " in all reqests"
+// @description except for AUTH functions, all endpoints must prefix /v1 and include Bearer: <JWT> in all requests
 // @description
 // @description v2 will include encyrption for DMs, private keys will be stored locally on client PCs
 // @description with no way for us to recover any data which is encrypted.
@@ -42,7 +42,7 @@ import (
 // @contact.url https://walletchat.fun
 // @contact.email walletchatextension@gmail.com
 
-// @host restwalletchat-app-sey3k.ondigitalocean.app
+// @host api.v0.walletchat.fun
 // @BasePath
 func main() {
 	godotenv.Load(".env")
