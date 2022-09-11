@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Wecome to the WalletChat API Documentation\n\nPlease make note that some JSON data structures are shared for both input/output.\nRequired input parameters will have a red * next to them in the data type outline at\nthe bottom of the page, along with a comment.  This means when executing API functionality\nfrom this API page, some fields may need to be removed from the JSON struct before submitting.\nPlease email the developers with any issues.\nSome JSON data structures are output only, and will be marked as such as well.\n\nv0 of the API does not include encryption or authentication.  Please as you are given access\nto this page, do not abuse this system and impersonate others, or submit offensive material.\ndevelopers monitor this data daily.\n\nv1 will include encyrption for DMs, private keys will be stored locally on client PCs\nwith no way for us to recover any data which is encrypted.\n\nv1 will also include basic JWT Authentication, however some more work to make this fully secure\nwill be needed and included in v2.",
+        "description": "v2 will include encyrption for DMs, private keys will be stored locally on client PCs\nwith no way for us to recover any data which is encrypted.",
         "title": "WalletChat API",
         "contact": {
             "url": "https://walletchat.fun",
@@ -495,6 +495,41 @@
             }
         },
         "/get_comments/{nftaddr}/{nftid}": {
+            "get": {
+                "description": "NFTs have a public comment section",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Get Public Comments for given NFT Contract and ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Comments"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/get_comments_cnt/{nftaddr}/{nftid}": {
             "get": {
                 "description": "NFTs have a public comment section",
                 "consumes": [

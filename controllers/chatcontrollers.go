@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/cryptoKevinL/walletChatDocs"
+	_ "rest-go-demo/docs"
 
 	"github.com/gorilla/mux"
 )
@@ -1460,7 +1460,7 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Success 200 {integer} int
-// @Router /get_comments/{nftaddr}/{nftid} [get]
+// @Router /get_comments_cnt/{nftaddr}/{nftid} [get]
 func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]
