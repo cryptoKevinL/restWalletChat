@@ -42,11 +42,12 @@ import (
 // @description v2 will include encyrption for DMs, private keys will be stored locally on client PCs
 // @description with no way for us to recover any data which is encrypted.
 // @description
-
 // @wallet_chat API Support via Twitter
 // @contact.url https://walletchat.fun
 // @contact.email walletchatextension@gmail.com
-
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 // @host restwalletchat-app-sey3k.ondigitalocean.app
 // @BasePath
 func main() {

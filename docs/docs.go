@@ -19,1445 +19,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/community": {
-            "post": {
-                "description": "Community Chat Data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "GroupChat"
-                ],
-                "summary": "CreateCommunityChatitem creates GroupChatitem just with community tag (likely could be consolidated)",
-                "parameters": [
-                    {
-                        "description": "Community Message Chat Data",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Groupchatitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Groupchatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/community/{community}/{address}": {
-            "get": {
-                "description": "TODO: need a creation API for communities, which includes specificied welcome message text, Twitter handle, page title",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "GroupChat"
-                ],
-                "summary": "Get Community Chat Landing Page Info",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/controllers.LandingPageItems"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/create_bookmark": {
-            "post": {
-                "description": "Bookmarks keep an NFT/Community group chat in the sidebar",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "GroupChat"
-                ],
-                "summary": "Join an NFT or Community group chat",
-                "parameters": [
-                    {
-                        "description": "Add Bookmark from Community Group Chat",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Bookmarkitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/create_chatitem": {
-            "post": {
-                "description": "For DMs, Chatitem data struct is used to store each message and associated info.\nREQUIRED: fromaddr, toaddr, message (see data struct section at bottom of page for more detailed info on each paramter)\nOther fields are generally filled in by the backed REST API and used as return parameters\nID is auto generated and should never be used as input.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "DMs"
-                ],
-                "summary": "Create/Insert DM Chat Message (1-to-1 messaging)",
-                "parameters": [
-                    {
-                        "description": "Direct Message Chat Data",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Chatitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/create_comments": {
-            "post": {
-                "description": "Comments are meant to be public, someday having an up/downvote method for auto-moderation",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "Comments are used within an NFT community chat",
-                "parameters": [
-                    {
-                        "description": "create struct",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Comments"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Comments"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/create_groupchatitem": {
-            "post": {
-                "description": "Currently used for all messages outside of DMs",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "GroupChat"
-                ],
-                "summary": "Create/Insert chat message for Community/NFT/Group Messaging",
-                "parameters": [
-                    {
-                        "description": "Group Message Chat Data",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Groupchatitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Groupchatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/create_settings": {
-            "post": {
-                "description": "Currently this only updates the public key, could be expanded as needed.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "Settings hold a user address and the public key used for encryption.",
-                "parameters": [
-                    {
-                        "description": "update struct",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Settings"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Settings"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/delete_bookmark": {
-            "post": {
-                "description": "Bookmarks keep an NFT/Community group chat in the sidebar",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "GroupChat"
-                ],
-                "summary": "Leave an NFT or Community group chat",
-                "parameters": [
-                    {
-                        "description": "Remove Bookmark from Community Group Chat",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Bookmarkitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/delete_comments/{fromaddr}/{nftaddr}/{nftid}": {
-            "delete": {
-                "description": "NFTs have a public comment section",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "Delete Public Comments for given FROM wallet address, NFT Contract and ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "FROM Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "nftaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT ID",
-                        "name": "nftid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/delete_settings/{address}": {
-            "delete": {
-                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Delete Settings Info",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/deleteall_chatitems/{fromaddr}/{toaddr}": {
-            "delete": {
-                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Delete All Chat Items (DMs) between FROM and TO given addresses",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "TO: Address",
-                        "name": "toaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "FROM: Address",
-                        "name": "fromaddr",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/get_bookmarks/{address}/": {
-            "get": {
-                "description": "This used for UI purposes, checking if a user/wallet has bookmarked a community.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "GroupChat"
-                ],
-                "summary": "Check if a wallet address has bookmarked/joined given NFT contract",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/get_bookmarks/{walletaddr}/{nftaddr}": {
-            "get": {
-                "description": "This used for UI purposes, checking if a user/wallet has bookmarked a community.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "GroupChat"
-                ],
-                "summary": "Check if a wallet address has bookmarked/joined given NFT contract",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "walletaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "nftaddr",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "bool"
-                        }
-                    }
-                }
-            }
-        },
-        "/get_comments/{nftaddr}/{nftid}": {
-            "get": {
-                "description": "NFTs have a public comment section",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "Get Public Comments for given NFT Contract and ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Comments"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/get_comments_cnt/{nftaddr}/{nftid}": {
-            "get": {
-                "description": "NFTs have a public comment section",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "Get Public Comments Count for given NFT Contract and ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "nftaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT ID",
-                        "name": "nftid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
-        "/get_groupchatitems/{address}": {
-            "get": {
-                "description": "Community Chat Data",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "GetGroupChatItems gets group chat data for a given NFT address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Get Group Chat Data By NFT Address",
-                        "name": "message",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Groupchatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/get_groupchatitems/{address}/{useraddress}": {
-            "get": {
-                "description": "Get all group chat items for a given wallet (useraddress) for a given NFT Contract Address (TODO: fix up var names)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "Get group chat items, given a wallt FROM address and NFT Contract Address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "NFT Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "FROM: wallet address",
-                        "name": "useraddress",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Groupchatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/get_groupchatitems_unreadcnt/{address}/{useraddress}": {
-            "get": {
-                "description": "For group chat unread counts, currently the database stores a timestamp for each time a user enters a group chat.\nWe though in the design it would be impractical to keep a read/unread count copy per user per message, but if this\nmethod doesn't proof to be fine grained enough, we could add a boolean relational table of read messgages per user.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "Get Unread Groupchat Items (TODO: cleanup naming convention here)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Common Name Mapped to User/Community",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
-        "/get_inbox/{address}": {
-            "get": {
-                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Inbox"
-                ],
-                "summary": "Get Inbox Summary With Last Message",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatiteminbox"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/get_settings/{address}": {
-            "get": {
-                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get Settings Info",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Settings"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/get_unread_cnt/{address}": {
-            "get": {
-                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Inbox"
-                ],
-                "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
-        "/get_unread_cnt/{address}/{nftaddr}/{nftid}": {
-            "get": {
-                "description": "Get Unread count for specifc NFT context given a wallet address and specific NFT",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "Get all unread messages for a specific NFT context",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "nftaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT ID",
-                        "name": "nftid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
-        "/get_unread_cnt/{fromaddr}/{toaddr}": {
-            "get": {
-                "description": "Get Unread count for DMs",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get all unread messages between two addresses",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "TO: Wallet Address",
-                        "name": "toaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "FROM: Wallet Address",
-                        "name": "from",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
-        "/get_unread_cnt_by_type/{address}/{type}": {
-            "get": {
-                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Message Type - nft|community|dm|all",
-                        "name": "type",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
-        "/get_unread_cnt_nft/{address}": {
-            "get": {
-                "description": "Get Unread count for all NFT contexts given a wallet address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get all unread messages for all NFT related chats for given user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
-        "/getall_chatitems/{address}": {
-            "get": {
-                "description": "Get all Chat Items for DMs for a given wallet address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get Chat Item For Given Wallet Address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "toaddr",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/getall_chatitems/{fromaddr}/{toaddr}": {
-            "get": {
-                "description": "Get chat data between the given two addresses, TO and FROM and interchangable here",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "DMs"
-                ],
-                "summary": "Get Chat Data Between Two Addresses",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "TO: Wallet Address",
-                        "name": "toaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "FROM: Wallet Address",
-                        "name": "from",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/getnft_chatitems/{address}": {
-            "get": {
-                "description": "Get ALL NFT context items for a given wallet address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get NFT Related Chat Items For Given Wallet Address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "toaddr",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/getnft_chatitems/{address}/{nftaddr}/{nftid}": {
-            "get": {
-                "description": "Get all specified NFT contract and ID items for a given wallet address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, relating to one wallet",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "nftaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT ID",
-                        "name": "nftid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid}": {
-            "get": {
-                "description": "Get ALL NFT context items for a specifc NFT context convo between two wallets",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "NFT"
-                ],
-                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "nftaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT ID",
-                        "name": "nftid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "TO: Wallet Address",
-                        "name": "toaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "FROM: Wallet Address",
-                        "name": "from",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/getnft_chatitems/{nftaddr}/{nftid}": {
-            "get": {
-                "description": "Get ALL NFT context items for a given wallet address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Unused/Legacy"
-                ],
-                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "nftaddr",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "NFT ID",
-                        "name": "nftid",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Chatitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/image": {
-            "put": {
-                "description": "Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "Store Image in DB for later user (update existing photo)",
-                "parameters": [
-                    {
-                        "description": "Profile Thumbnail Pic",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Imageitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "Store Image in DB for later user",
-                "parameters": [
-                    {
-                        "description": "Profile Thumbnail Pic",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Imageitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/image/{name}": {
-            "get": {
-                "description": "Retreive image data for use with user/community/nft group dislayed icon",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "Get Thumbnail Image Data",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Common Name Mapped to User/Community",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Imageitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/is_owner/{contract}/{wallet}": {
-            "get": {
-                "description": "API user could check this directly via any third party service like NFTPort, Moralis as well",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "Check if given wallet address owns an NFT from given contract address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "NFT Contract Address",
-                        "name": "contract",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Wallet Address",
-                        "name": "wallet",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/controllers.LandingPageItems"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/name": {
-            "put": {
-                "description": "Give a common name (Kevin.eth, BillyTheKid, etc) to an Address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "give a common name to a user address, or NFT collection (update exiting)",
-                "parameters": [
-                    {
-                        "description": "Address and Name to map together",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Addrnameitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Give a common name (Kevin.eth, BillyTheKid, etc) to an Address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "give a common name to a user address, or NFT collection",
-                "parameters": [
-                    {
-                        "description": "Address and Name to map together",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Addrnameitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/name/{name}": {
-            "get": {
-                "description": "get the given a common name (Kevin.eth, BillyTheKid, etc) what has already been mapped to an Address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "get the common name which has been mapped to an address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Get Name for given address",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Addrnameitem"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/register": {
             "post": {
                 "description": "This is a one-time operation, maybe could be combined into the nonce-generating call.  Basically places a wallet address\ninto the database for further use.  Only the \"address\" field is needed for input here in the AuthUser struct.",
@@ -1526,9 +87,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/unreadcount/{address}": {
+        "/users/{address}/nonce": {
             "get": {
-                "description": "Get Unread count just given an address",
+                "description": "As part of the login process, we need a user to sign a nonce genrated from the API, to prove the user in fact\nthe owner of the wallet they are siging in from.  JWT currently set to 24 hour validity (could change this upon request)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1536,10 +97,96 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Inbox"
+                    "Auth"
                 ],
-                "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
+                "summary": "If the current wallet doesn't have a valid local JWT, need to request a new nonce to sign",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "wallet address to get nonce to sign",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": ""
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/community": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Community Chat Data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "CreateCommunityChatitem creates GroupChatitem just with community tag (likely could be consolidated)",
+                "parameters": [
+                    {
+                        "description": "Community Message Chat Data",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Groupchatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Groupchatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/community/{community}/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "TODO: need a creation API for communities, which includes specificied welcome message text, Twitter handle, page title",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Get Community Chat Landing Page Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "Wallet Address",
@@ -1552,15 +199,65 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "integer"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controllers.LandingPageItems"
+                            }
                         }
                     }
                 }
             }
         },
-        "/update_chatitem/{fromaddr}/{toaddr}": {
-            "put": {
-                "description": "Currently this only update the message read/unread status.  It could update the entire JSON struct\nupon request, however we only needed this functionality currently and it saved re-encryption of the data.\nTODO: TO/FROM address in the URL is not needed/not used anymore.",
+        "/v1/create_bookmark": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Bookmarks keep an NFT/Community group chat in the sidebar",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Join an NFT or Community group chat",
+                "parameters": [
+                    {
+                        "description": "Add Bookmark from Community Group Chat",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Bookmarkitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/create_chatitem": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "For DMs, Chatitem data struct is used to store each message and associated info.\nREQUIRED: fromaddr, toaddr, message (see data struct section at bottom of page for more detailed info on each paramter)\nOther fields are generally filled in by the backed REST API and used as return parameters\nID is auto generated and should never be used as input.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1570,10 +267,10 @@ const docTemplate = `{
                 "tags": [
                     "DMs"
                 ],
-                "summary": "Update Message Read Status of a given DM chat message",
+                "summary": "Create/Insert DM Chat Message (1-to-1 messaging)",
                 "parameters": [
                     {
-                        "description": "chat item JSON struct to update msg read status",
+                        "description": "Direct Message Chat Data",
                         "name": "message",
                         "in": "body",
                         "required": true,
@@ -1595,8 +292,97 @@ const docTemplate = `{
                 }
             }
         },
-        "/update_settings": {
-            "put": {
+        "/v1/create_comments": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Comments are meant to be public, someday having an up/downvote method for auto-moderation",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Comments are used within an NFT community chat",
+                "parameters": [
+                    {
+                        "description": "create struct",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Comments"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Comments"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/create_groupchatitem": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Currently used for all messages outside of DMs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Create/Insert chat message for Community/NFT/Group Messaging",
+                "parameters": [
+                    {
+                        "description": "Group Message Chat Data",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Groupchatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Groupchatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/create_settings": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Currently this only updates the public key, could be expanded as needed.",
                 "consumes": [
                     "application/json"
@@ -1632,9 +418,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{address}/nonce": {
-            "get": {
-                "description": "As part of the login process, we need a user to sign a nonce genrated from the API, to prove the user in fact\nthe owner of the wallet they are siging in from.  JWT currently set to 24 hour validity (could change this upon request)",
+        "/v1/delete_bookmark": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Bookmarks keep an NFT/Community group chat in the sidebar",
                 "consumes": [
                     "application/json"
                 ],
@@ -1642,13 +433,178 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "GroupChat"
                 ],
-                "summary": "If the current wallet doesn't have a valid local JWT, need to request a new nonce to sign",
+                "summary": "Leave an NFT or Community group chat",
+                "parameters": [
+                    {
+                        "description": "Remove Bookmark from Community Group Chat",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Bookmarkitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/delete_comments/{fromaddr}/{nftaddr}/{nftid}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "NFTs have a public comment section",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Delete Public Comments for given FROM wallet address, NFT Contract and ID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "wallet address to get nonce to sign",
+                        "description": "FROM Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT ID",
+                        "name": "nftid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/delete_settings/{address}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Delete Settings Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/deleteall_chatitems/{fromaddr}/{toaddr}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Delete All Chat Items (DMs) between FROM and TO given addresses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "TO: Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "FROM: Address",
+                        "name": "fromaddr",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/v1/get_bookmarks/{address}/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "This used for UI purposes, checking if a user/wallet has bookmarked a community.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Check if a wallet address has bookmarked/joined given NFT contract",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
                         "name": "address",
                         "in": "path",
                         "required": true
@@ -1658,7 +614,1251 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": ""
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_bookmarks/{walletaddr}/{nftaddr}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "This used for UI purposes, checking if a user/wallet has bookmarked a community.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "GroupChat"
+                ],
+                "summary": "Check if a wallet address has bookmarked/joined given NFT contract",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "walletaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "bool"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_comments/{nftaddr}/{nftid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "NFTs have a public comment section",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Get Public Comments for given NFT Contract and ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Comments"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_comments_cnt/{nftaddr}/{nftid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "NFTs have a public comment section",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Get Public Comments Count for given NFT Contract and ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT ID",
+                        "name": "nftid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_groupchatitems/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Community Chat Data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "GetGroupChatItems gets group chat data for a given NFT address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Get Group Chat Data By NFT Address",
+                        "name": "message",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Groupchatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_groupchatitems/{address}/{useraddress}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all group chat items for a given wallet (useraddress) for a given NFT Contract Address (TODO: fix up var names)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Get group chat items, given a wallt FROM address and NFT Contract Address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "NFT Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "FROM: wallet address",
+                        "name": "useraddress",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Groupchatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_groupchatitems_unreadcnt/{address}/{useraddress}": {
+            "get": {
+                "description": "For group chat unread counts, currently the database stores a timestamp for each time a user enters a group chat.\nWe though in the design it would be impractical to keep a read/unread count copy per user per message, but if this\nmethod doesn't proof to be fine grained enough, we could add a boolean relational table of read messgages per user.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Get Unread Groupchat Items (TODO: cleanup naming convention here)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Common Name Mapped to User/Community",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_inbox/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbox"
+                ],
+                "summary": "Get Inbox Summary With Last Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatiteminbox"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_settings/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "TODO: Need to protect this with JWT in addition to other API calls needed to use FROM addr from the JWT",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get Settings Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Settings"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_unread_cnt/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbox"
+                ],
+                "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_unread_cnt/{address}/{nftaddr}/{nftid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Unread count for specifc NFT context given a wallet address and specific NFT",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Get all unread messages for a specific NFT context",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT ID",
+                        "name": "nftid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_unread_cnt/{fromaddr}/{toaddr}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Unread count for DMs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get all unread messages between two addresses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "TO: Wallet Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "FROM: Wallet Address",
+                        "name": "from",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_unread_cnt_by_type/{address}/{type}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Each 1-on-1 Conversation, NFT and Community Chat For Display in Inbox",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Message Type - nft|community|dm|all",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/get_unread_cnt_nft/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Unread count for all NFT contexts given a wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get all unread messages for all NFT related chats for given user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/getall_chatitems/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all Chat Items for DMs for a given wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get Chat Item For Given Wallet Address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/getall_chatitems/{fromaddr}/{toaddr}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get chat data between the given two addresses, TO and FROM and interchangable here",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DMs"
+                ],
+                "summary": "Get Chat Data Between Two Addresses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "TO: Wallet Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "FROM: Wallet Address",
+                        "name": "from",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/getnft_chatitems/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get ALL NFT context items for a given wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get NFT Related Chat Items For Given Wallet Address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/getnft_chatitems/{address}/{nftaddr}/{nftid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get all specified NFT contract and ID items for a given wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, relating to one wallet",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT ID",
+                        "name": "nftid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get ALL NFT context items for a specifc NFT context convo between two wallets",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "NFT"
+                ],
+                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID, between two wallet addresses (TO and FROM are interchangable)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT ID",
+                        "name": "nftid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "TO: Wallet Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "FROM: Wallet Address",
+                        "name": "from",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/getnft_chatitems/{nftaddr}/{nftid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get ALL NFT context items for a given wallet address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Unused/Legacy"
+                ],
+                "summary": "Get NFT Related Chat Items For Given NFT Contract and ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "nftaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "NFT ID",
+                        "name": "nftid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/image": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Store Image in DB for later user (update existing photo)",
+                "parameters": [
+                    {
+                        "description": "Profile Thumbnail Pic",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Imageitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Currently used for the WC HQ Logo, stores the base64 raw data of the profile image for a community",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Store Image in DB for later user",
+                "parameters": [
+                    {
+                        "description": "Profile Thumbnail Pic",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Imageitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/image/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retreive image data for use with user/community/nft group dislayed icon",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Get Thumbnail Image Data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Common Name Mapped to User/Community",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Imageitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/is_owner/{contract}/{wallet}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "API user could check this directly via any third party service like NFTPort, Moralis as well",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Check if given wallet address owns an NFT from given contract address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "NFT Contract Address",
+                        "name": "contract",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "wallet",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/controllers.LandingPageItems"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/name": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Give a common name (Kevin.eth, BillyTheKid, etc) to an Address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "give a common name to a user address, or NFT collection (update exiting)",
+                "parameters": [
+                    {
+                        "description": "Address and Name to map together",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Addrnameitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Give a common name (Kevin.eth, BillyTheKid, etc) to an Address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "give a common name to a user address, or NFT collection",
+                "parameters": [
+                    {
+                        "description": "Address and Name to map together",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Addrnameitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Bookmarkitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/name/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "get the given a common name (Kevin.eth, BillyTheKid, etc) what has already been mapped to an Address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "get the common name which has been mapped to an address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Get Name for given address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Addrnameitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/unreadcount/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Unread count just given an address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Inbox"
+                ],
+                "summary": "Get all unread messages TO a specific user, used for total count notification at top notification bar",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Wallet Address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/update_chatitem/{fromaddr}/{toaddr}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Currently this only update the message read/unread status.  It could update the entire JSON struct\nupon request, however we only needed this functionality currently and it saved re-encryption of the data.\nTODO: TO/FROM address in the URL is not needed/not used anymore.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DMs"
+                ],
+                "summary": "Update Message Read Status of a given DM chat message",
+                "parameters": [
+                    {
+                        "description": "chat item JSON struct to update msg read status",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Chatitem"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/update_settings": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Currently this only updates the public key, could be expanded as needed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Common"
+                ],
+                "summary": "Settings hold a user address and the public key used for encryption.",
+                "parameters": [
+                    {
+                        "description": "update struct",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.Settings"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Settings"
+                            }
                         }
                     }
                 }
@@ -2029,13 +2229,20 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "restwalletchat-app-sey3k.ondigitalocean.app",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "WalletChat API",

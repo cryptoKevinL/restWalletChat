@@ -44,9 +44,10 @@ type NFTPortOwnerOf struct {
 // @Tags Inbox
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 200 {array} entity.Chatiteminbox
-// @Router /get_inbox/{address} [get]
+// @Router /v1/get_inbox/{address} [get]
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//GetInboxByID returns the latest message for each unique conversation
 	vars := mux.Vars(r)
@@ -253,9 +254,10 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 // @Tags Inbox
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 200 {integer} int
-// @Router /get_unread_cnt/{address} [get]
+// @Router /v1/get_unread_cnt/{address} [get]
 func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -276,10 +278,11 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Param type path string true "Message Type - nft|community|dm|all"
 // @Success 200 {integer} int
-// @Router /get_unread_cnt_by_type/{address}/{type} [get]
+// @Router /v1/get_unread_cnt_by_type/{address}/{type} [get]
 func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -354,9 +357,10 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 // @Tags Inbox
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 200 {integer} int
-// @Router /unreadcount/{address} [get]
+// @Router /v1/unreadcount/{address} [get]
 func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -420,11 +424,12 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Success 200 {integer} int
-// @Router /get_unread_cnt/{address}/{nftaddr}/{nftid} [get]
+// @Router /v1/get_unread_cnt/{address}/{nftaddr}/{nftid} [get]
 func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -445,9 +450,10 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 200 {integer} int
-// @Router /get_unread_cnt_nft/{address} [get]
+// @Router /v1/get_unread_cnt_nft/{address} [get]
 func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -524,10 +530,11 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param toaddr path string true "TO: Wallet Address"
 // @Param from path string true "FROM: Wallet Address"
 // @Success 200 {integer} int
-// @Router /get_unread_cnt/{fromaddr}/{toaddr} [get]
+// @Router /v1/get_unread_cnt/{fromaddr}/{toaddr} [get]
 func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	to := vars["toaddr"]
@@ -547,9 +554,10 @@ func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param toaddr path string true "Wallet Address"
 // @Success 200 {array} entity.Chatitem
-// @Router /getall_chatitems/{address} [get]
+// @Router /v1/getall_chatitems/{address} [get]
 func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -566,9 +574,10 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param toaddr path string true "Wallet Address"
 // @Success 200 {array} entity.Chatitem
-// @Router /getnft_chatitems/{address} [get]
+// @Router /v1/getnft_chatitems/{address} [get]
 func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -586,10 +595,11 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 // @Tags DMs
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param toaddr path string true "TO: Wallet Address"
 // @Param from path string true "FROM: Wallet Address"
 // @Success 200 {array} entity.Chatitem
-// @Router /getall_chatitems/{fromaddr}/{toaddr} [get]
+// @Router /v1/getall_chatitems/{fromaddr}/{toaddr} [get]
 func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
@@ -629,10 +639,11 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Success 200 {array} entity.Chatitem
-// @Router /getnft_chatitems/{nftaddr}/{nftid} [get]
+// @Router /v1/getnft_chatitems/{nftaddr}/{nftid} [get]
 func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["nftaddr"]
@@ -651,12 +662,13 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Param toaddr path string true "TO: Wallet Address"
 // @Param from path string true "FROM: Wallet Address"
 // @Success 200 {array} entity.Chatitem
-// @Router /getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid} [get]
+// @Router /v1/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid} [get]
 func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
@@ -702,11 +714,12 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Success 200 {array} entity.Chatitem
-// @Router /getnft_chatitems/{address}/{nftaddr}/{nftid} [get]
+// @Router /v1/getnft_chatitems/{address}/{nftaddr}/{nftid} [get]
 func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletaddr := vars["address"]
@@ -751,9 +764,10 @@ func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 // @Tags DMs
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Chatitem true "Direct Message Chat Data"
 // @Success 200 {array} entity.Chatitem
-// @Router /create_chatitem [post]
+// @Router /v1/create_chatitem [post]
 func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
@@ -784,9 +798,10 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Groupchatitem true "Group Message Chat Data"
 // @Success 200 {array} entity.Groupchatitem
-// @Router /create_groupchatitem [post]
+// @Router /v1/create_groupchatitem [post]
 func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
@@ -811,9 +826,10 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Groupchatitem true "Community Message Chat Data"
 // @Success 200 {array} entity.Groupchatitem
-// @Router /community [post]
+// @Router /v1/community [post]
 func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Groupchatitem
@@ -841,9 +857,10 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message path string true "Get Group Chat Data By NFT Address"
 // @Success 200 {array} entity.Groupchatitem
-// @Router /get_groupchatitems/{address} [get]
+// @Router /v1/get_groupchatitems/{address} [get]
 func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -861,9 +878,10 @@ func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Bookmarkitem true "Add Bookmark from Community Group Chat"
 // @Success 200 {array} entity.Bookmarkitem
-// @Router /create_bookmark [post]
+// @Router /v1/create_bookmark [post]
 func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var bookmark entity.Bookmarkitem
@@ -901,9 +919,10 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Bookmarkitem true "Remove Bookmark from Community Group Chat"
 // @Success 200 {array} entity.Bookmarkitem
-// @Router /delete_bookmark [post]
+// @Router /v1/delete_bookmark [post]
 func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var bookmark entity.Bookmarkitem
@@ -943,10 +962,11 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param walletaddr path string true "Wallet Address"
 // @Param nftaddr path string true "NFT Contract Address"
 // @Success 200 {bool} bool
-// @Router /get_bookmarks/{walletaddr}/{nftaddr} [get]
+// @Router /v1/get_bookmarks/{walletaddr}/{nftaddr} [get]
 func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	walletaddr := vars["walletaddr"]
@@ -971,9 +991,10 @@ func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 200 {array} entity.Bookmarkitem
-// @Router /get_bookmarks/{address}/ [get]
+// @Router /v1/get_bookmarks/{address}/ [get]
 func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -1030,9 +1051,10 @@ func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Imageitem true "Profile Thumbnail Pic"
 // @Success 200 {array} entity.Bookmarkitem
-// @Router /image [post]
+// @Router /v1/image [post]
 func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imgname entity.Imageitem
@@ -1050,9 +1072,10 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Imageitem true "Profile Thumbnail Pic"
 // @Success 200 {array} entity.Bookmarkitem
-// @Router /image [put]
+// @Router /v1/image [put]
 func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imgname entity.Imageitem
@@ -1078,9 +1101,10 @@ func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param name path string true "Common Name Mapped to User/Community"
 // @Success 200 {array} entity.Imageitem
-// @Router /image/{name} [get]
+// @Router /v1/image/{name} [get]
 func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
@@ -1099,9 +1123,10 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Addrnameitem true "Address and Name to map together"
 // @Success 200 {array} entity.Bookmarkitem
-// @Router /name [post]
+// @Router /v1/name [post]
 func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrname entity.Addrnameitem
@@ -1119,9 +1144,10 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Get Name for given address"
 // @Success 200 {array} entity.Addrnameitem
-// @Router /name/{name} [get]
+// @Router /v1/name/{name} [get]
 func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	address := vars["address"]
@@ -1140,9 +1166,10 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Addrnameitem true "Address and Name to map together"
 // @Success 200 {array} entity.Bookmarkitem
-// @Router /name [put]
+// @Router /v1/name [put]
 func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var addrname entity.Addrnameitem
@@ -1168,10 +1195,11 @@ func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "NFT Address"
 // @Param useraddress path string true "FROM: wallet address"
 // @Success 200 {array} entity.Groupchatitem
-// @Router /get_groupchatitems/{address}/{useraddress} [get]
+// @Router /v1/get_groupchatitems/{address}/{useraddress} [get]
 func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
@@ -1217,7 +1245,7 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 // @Produce plain
 // @Param name path string true "Common Name Mapped to User/Community"
 // @Success 200 {integer} int
-// @Router /get_groupchatitems_unreadcnt/{address}/{useraddress} [get]
+// @Router /v1/get_groupchatitems_unreadcnt/{address}/{useraddress} [get]
 func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
@@ -1248,9 +1276,10 @@ func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 // @Tags DMs
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Chatitem true "chat item JSON struct to update msg read status"
 // @Success 200 {array} entity.Chatitem
-// @Router /update_chatitem/{fromaddr}/{toaddr} [put]
+// @Router /v1/update_chatitem/{fromaddr}/{toaddr} [put]
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
@@ -1281,10 +1310,11 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param toaddr path string true "TO: Address"
 // @Param fromaddr path string true "FROM: Address"
 // @Success 204
-// @Router /deleteall_chatitems/{fromaddr}/{toaddr} [delete]
+// @Router /v1/deleteall_chatitems/{fromaddr}/{toaddr} [delete]
 func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	to := vars["toaddr"]
@@ -1302,9 +1332,10 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Settings true "update struct"
 // @Success 200 {array} entity.Settings
-// @Router /create_settings [post]
+// @Router /v1/create_settings [post]
 func CreateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settings entity.Settings
@@ -1322,9 +1353,10 @@ func CreateSettings(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Settings true "update struct"
 // @Success 200 {array} entity.Settings
-// @Router /update_settings [put]
+// @Router /v1/update_settings [put]
 func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settings entity.Settings
@@ -1343,9 +1375,10 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 204
-// @Router /delete_settings/{address} [delete]
+// @Router /v1/delete_settings/{address} [delete]
 func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -1362,9 +1395,10 @@ func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 // @Tags Unused/Legacy
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 200 {array} entity.Settings
-// @Router /get_settings/{address} [get]
+// @Router /v1/get_settings/{address} [get]
 func GetSettings(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
@@ -1381,9 +1415,10 @@ func GetSettings(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param message body entity.Comments true "create struct"
 // @Success 200 {array} entity.Comments
-// @Router /create_comments [post]
+// @Router /v1/create_comments [post]
 func CreateComments(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var comment entity.Comments
@@ -1413,11 +1448,12 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "FROM Wallet Address"
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Success 204
-// @Router /delete_comments/{fromaddr}/{nftaddr}/{nftid} [delete]
+// @Router /v1/delete_comments/{fromaddr}/{nftaddr}/{nftid} [delete]
 func DeleteComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fromaddr := vars["address"]
@@ -1436,9 +1472,10 @@ func DeleteComments(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Success 200 {array} entity.Comments
-// @Router /get_comments/{nftaddr}/{nftid} [get]
+// @Router /v1/get_comments/{nftaddr}/{nftid} [get]
 func GetComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]
@@ -1457,10 +1494,11 @@ func GetComments(w http.ResponseWriter, r *http.Request) {
 // @Tags NFT
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param nftaddr path string true "NFT Contract Address"
 // @Param nftid path string true "NFT ID"
 // @Success 200 {integer} int
-// @Router /get_comments_cnt/{nftaddr}/{nftid} [get]
+// @Router /v1/get_comments_cnt/{nftaddr}/{nftid} [get]
 func GetCommentsCount(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["nftid"]
@@ -1687,10 +1725,11 @@ func FormatTwitterData(data TwitterTweetsData) []TweetType {
 // @Tags GroupChat
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param address path string true "Wallet Address"
 // @Param address path string true "Wallet Address"
 // @Success 200 {array} LandingPageItems
-// @Router /community/{community}/{address} [get]
+// @Router /v1/community/{community}/{address} [get]
 func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	community := vars["community"]
@@ -1805,10 +1844,11 @@ func GetCommunityChat(w http.ResponseWriter, r *http.Request) {
 // @Tags Common
 // @Accept  json
 // @Produce  json
+// @Security BearerAuth
 // @Param contract path string true "NFT Contract Address"
 // @Param wallet path string true "Wallet Address"
 // @Success 200 {array} LandingPageItems
-// @Router /is_owner/{contract}/{wallet} [get]
+// @Router /v1/is_owner/{contract}/{wallet} [get]
 func IsOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	contract := vars["contract"]
