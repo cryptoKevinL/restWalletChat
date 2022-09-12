@@ -3,7 +3,6 @@ module rest-go-demo
 go 1.14
 
 require (
-	github.com/cryptoKevinL/walletChatDocs v0.0.0-20220829000319-d70701ad841b // indirect
 	github.com/ethereum/go-ethereum v1.10.23
 	github.com/go-chi/cors v1.2.1
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
