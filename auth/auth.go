@@ -282,12 +282,12 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		}
 		renderJson(r, w, http.StatusOK, resp)
 
-		// // Finally, we set the client cookie for "token" as the JWT we just generated
-		// // we also set an expiry time which is the same as the token itself
-		// http.SetCookie(w, &http.Cookie{
-		// 	Name:  "jwt",
-		// 	Value: signedToken,
-		// })
+		// Finally, we set the client cookie for "token" as the JWT we just generated
+		// we also set an expiry time which is the same as the token itself
+		http.SetCookie(w, &http.Cookie{
+			Name:  "jwt",
+			Value: signedToken,
+		})
 	}
 }
 
