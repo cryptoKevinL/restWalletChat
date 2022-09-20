@@ -196,15 +196,7 @@ func UserNonceHandler() http.HandlerFunc {
 			Address: strings.ToLower(address), // let's only store lower case
 			Nonce:   nonce,
 		}
-		if err := CreateIfNotExists(user); err != nil {
-			switch errors.Is(err, ErrUserExists) {
-			case true:
-				w.WriteHeader(http.StatusConflict)
-			default:
-				w.WriteHeader(http.StatusInternalServerError)
-			}
-			return
-		}
+		CreateIfNotExists(user)
 		//end of copied /register functionality
 
 		Authuser, err := Get(strings.ToLower(address))
@@ -289,6 +281,13 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			AccessToken: signedToken,
 		}
 		renderJson(r, w, http.StatusOK, resp)
+
+		// // Finally, we set the client cookie for "token" as the JWT we just generated
+		// // we also set an expiry time which is the same as the token itself
+		// http.SetCookie(w, &http.Cookie{
+		// 	Name:  "jwt",
+		// 	Value: signedToken,
+		// })
 	}
 }
 
