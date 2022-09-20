@@ -132,16 +132,7 @@ func (p RegisterPayload) Validate() error {
 	return nil
 }
 
-// RegisterHandler godoc
-// @Summary Register Wallet Address for the first time, one-time operation
-// @Description This is a one-time operation, maybe could be combined into the nonce-generating call.  Basically places a wallet address
-// @Description into the database for further use.  Only the "address" field is needed for input here in the AuthUser struct.
-// @Tags Auth
-// @Accept  json
-// @Produce json
-// @Param message body Authuser true "address input in json format"
-// @Success 200 {integer} int
-// @Router /register [post]
+//Legacy - not needed anymore
 func RegisterHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestBody, _ := ioutil.ReadAll(r.Body)
@@ -194,6 +185,28 @@ func UserNonceHandler() http.HandlerFunc {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
+		//combining /register and /users (no need to call both and check each time)
+		nonce, err := GetNonce()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		user := Authuser{
+			Address: strings.ToLower(address), // let's only store lower case
+			Nonce:   nonce,
+		}
+		if err := CreateIfNotExists(user); err != nil {
+			switch errors.Is(err, ErrUserExists) {
+			case true:
+				w.WriteHeader(http.StatusConflict)
+			default:
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+			return
+		}
+		//end of copied /register functionality
+
 		Authuser, err := Get(strings.ToLower(address))
 		if err != nil {
 			switch errors.Is(err, ErrUserNotExists) {

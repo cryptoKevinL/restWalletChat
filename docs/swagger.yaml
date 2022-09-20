@@ -1,11 +1,4 @@
 definitions:
-  auth.Authuser:
-    properties:
-      address:
-        type: string
-      nonce:
-        type: string
-    type: object
   auth.SigninPayload:
     properties:
       address:
@@ -268,30 +261,6 @@ info:
   title: WalletChat API
   version: "1.0"
 paths:
-  /register:
-    post:
-      consumes:
-      - application/json
-      description: |-
-        This is a one-time operation, maybe could be combined into the nonce-generating call.  Basically places a wallet address
-        into the database for further use.  Only the "address" field is needed for input here in the AuthUser struct.
-      parameters:
-      - description: address input in json format
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/auth.Authuser'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: integer
-      summary: Register Wallet Address for the first time, one-time operation
-      tags:
-      - Auth
   /signin:
     post:
       consumes:

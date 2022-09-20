@@ -10,40 +10,6 @@
         "version": "1.0"
     },
     "paths": {
-        "/register": {
-            "post": {
-                "description": "This is a one-time operation, maybe could be combined into the nonce-generating call.  Basically places a wallet address\ninto the database for further use.  Only the \"address\" field is needed for input here in the AuthUser struct.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Register Wallet Address for the first time, one-time operation",
-                "parameters": [
-                    {
-                        "description": "address input in json format",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/auth.Authuser"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                }
-            }
-        },
         "/signin": {
             "post": {
                 "description": "Every call the to API after this signin should present the JWT Bearer token for authenticated access.\nUpon request we can change the timeout to greater than 24 hours, or setup an addtional dedicated API for\nan agreed upon development and maintenance cost",
@@ -1857,17 +1823,6 @@
         }
     },
     "definitions": {
-        "auth.Authuser": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "nonce": {
-                    "type": "string"
-                }
-            }
-        },
         "auth.SigninPayload": {
             "type": "object",
             "properties": {
