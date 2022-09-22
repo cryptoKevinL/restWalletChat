@@ -275,6 +275,13 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		http.SetCookie(w, &http.Cookie{
+			Name:  "jwt",
+			Value: signedToken,
+			// true means no scripts, http requests only. This has
+			// nothing to do with https vs http
+			//HttpOnly: true,
+		})
 		resp := struct {
 			AccessToken string `json:"access"`
 		}{
