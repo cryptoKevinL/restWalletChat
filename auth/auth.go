@@ -280,9 +280,10 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 		http.SetCookie(w, &http.Cookie{
-			Name:  "Authorization",
-			Value: signedToken,
-			Path:  "/",
+			Name:   "Authorization",
+			Value:  signedToken,
+			Path:   "/",
+			Domain: "walletchat.fun",
 			// true means no scripts, http requests only. This has
 			// nothing to do with https vs http
 			HttpOnly: true,
