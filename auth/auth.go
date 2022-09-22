@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	"log"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -254,8 +254,12 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		requestBody, _ := ioutil.ReadAll(r.Body)
 		if err := json.Unmarshal(requestBody, &p); err != nil { // Parse []byte to the go struct pointer
 			fmt.Println("Can not unmarshal JSON in SigninHandler")
+			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
 		if err := p.Validate(); err != nil {
+			fmt.Println("Some fields were invalid")
+			fmt.Println(err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -276,7 +280,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 		http.SetCookie(w, &http.Cookie{
-			Name:  "jwt",
+			Name:  "Authorization",
 			Value: signedToken,
 			// true means no scripts, http requests only. This has
 			// nothing to do with https vs http
@@ -323,12 +327,28 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			headerValue := r.Header.Get("Authorization")
-			const prefix = "Bearer "
-			if len(headerValue) < len(prefix) {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			tokenString := headerValue[len(prefix):]
+			if len(headerValue) > 0 { 
+				const prefix = "Bearer "
+				if len(headerValue) < len(prefix) {
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+				fmt.Println("Found JWT in Authorization header")
+				headerValue = headerValue[len(prefix):]
+			} else {
+				tokenCookie, err := r.Cookie("Authorization")
+				if err != nil {
+					log.Fatalf("Error occured while reading cookie")
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+				fmt.Println("Found JWT in Cookie")
+				headerValue = tokenCookie.Value
+			} 
+			fmt.Println("Authorization: ", headerValue)
+			// fmt.Println("headerValue: ", r.Header)
+			
+			tokenString := headerValue //headerValue[len(prefix):]
 			if len(tokenString) == 0 {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
