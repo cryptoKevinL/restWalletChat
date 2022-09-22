@@ -275,21 +275,18 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		// Finally, we set the client cookie for "token" as the JWT we just generated
-		// we also set an expiry time which is the same as the token itself
-		http.SetCookie(w, &http.Cookie{
-			Name:  "jwt",
-			Value: signedToken,
-			// true means no scripts, http requests only. This has
-			// nothing to do with https vs http
-			HttpOnly: true,
-		})
 		resp := struct {
 			AccessToken string `json:"access"`
 		}{
 			AccessToken: signedToken,
 		}
-		renderJson(r, w, http.StatusOK, resp)
+		renderJsonWithCookie(r, w, http.StatusOK, http.Cookie{
+			Name:  "jwt",
+			Value: signedToken,
+			// true means no scripts, http requests only. This has
+			// nothing to do with https vs http
+			HttpOnly: true,
+		}, resp)
 	}
 }
 
@@ -418,4 +415,23 @@ func renderJson(r *http.Request, w http.ResponseWriter, statusCode int, res inte
 	if len(body) > 0 {
 		w.Write(body)
 	}
+}
+
+func renderJsonWithCookie(r *http.Request, w http.ResponseWriter, statusCode int, cookie http.Cookie, res interface{}) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8 ")
+	var body []byte
+	if res != nil {
+		var err error
+		body, err = json.Marshal(res)
+		if err != nil { // TODO handle me better
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}
+	w.WriteHeader(statusCode)
+	if len(body) > 0 {
+		w.Write(body)
+	}
+	// Finally, we set the client cookie for "token" as the JWT we just generated
+	// we also set an expiry time which is the same as the token itself
+	http.SetCookie(w, &cookie)
 }
