@@ -365,6 +365,11 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["address"]
 
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	//get configured items from DB
 	var config entity.Unreadcountitem
 	// var dbQuery = database.Connector.Where("walletaddr = ?", key).Find(&config)

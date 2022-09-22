@@ -74,10 +74,14 @@ func main() {
 
 	initaliseHandlers(wsRouter)
 
-	// cors.AllowAll() setup the middleware with default options being
-	// all origins accepted with simple methods (GET, POST). See
-	// documentation below for more options.
-	handler := cors.AllowAll().Handler(router)
+	//handler := cors.Default().Handler(router) //cors.AllowAll().Handler(router)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://app.walletchat.fun", "http://localhost:3000", "http://localhost:8080", "http://v1.walletchat.fun"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		//Debug: true,
+	})
+	handler := c.Handler(router)
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
