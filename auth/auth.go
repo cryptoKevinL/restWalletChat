@@ -282,9 +282,10 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		http.SetCookie(w, &http.Cookie{
 			Name:  "Authorization",
 			Value: signedToken,
+			Path:  "/",
 			// true means no scripts, http requests only. This has
 			// nothing to do with https vs http
-			//HttpOnly: true,
+			HttpOnly: true,
 		})
 		resp := struct {
 			AccessToken string `json:"access"`
