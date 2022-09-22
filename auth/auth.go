@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"log"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -327,7 +327,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			headerValue := r.Header.Get("Authorization")
-			if len(headerValue) > 0 { 
+			if len(headerValue) > 0 {
 				const prefix = "Bearer "
 				if len(headerValue) < len(prefix) {
 					w.WriteHeader(http.StatusUnauthorized)
@@ -338,16 +338,16 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 			} else {
 				tokenCookie, err := r.Cookie("Authorization")
 				if err != nil {
-					log.Fatalf("Error occured while reading cookie")
+					//log.Fatalf("Error occured while reading cookie")
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
 				fmt.Println("Found JWT in Cookie")
 				headerValue = tokenCookie.Value
-			} 
+			}
 			fmt.Println("Authorization: ", headerValue)
 			// fmt.Println("headerValue: ", r.Header)
-			
+
 			tokenString := headerValue //headerValue[len(prefix):]
 			if len(tokenString) == 0 {
 				w.WriteHeader(http.StatusUnauthorized)
