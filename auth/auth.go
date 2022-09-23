@@ -14,7 +14,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"log"
+	// "log"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -266,25 +266,26 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 		address := strings.ToLower(p.Address)
 		Authuser, err := Authenticate(address, p.Nonce, p.Sig)
 		switch err {
-		case nil:
-		case ErrAuthError:
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		default:
-			w.WriteHeader(http.StatusInternalServerError)
-			return
+			case nil:
+			case ErrAuthError:
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			default:
+				w.WriteHeader(http.StatusInternalServerError)
+				return
 		}
 		signedToken, err := jwtProvider.CreateStandard(Authuser.Address)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		fmt.Println("User " + address + "signed in!")
 		http.SetCookie(w, &http.Cookie{
 			Name:  "Authorization",
 			Value: signedToken,
 			// true means no scripts, http requests only. This has
 			// nothing to do with https vs http
-			//HttpOnly: true,
+			HttpOnly: true,
 		})
 		resp := struct {
 			AccessToken string `json:"access"`
@@ -330,19 +331,21 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 			if len(headerValue) > 0 { 
 				const prefix = "Bearer "
 				if len(headerValue) < len(prefix) {
+					fmt.Println("Authorization header malformed")
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				fmt.Println("Found JWT in Authorization header")
 				headerValue = headerValue[len(prefix):]
 			} else {
 				tokenCookie, err := r.Cookie("Authorization")
 				if err != nil {
-					log.Fatalf("Error occured while reading cookie")
+					// log.Fatalf()
+					fmt.Println("Error occured while reading cookie")
+					fmt.Println(err)
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				fmt.Println("Found JWT in Cookie")
+				// fmt.Println("Found JWT in Cookie")
 				headerValue = tokenCookie.Value
 			} 
 			fmt.Println("Authorization: ", headerValue)
