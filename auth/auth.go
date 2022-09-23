@@ -280,12 +280,12 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 		http.SetCookie(w, &http.Cookie{
-			Name:     "Authorization",
-			Value:    signedToken,
-			Path:     "/",
-			SameSite: 4,
-			Secure:   true,
-			MaxAge:   86400,
+			Name:  "Authorization",
+			Value: signedToken,
+			// Path:     "/",
+			// SameSite: 4,
+			// Secure:   true,
+			// MaxAge:   86400,
 			// true means no scripts, http requests only. This has
 			// nothing to do with https vs http
 			HttpOnly: true,
