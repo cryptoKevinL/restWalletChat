@@ -41,6 +41,7 @@ type Chatitem struct {
 	Nftaddr       string    `json:"nftaddr"`                     //ONLY USED FOR NFT DM CONTEXT
 	Nftid         string    `json:"nftid"`                       //ONLY USED FOR NFT DM CONTEXT
 	Name          string    `json:"sender_name"`                 //AUTO-SET BY BACKED FOR RETURN VALUE
+	Encryptsymkey string    `json:"encrypted_sym_lit_key"`       //USE IF USING LIT ENCRYPTION
 }
 
 //for olivers view function
