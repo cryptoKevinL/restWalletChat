@@ -337,7 +337,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 					w.WriteHeader(http.StatusUnauthorized)
 					return
 				}
-				fmt.Println("Found JWT in Authorization header")
+				//fmt.Println("Found JWT in Authorization header")
 				headerValue = headerValue[len(prefix):]
 			} else {
 				tokenCookie, err := r.Cookie("Authorization")
