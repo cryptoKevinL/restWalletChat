@@ -349,7 +349,7 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 				fmt.Println("Found JWT in Cookie")
 				headerValue = tokenCookie.Value
 			}
-			fmt.Println("Authorization: ", headerValue)
+			// fmt.Println("Authorization: ", headerValue)
 			// fmt.Println("headerValue: ", r.Header)
 
 			tokenString := headerValue //headerValue[len(prefix):]
