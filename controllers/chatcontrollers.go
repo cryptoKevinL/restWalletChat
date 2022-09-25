@@ -106,7 +106,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			itemToInsert.Type = entity.Message
 			itemToInsert.Sendername = addrname.Name
 			itemToInsert.Encryptsymkey = vchatitem.Encryptsymkey
-			fmt.Printf("encrypted symmetric LIT key: %#v\n", vchatitem.Encryptsymkey)
+			fmt.Printf("encrypted symmetric LIT key: %#v %#v %#v\n", vchatitem.Encryptsymkey, vchatitem.Toaddr, vchatitem.Fromaddr)
 
 			found := false
 			for i := 0; i < len(userInbox); i++ {
