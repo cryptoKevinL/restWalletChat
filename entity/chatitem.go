@@ -150,4 +150,5 @@ type Chatiteminbox struct {
 	Name          string    `json:"name"`
 	LogoData      string    `json:"logo"`
 	Chain         string    `json:"chain"`
+	Encryptsymkey string    `json:"encrypted_sym_lit_key"` //USE IF USING LIT ENCRYPTION
 }
