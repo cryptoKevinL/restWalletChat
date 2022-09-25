@@ -56,6 +56,7 @@ type V_chatitem struct {
 	Nftaddr       string    `json:"nftaddr"`
 	NftId         string    `json:"nftid"`
 	Name          string    `json:"sender_name"`
+	Encryptsymkey string    `json:"encrypted_sym_lit_key"` //USE IF USING LIT ENCRYPTION
 }
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char

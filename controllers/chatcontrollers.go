@@ -105,6 +105,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 			itemToInsert.Contexttype = entity.DM
 			itemToInsert.Type = entity.Message
 			itemToInsert.Sendername = addrname.Name
+			itemToInsert.Encryptsymkey = vchatitem.Encryptsymkey
 
 			found := false
 			for i := 0; i < len(userInbox); i++ {
