@@ -42,6 +42,7 @@ type Chatitem struct {
 	Nftid         string    `json:"nftid"`                       //ONLY USED FOR NFT DM CONTEXT
 	Name          string    `json:"sender_name"`                 //AUTO-SET BY BACKED FOR RETURN VALUE
 	Encryptsymkey string    `json:"encrypted_sym_lit_key"`       //USE IF USING LIT ENCRYPTION
+	Litaccesscond string    `json:"lit_access_conditions"`
 }
 
 //for olivers view function
@@ -57,6 +58,7 @@ type V_chatitem struct {
 	NftId         string    `json:"nftid"`
 	Name          string    `json:"sender_name"`
 	Encryptsymkey string    `json:"encrypted_sym_lit_key"` //USE IF USING LIT ENCRYPTION
+	Litaccesscond string    `json:"lit_access_conditions"`
 }
 
 //changing case causes _ in Golang table name calls....thats why its all lower case after first char
@@ -152,4 +154,5 @@ type Chatiteminbox struct {
 	LogoData      string    `json:"logo"`
 	Chain         string    `json:"chain"`
 	Encryptsymkey string    `json:"encrypted_sym_lit_key"` //USE IF USING LIT ENCRYPTION
+	Litaccesscond string    `json:"lit_access_conditions"`
 }
