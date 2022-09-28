@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/big"
 	"net/http"
 	"regexp"
@@ -389,7 +388,7 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 
 	isValid, err := seqAPI.IsValidMessageSignature(context.Background(), chainID, walletAddress, message, signature)
 	if err != nil {
-		log.Fatal(err)
+		isValid = false
 	}
 	//fmt.Println("isValid?", isValid)
 	return isValid
