@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"net/http"
 	"regexp"
@@ -22,6 +23,8 @@ import (
 	"github.com/gorilla/mux"
 
 	_ "rest-go-demo/docs"
+
+	"github.com/0xsequence/go-sequence/api"
 )
 
 var (
@@ -381,6 +384,17 @@ func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.H
 	}
 }
 
+func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string, signature string, message string) bool {
+	seqAPI := api.NewAPIClient("https://api.sequence.app", http.DefaultClient)
+
+	isValid, err := seqAPI.IsValidMessageSignature(context.Background(), chainID, walletAddress, message, signature)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//fmt.Println("isValid?", isValid)
+	return isValid
+}
+
 func Authenticate(address string, nonce string, sigHex string) (Authuser, error) {
 	Authuser, err := Get(address)
 	if err != nil {
@@ -390,18 +404,28 @@ func Authenticate(address string, nonce string, sigHex string) (Authuser, error)
 		return Authuser, ErrAuthError
 	}
 
-	sig := hexutil.MustDecode(sigHex)
-	// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
-	// check here why I am subtracting 27 from the last byte
-	sig[crypto.RecoveryIDOffset] -= 27
-	msg := accounts.TextHash([]byte(nonce))
-	recovered, err := crypto.SigToPub(msg, sig)
-	if err != nil {
-		return Authuser, err
-	}
-	recoveredAddr := crypto.PubkeyToAddress(*recovered)
+	recoveredAddr := " "
+	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up
+		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("ethereum", address, sigHex, nonce)
 
-	if Authuser.Address != strings.ToLower(recoveredAddr.Hex()) {
+		if isValidSequenceWalletSig {
+			recoveredAddr = address
+		}
+
+	} else {
+		sig := hexutil.MustDecode(sigHex)
+		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
+		// check here why I am subtracting 27 from the last byte
+		sig[crypto.RecoveryIDOffset] -= 27
+		msg := accounts.TextHash([]byte(nonce))
+		recovered, err := crypto.SigToPub(msg, sig)
+		if err != nil {
+			return Authuser, err
+		}
+		recoveredAddr = strings.ToLower(crypto.PubkeyToAddress(*recovered).Hex())
+	}
+
+	if Authuser.Address != recoveredAddr {
 		return Authuser, ErrAuthError
 	}
 
