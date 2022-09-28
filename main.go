@@ -57,7 +57,7 @@ func main() {
 	jwtProvider := auth.NewJwtHmacProvider(
 		"read something from env here maybe",
 		"awesome-metamask-login",
-		time.Minute*60*24,
+		time.Minute*60*24*30,
 	)
 
 	router := mux.NewRouter().StrictSlash(true)
