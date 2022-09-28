@@ -388,6 +388,7 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 
 	isValid, err := seqAPI.IsValidMessageSignature(context.Background(), chainID, walletAddress, message, signature)
 	if err != nil {
+		fmt.Println("Failed to Verify Sequence Wallet Signature?", err)
 		isValid = false
 	}
 	//fmt.Println("isValid?", isValid)
@@ -405,10 +406,12 @@ func Authenticate(address string, nonce string, sigHex string) (Authuser, error)
 
 	recoveredAddr := " "
 	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up
+		fmt.Println("Using Sequence Wallet Signature")
 		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("ethereum", address, sigHex, nonce)
 
 		if isValidSequenceWalletSig {
 			recoveredAddr = address
+			fmt.Println("Sequence Wallet Signature Valid!")
 		}
 
 	} else {
