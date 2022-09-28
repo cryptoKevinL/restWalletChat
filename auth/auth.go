@@ -407,7 +407,7 @@ func Authenticate(address string, nonce string, sigHex string) (Authuser, error)
 	recoveredAddr := " "
 	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up
 		fmt.Println("Using Sequence Wallet Signature")
-		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("ethereum", address, sigHex, nonce)
+		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("mainnet", address, sigHex, nonce)
 
 		if isValidSequenceWalletSig {
 			recoveredAddr = address
