@@ -1207,15 +1207,15 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	var addrname entity.Addrnameitem
 	json.Unmarshal(requestBody, &addrname)
 
-	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == addrname.Address {
-		database.Connector.Create(&addrname)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(addrname)
-	} else {
-		w.WriteHeader(http.StatusForbidden)
-	}
+	//Authuser := auth.GetUserFromReqContext(r)
+	//if Authuser.Address == addrname.Address {
+	database.Connector.Create(&addrname)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(addrname)
+	// } else {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// }
 }
 
 // GetAddrNameItem godoc
