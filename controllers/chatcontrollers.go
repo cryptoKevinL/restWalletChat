@@ -621,10 +621,10 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/getall_chatitems/{fromaddr}/{toaddr} [get]
 func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	from := vars["fromaddr"]
-	//to := vars["toaddr"]
+	//from := vars["fromaddr"]
+	to := vars["toaddr"]
 	Authuser := auth.GetUserFromReqContext(r)
-	to := Authuser.Address
+	from := Authuser.Address
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
