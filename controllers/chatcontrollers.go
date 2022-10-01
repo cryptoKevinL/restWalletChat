@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"rest-go-demo/auth"
 	"rest-go-demo/database"
 	"rest-go-demo/entity"
 	"strconv"
@@ -50,8 +51,9 @@ type NFTPortOwnerOf struct {
 // @Router /v1/get_inbox/{address} [get]
 func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 	//GetInboxByID returns the latest message for each unique conversation
-	vars := mux.Vars(r)
-	key := vars["address"] //owner of the inbox
+	//vars := mux.Vars(r)
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address //vars["address"] //owner of the inbox
 
 	//fmt.Printf("GetInboxByOwner: %#v\n", key)
 
@@ -262,8 +264,9 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {integer} int
 // @Router /v1/get_unread_cnt/{address} [get]
 func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	//vars := mux.Vars(r)
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address //vars["address"]
 
 	var chat []entity.Chatitem
 	database.Connector.Where("toaddr = ?", key).Where("msgread != ?", true).Find(&chat)
@@ -288,7 +291,8 @@ func GetUnreadMsgCntTotal(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/get_unread_cnt_by_type/{address}/{type} [get]
 func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address //key := vars["address"]
 	msgtype := vars["type"] //nft/community/DM/ALL
 
 	msgCntTotal := 0
@@ -365,8 +369,10 @@ func GetUnreadMsgCntTotalByType(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {integer} int
 // @Router /v1/unreadcount/{address} [get]
 func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	//vars := mux.Vars(r)
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
+	//key := vars["address"]
 
 	//get configured items from DB
 	var config entity.Unreadcountitem
@@ -435,7 +441,9 @@ func GetUnreadcnt(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/get_unread_cnt/{address}/{nftaddr}/{nftid} [get]
 func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
+	//key := vars["address"]
 	addr := vars["nftaddr"]
 	id := vars["nftid"]
 
@@ -458,8 +466,10 @@ func GetUnreadMsgCntNft(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {integer} int
 // @Router /v1/get_unread_cnt_nft/{address} [get]
 func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	// vars := mux.Vars(r)
+	// key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
 
 	var chat []entity.Chatitem
 	database.Connector.Where("toaddr = ?", key).Where("nftid != ?", 0).Find(&chat)
@@ -540,7 +550,9 @@ func GetUnreadMsgCntNftAllByAddr(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/get_unread_cnt/{fromaddr}/{toaddr} [get]
 func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	to := vars["toaddr"]
+	//to := vars["toaddr"]
+	Authuser := auth.GetUserFromReqContext(r)
+	to := Authuser.Address
 	owner := vars["fromaddr"]
 
 	var chat []entity.Chatitem
@@ -562,8 +574,10 @@ func GetUnreadMsgCnt(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} entity.Chatitem
 // @Router /v1/getall_chatitems/{address} [get]
 func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	// vars := mux.Vars(r)
+	// key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", key).Or("toaddr = ?", key).Find(&chat)
@@ -582,8 +596,10 @@ func GetChatFromAddress(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} entity.Chatitem
 // @Router /v1/getnft_chatitems/{address} [get]
 func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	// vars := mux.Vars(r)
+	// key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", key).Where("nftid != ?", 0).Or("toaddr = ?", key).Where("nftid != ?", 0).Find(&chat)
@@ -606,7 +622,9 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
-	to := vars["toaddr"]
+	//to := vars["toaddr"]
+	Authuser := auth.GetUserFromReqContext(r)
+	to := Authuser.Address
 
 	var chat []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Find(&chat)
@@ -675,7 +693,10 @@ func GetChatNftContext(w http.ResponseWriter, r *http.Request) {
 func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	from := vars["fromaddr"]
-	to := vars["toaddr"]
+
+	Authuser := auth.GetUserFromReqContext(r)
+	to := Authuser.Address
+	//to := vars["toaddr"]
 	addr := vars["nftaddr"]
 	id := vars["nftid"]
 
@@ -725,7 +746,9 @@ func GetChatNftAllItemsFromAddrAndNFT(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/getnft_chatitems/{address}/{nftaddr}/{nftid} [get]
 func GetChatNftAllItemsFromAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	walletaddr := vars["address"]
+	//walletaddr := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	walletaddr := Authuser.Address
 	addr := vars["nftaddr"]
 	id := vars["nftid"]
 
@@ -782,16 +805,24 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	//I think can remove this too since Oliver added a DB trigger
 	chat.Timestamp_dtm = time.Now()
 
-	dbQuery := database.Connector.Create(&chat)
-	if dbQuery.RowsAffected == 0 {
-		fmt.Println(dbQuery.Error)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(dbQuery.Error)
+	//ensure user in body is same as user in JWT
+	Authuser := auth.GetUserFromReqContext(r)
+	walletaddr := Authuser.Address
+
+	if walletaddr == chat.Fromaddr {
+		dbQuery := database.Connector.Create(&chat)
+		if dbQuery.RowsAffected == 0 {
+			fmt.Println(dbQuery.Error)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(dbQuery.Error)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(chat)
+		}
 	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(chat)
+		w.WriteHeader(http.StatusForbidden)
 	}
 }
 
@@ -817,10 +848,16 @@ func CreateGroupChatitem(w http.ResponseWriter, r *http.Request) {
 	//probably can removed now with DB trigger
 	chat.Timestamp_dtm = time.Now()
 
-	database.Connector.Create(&chat)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(chat)
+	Authuser := auth.GetUserFromReqContext(r)
+
+	if chat.Fromaddr == Authuser.Address {
+		database.Connector.Create(&chat)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(chat)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // CreateCommunityChatitem godoc
@@ -848,10 +885,15 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 	//can remove now I think
 	chat.Timestamp_dtm = time.Now()
 
-	database.Connector.Create(&chat)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(chat)
+	Authuser := auth.GetUserFromReqContext(r)
+	if chat.Fromaddr == Authuser.Address {
+		database.Connector.Create(&chat)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(chat)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // GetGroupChatItems godoc
@@ -865,8 +907,10 @@ func CreateCommunityChatitem(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} entity.Groupchatitem
 // @Router /v1/get_groupchatitems/{address} [get]
 func GetGroupChatItems(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	//vars := mux.Vars(r)
+	//key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
 
 	var chat []entity.Groupchatitem
 	database.Connector.Where("nftaddr = ?", key).Find(&chat)
@@ -890,30 +934,36 @@ func CreateBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	var bookmark entity.Bookmarkitem
 	json.Unmarshal(requestBody, &bookmark)
 
-	//fmt.Printf("Bookmark Item: %#v\n", chat)
-	bookmark.Chain = "none"
-	//0x check is a cheap hack right now since NFTPort.xyz is rate limiting us a lot
-	if strings.HasPrefix(bookmark.Nftaddr, "0x") {
-		bookmark.Chain = "ethereum"
-	}
-	if strings.HasPrefix(bookmark.Nftaddr, "poap_") {
-		bookmark.Chain = "xdai"
-	}
-	//end hack for limiting NFTport API
-	var result = IsOnChain(bookmark.Nftaddr, "ethereum")
-	if result {
-		bookmark.Chain = "ethereum"
-	} else {
-		var result = IsOnChain(bookmark.Nftaddr, "polygon")
-		if result {
-			bookmark.Chain = "polygon"
-		}
-	}
+	Authuser := auth.GetUserFromReqContext(r)
 
-	database.Connector.Create(&bookmark)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(bookmark)
+	if bookmark.Walletaddr == Authuser.Address {
+		//fmt.Printf("Bookmark Item: %#v\n", chat)
+		bookmark.Chain = "none"
+		//0x check is a cheap hack right now since NFTPort.xyz is rate limiting us a lot
+		if strings.HasPrefix(bookmark.Nftaddr, "0x") {
+			bookmark.Chain = "ethereum"
+		}
+		if strings.HasPrefix(bookmark.Nftaddr, "poap_") {
+			bookmark.Chain = "xdai"
+		}
+		//end hack for limiting NFTport API
+		var result = IsOnChain(bookmark.Nftaddr, "ethereum")
+		if result {
+			bookmark.Chain = "ethereum"
+		} else {
+			var result = IsOnChain(bookmark.Nftaddr, "polygon")
+			if result {
+				bookmark.Chain = "polygon"
+			}
+		}
+
+		database.Connector.Create(&bookmark)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(bookmark)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // DeleteBookmarkItem godoc
@@ -931,32 +981,38 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	var bookmark entity.Bookmarkitem
 	json.Unmarshal(requestBody, &bookmark)
 
-	var success = database.Connector.Where("nftaddr = ?", bookmark.Nftaddr).Where("walletaddr = ?", bookmark.Walletaddr).Delete(bookmark)
+	Authuser := auth.GetUserFromReqContext(r)
 
-	var returnval bool
-	if success.RowsAffected > 0 {
-		returnval = true
-	}
+	if bookmark.Walletaddr == Authuser.Address {
+		var success = database.Connector.Where("nftaddr = ?", bookmark.Nftaddr).Where("walletaddr = ?", bookmark.Walletaddr).Delete(bookmark)
 
-	//set the fact the user has manually unjoined this NFT
-	var tempUserUnjoined entity.Userunjoined
-	var checkUser = database.Connector.Where("nftaddr = ?", bookmark.Nftaddr).Where("walletaddr = ?", bookmark.Walletaddr).Find(&tempUserUnjoined)
+		var returnval bool
+		if success.RowsAffected > 0 {
+			returnval = true
+		}
 
-	if checkUser.RowsAffected > 0 {
-		database.Connector.Model(&entity.Userunjoined{}).
-			Where("walletaddr = ?", bookmark.Walletaddr).
-			Where("nftaddr = ?", bookmark.Nftaddr).
-			Update("unjoined", true)
+		//set the fact the user has manually unjoined this NFT
+		var tempUserUnjoined entity.Userunjoined
+		var checkUser = database.Connector.Where("nftaddr = ?", bookmark.Nftaddr).Where("walletaddr = ?", bookmark.Walletaddr).Find(&tempUserUnjoined)
+
+		if checkUser.RowsAffected > 0 {
+			database.Connector.Model(&entity.Userunjoined{}).
+				Where("walletaddr = ?", bookmark.Walletaddr).
+				Where("nftaddr = ?", bookmark.Nftaddr).
+				Update("unjoined", true)
+		} else {
+			tempUserUnjoined.Nftaddr = bookmark.Nftaddr
+			tempUserUnjoined.Walletaddr = bookmark.Walletaddr
+			tempUserUnjoined.Unjoined = true
+			database.Connector.Create(&tempUserUnjoined)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(returnval)
 	} else {
-		tempUserUnjoined.Nftaddr = bookmark.Nftaddr
-		tempUserUnjoined.Walletaddr = bookmark.Walletaddr
-		tempUserUnjoined.Unjoined = true
-		database.Connector.Create(&tempUserUnjoined)
+		w.WriteHeader(http.StatusForbidden)
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(returnval)
 }
 
 // IsBookmarkItem godoc
@@ -972,8 +1028,11 @@ func DeleteBookmarkItem(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/get_bookmarks/{walletaddr}/{nftaddr} [get]
 func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	walletaddr := vars["walletaddr"]
+	//walletaddr := vars["walletaddr"]
 	nftaddr := vars["nftaddr"]
+
+	Authuser := auth.GetUserFromReqContext(r)
+	walletaddr := Authuser.Address
 
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Where("walletaddr = ?", walletaddr).Where("nftaddr = ?", nftaddr).Find(&bookmarks)
@@ -999,8 +1058,10 @@ func IsBookmarkItem(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} entity.Bookmarkitem
 // @Router /v1/get_bookmarks/{address}/ [get]
 func GetBookmarkItems(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	// vars := mux.Vars(r)
+	// key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
 
 	var bookmarks []entity.Bookmarkitem
 	database.Connector.Where("walletaddr = ?", key).Find(&bookmarks)
@@ -1063,10 +1124,17 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	var imgname entity.Imageitem
 	json.Unmarshal(requestBody, &imgname)
 
+	//Authuser := auth.GetUserFromReqContext(r)
+	//TODO: get address to name mapping or send it in
+
+	//if Authuser.Address == imgname. {
 	database.Connector.Create(&imgname)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(imgname)
+	// } else {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// }
 }
 
 // UpdateImageItem godoc
@@ -1083,6 +1151,8 @@ func UpdateImageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var imgname entity.Imageitem
 	json.Unmarshal(requestBody, &imgname)
+
+	//TODO same as above, need address
 
 	var result = database.Connector.Model(&entity.Addrnameitem{}).
 		Where("name = ?", imgname.Name).
@@ -1112,6 +1182,8 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
 
+	//TODO: need to confirm address is JWT for user
+
 	var imgname []entity.Imageitem
 
 	database.Connector.Where("name = ?", name).Find(&imgname)
@@ -1135,10 +1207,15 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	var addrname entity.Addrnameitem
 	json.Unmarshal(requestBody, &addrname)
 
-	database.Connector.Create(&addrname)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(addrname)
+	Authuser := auth.GetUserFromReqContext(r)
+	if Authuser.Address == addrname.Address {
+		database.Connector.Create(&addrname)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(addrname)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // GetAddrNameItem godoc
@@ -1152,8 +1229,10 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} entity.Addrnameitem
 // @Router /v1/name/{name} [get]
 func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	address := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	address := Authuser.Address
+	//address := vars["address"]
+	//vars := mux.Vars(r)
 
 	var addrname []entity.Addrnameitem
 
@@ -1178,18 +1257,23 @@ func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	var addrname entity.Addrnameitem
 	json.Unmarshal(requestBody, &addrname)
 
-	var result = database.Connector.Model(&entity.Addrnameitem{}).
-		Where("address = ?", addrname.Address).
-		Update("name", addrname.Name)
+	Authuser := auth.GetUserFromReqContext(r)
+	if Authuser.Address == addrname.Address {
+		var result = database.Connector.Model(&entity.Addrnameitem{}).
+			Where("address = ?", addrname.Address).
+			Update("name", addrname.Name)
 
-	var returnval bool
-	if result.RowsAffected > 0 {
-		returnval = true
+		var returnval bool
+		if result.RowsAffected > 0 {
+			returnval = true
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(returnval)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(returnval)
 }
 
 // GetGroupChatItemsByAddr godoc
@@ -1206,7 +1290,9 @@ func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
-	fromaddr := vars["useraddress"]
+	//fromaddr := vars["useraddress"]
+	Authuser := auth.GetUserFromReqContext(r)
+	fromaddr := Authuser.Address
 
 	var chat []entity.Groupchatitem
 
@@ -1252,7 +1338,9 @@ func GetGroupChatItemsByAddr(w http.ResponseWriter, r *http.Request) {
 func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	nftaddr := vars["address"]
-	fromaddr := vars["useraddress"]
+	//fromaddr := vars["useraddress"]
+	Authuser := auth.GetUserFromReqContext(r)
+	fromaddr := Authuser.Address
 
 	var chat []entity.Groupchatitem
 
@@ -1288,23 +1376,27 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	var chat entity.Chatitem
 
 	json.Unmarshal(requestBody, &chat)
+	Authuser := auth.GetUserFromReqContext(r)
+	if Authuser.Address == chat.Fromaddr {
+		//for now only support updating the read status
+		//we would need to re-encrypt the data on message update (not hard just need to add it)
+		// database.Connector.Model(&entity.Chatitem{}).
+		// 	Where("fromaddr = ?", chat.Fromaddr).
+		// 	Where("toaddr = ?", chat.Toaddr).
+		// 	Where("timestamp = ?", chat.Timestamp).
+		// 	Update("message", chat.Message)
+		database.Connector.Model(&entity.Chatitem{}).
+			Where("fromaddr = ?", chat.Fromaddr).
+			Where("toaddr = ?", chat.Toaddr).
+			Where("timestamp = ?", chat.Timestamp).
+			Update("msgread", chat.Msgread)
 
-	//for now only support updating the read status
-	//we would need to re-encrypt the data on message update (not hard just need to add it)
-	// database.Connector.Model(&entity.Chatitem{}).
-	// 	Where("fromaddr = ?", chat.Fromaddr).
-	// 	Where("toaddr = ?", chat.Toaddr).
-	// 	Where("timestamp = ?", chat.Timestamp).
-	// 	Update("message", chat.Message)
-	database.Connector.Model(&entity.Chatitem{}).
-		Where("fromaddr = ?", chat.Fromaddr).
-		Where("toaddr = ?", chat.Toaddr).
-		Where("timestamp = ?", chat.Timestamp).
-		Update("msgread", chat.Msgread)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(chat)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(chat)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // DeleteAllChatitemsToAddressByOwner godoc
@@ -1321,9 +1413,11 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	to := vars["toaddr"]
-	owner := vars["fromaddr"]
+	//owner := vars["fromaddr"]
 
 	var chat entity.Chatitem
+	Authuser := auth.GetUserFromReqContext(r)
+	owner := Authuser.Address
 
 	database.Connector.Where("toaddr = ?", to).Where("fromaddr = ?", owner).Delete(&chat)
 	w.WriteHeader(http.StatusNoContent)
@@ -1344,10 +1438,15 @@ func CreateSettings(w http.ResponseWriter, r *http.Request) {
 	var settings entity.Settings
 	json.Unmarshal(requestBody, &settings)
 
-	database.Connector.Create(&settings)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(settings)
+	Authuser := auth.GetUserFromReqContext(r)
+	if Authuser.Address == settings.Walletaddr {
+		database.Connector.Create(&settings)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(settings)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // UpdateSettings godoc
@@ -1364,12 +1463,17 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settings entity.Settings
 
-	json.Unmarshal(requestBody, &settings)
-	database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("publickey", settings.Publickey)
+	Authuser := auth.GetUserFromReqContext(r)
+	if Authuser.Address == settings.Walletaddr {
+		json.Unmarshal(requestBody, &settings)
+		database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("publickey", settings.Publickey)
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(settings)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(settings)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // DeleteSettings godoc
@@ -1383,8 +1487,10 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 // @Success 204
 // @Router /v1/delete_settings/{address} [delete]
 func DeleteSettings(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	//vars := mux.Vars(r)
+	//key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
 
 	var settings entity.Settings
 
@@ -1403,8 +1509,10 @@ func DeleteSettings(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} entity.Settings
 // @Router /v1/get_settings/{address} [get]
 func GetSettings(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["address"]
+	// vars := mux.Vars(r)
+	// key := vars["address"]
+	Authuser := auth.GetUserFromReqContext(r)
+	key := Authuser.Address
 
 	var settings []entity.Settings
 	database.Connector.Where("walletaddr = ?", key).Find(&settings)
@@ -1427,10 +1535,15 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 	var comment entity.Comments
 	json.Unmarshal(requestBody, &comment)
 
-	database.Connector.Create(&comment)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(comment)
+	Authuser := auth.GetUserFromReqContext(r)
+	if Authuser.Address == comment.Fromaddr {
+		database.Connector.Create(&comment)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(comment)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // func UpdateComments(w http.ResponseWriter, r *http.Request) {
@@ -1459,9 +1572,11 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/delete_comments/{fromaddr}/{nftaddr}/{nftid} [delete]
 func DeleteComments(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	fromaddr := vars["address"]
+	//fromaddr := vars["address"]
 	nftaddr := vars["nftaddr"]
 	nftid := vars["nftid"]
+	Authuser := auth.GetUserFromReqContext(r)
+	fromaddr := Authuser.Address
 
 	var comment entity.Comments
 

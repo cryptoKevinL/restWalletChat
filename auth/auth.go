@@ -310,7 +310,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 
 func WelcomeHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		Authuser := getUserFromReqContext(r)
+		Authuser := GetUserFromReqContext(r)
 		fmt.Println("getting Authuser: ", Authuser)
 		resp := struct {
 			Msg string `json:"msg"`
@@ -323,7 +323,7 @@ func WelcomeHandler() http.HandlerFunc {
 
 // ============================================================================
 
-func getUserFromReqContext(r *http.Request) Authuser {
+func GetUserFromReqContext(r *http.Request) Authuser {
 	ctx := r.Context()
 	key := ctx.Value("Authuser").(Authuser)
 	return key
