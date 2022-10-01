@@ -1377,7 +1377,7 @@ func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 
 	json.Unmarshal(requestBody, &chat)
 	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == chat.Fromaddr {
+	if Authuser.Address == chat.Toaddr {
 		//for now only support updating the read status
 		//we would need to re-encrypt the data on message update (not hard just need to add it)
 		// database.Connector.Model(&entity.Chatitem{}).
