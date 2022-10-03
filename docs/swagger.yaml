@@ -108,12 +108,17 @@ definitions:
     type: object
   entity.Chatitem:
     properties:
+      encrypted_sym_lit_key:
+        description: USE IF USING LIT ENCRYPTION
+        type: string
       fromaddr:
         description: '*** REQUIRED INPUT ***'
         type: string
       id:
         description: AUTO-GENERATED (PRIMARY KEY)
         type: integer
+      lit_access_conditions:
+        type: string
       message:
         description: '*** REQUIRED INPUT ***'
         type: string
@@ -150,10 +155,15 @@ definitions:
         type: string
       context_type:
         type: string
+      encrypted_sym_lit_key:
+        description: USE IF USING LIT ENCRYPTION
+        type: string
       fromaddr:
         type: string
       id:
         type: integer
+      lit_access_conditions:
+        type: string
       logo:
         type: string
       message:
@@ -228,11 +238,12 @@ definitions:
     type: object
   entity.Settings:
     properties:
+      email:
+        description: Publickey  string `json:"publickey"` //need this for encryption,
+          don't want to get it over and over
+        type: string
       id:
         type: integer
-      publickey:
-        description: need this for encryption, don't want to get it over and over
-        type: string
       walletaddr:
         type: string
     type: object
@@ -478,33 +489,6 @@ paths:
       summary: Create/Insert chat message for Community/NFT/Group Messaging
       tags:
       - GroupChat
-  /v1/create_settings:
-    post:
-      consumes:
-      - application/json
-      description: Currently this only updates the public key, could be expanded as
-        needed.
-      parameters:
-      - description: update struct
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/entity.Settings'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.Settings'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Settings hold a user address and the public key used for encryption.
-      tags:
-      - Common
   /v1/delete_bookmark:
     post:
       consumes:
@@ -1423,11 +1407,10 @@ paths:
       tags:
       - DMs
   /v1/update_settings:
-    put:
+    post:
       consumes:
       - application/json
-      description: Currently this only updates the public key, could be expanded as
-        needed.
+      description: Currently this only updates email address field
       parameters:
       - description: update struct
         in: body
@@ -1446,7 +1429,8 @@ paths:
             type: array
       security:
       - BearerAuth: []
-      summary: Settings hold a user address and the public key used for encryption.
+      summary: Settings hold a user address and the email address for notifications
+        if they opt-in
       tags:
       - Common
 securityDefinitions:

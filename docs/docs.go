@@ -342,48 +342,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/create_settings": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Currently this only updates the public key, could be expanded as needed.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "Settings hold a user address and the public key used for encryption.",
-                "parameters": [
-                    {
-                        "description": "update struct",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Settings"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Settings"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/v1/delete_bookmark": {
             "post": {
                 "security": [
@@ -1789,13 +1747,13 @@ const docTemplate = `{
             }
         },
         "/v1/update_settings": {
-            "put": {
+            "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Currently this only updates the public key, could be expanded as needed.",
+                "description": "Currently this only updates email address field",
                 "consumes": [
                     "application/json"
                 ],
@@ -1805,7 +1763,7 @@ const docTemplate = `{
                 "tags": [
                     "Common"
                 ],
-                "summary": "Settings hold a user address and the public key used for encryption.",
+                "summary": "Settings hold a user address and the email address for notifications if they opt-in",
                 "parameters": [
                     {
                         "description": "update struct",
@@ -2001,6 +1959,10 @@ const docTemplate = `{
                 "toaddr"
             ],
             "properties": {
+                "encrypted_sym_lit_key": {
+                    "description": "USE IF USING LIT ENCRYPTION",
+                    "type": "string"
+                },
                 "fromaddr": {
                     "description": "*** REQUIRED INPUT ***",
                     "type": "string"
@@ -2008,6 +1970,9 @@ const docTemplate = `{
                 "id": {
                     "description": "AUTO-GENERATED (PRIMARY KEY)",
                     "type": "integer"
+                },
+                "lit_access_conditions": {
+                    "type": "string"
                 },
                 "message": {
                     "description": "*** REQUIRED INPUT ***",
@@ -2053,11 +2018,18 @@ const docTemplate = `{
                 "context_type": {
                     "type": "string"
                 },
+                "encrypted_sym_lit_key": {
+                    "description": "USE IF USING LIT ENCRYPTION",
+                    "type": "string"
+                },
                 "fromaddr": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "lit_access_conditions": {
+                    "type": "string"
                 },
                 "logo": {
                     "type": "string"
@@ -2172,12 +2144,12 @@ const docTemplate = `{
         "entity.Settings": {
             "type": "object",
             "properties": {
+                "email": {
+                    "description": "Publickey  string ` + "`" + `json:\"publickey\"` + "`" + ` //need this for encryption, don't want to get it over and over",
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
-                },
-                "publickey": {
-                    "description": "need this for encryption, don't want to get it over and over",
-                    "type": "string"
                 },
                 "walletaddr": {
                     "type": "string"
