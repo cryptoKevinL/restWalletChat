@@ -32,14 +32,13 @@ import (
 // @description Please email the developers with any issues.
 // @description Some JSON data structures are output only, and will be marked as such as well.
 // @description
-// @description v1 includes basic JWT Authentication, however some additional work is in progress to make this fully secure.
+// @description v1 includes JWT Authentication
 // @description except for AUTH functions, all /v1 endpoints must include "Bearer <JWT>" in all requests showing the Lock Icon"
 // @description For this API Doc, use the "Authorize" button on the right hand side to ender "Bearer <JWT>" where the JWT will
 // @description come from the return value of the /signin endpoint.  Please read the /register, /users/<>/nonce, and /signin
 // @description descriptions to understand the login workflow via JWT Auth.
 // @description
-// @description v2 will include encyrption for DMs, private keys will be stored locally on client PCs
-// @description with no way for us to recover any data which is encrypted.
+// @description v1.1 will include encyrption for DMs, using LIT Protocol for encryption
 // @description
 // @wallet_chat API Support via Twitter
 // @contact.url https://walletchat.fun
