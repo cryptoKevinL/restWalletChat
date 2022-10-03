@@ -17,6 +17,8 @@ import (
 	_ "rest-go-demo/docs"
 
 	"github.com/gorilla/mux"
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 func stringInSlice(a string, list []string) bool {
@@ -808,6 +810,7 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 	//ensure user in body is same as user in JWT
 	Authuser := auth.GetUserFromReqContext(r)
 	walletaddr := Authuser.Address
+	chat.Fromaddr = strings.ToLower(chat.Fromaddr)
 
 	if walletaddr == chat.Fromaddr {
 		dbQuery := database.Connector.Create(&chat)
@@ -820,8 +823,36 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusCreated)
 			json.NewEncoder(w).Encode(chat)
+
+			//also notify the TO user of a new message (need to throttle this somehow)
+			var settings entity.Settings
+			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
+			if dbResult.RowsAffected > 0 {
+				var fromAddrname entity.Addrnameitem
+				database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
+				var toAddrname entity.Addrnameitem
+				database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
+
+				from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+				subject := "Message Waiting In WalletChat"
+				to := mail.NewEmail(toAddrname.Name, settings.Email)
+				plainTextContent := "You have message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!"
+				htmlContent := "<strong>You have message from " + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!</strong>"
+				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+				response, err := client.Send(message)
+				if err != nil {
+					log.Println(err)
+				} else {
+					fmt.Println(response.StatusCode)
+					fmt.Println(response.Body)
+					fmt.Println(response.Headers)
+				}
+			}
 		}
 	} else {
+		fmt.Println("create_chatitem - JWT Address: ", Authuser.Address)
+		fmt.Println("create_chatitem - POST Address: ", chat.Fromaddr)
 		w.WriteHeader(http.StatusForbidden)
 	}
 }
@@ -1423,55 +1454,53 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// CreateSettings godoc
-// @Summary Settings hold a user address and the public key used for encryption.
-// @Description Currently this only updates the public key, could be expanded as needed.
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Settings true "update struct"
-// @Success 200 {array} entity.Settings
-// @Router /v1/create_settings [post]
-func CreateSettings(w http.ResponseWriter, r *http.Request) {
-	requestBody, _ := ioutil.ReadAll(r.Body)
-	var settings entity.Settings
-	json.Unmarshal(requestBody, &settings)
+// func CreateSettings(w http.ResponseWriter, r *http.Request) {
+// 	requestBody, _ := ioutil.ReadAll(r.Body)
+// 	var settings entity.Settings
+// 	json.Unmarshal(requestBody, &settings)
 
-	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == settings.Walletaddr {
-		database.Connector.Create(&settings)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(settings)
-	} else {
-		w.WriteHeader(http.StatusForbidden)
-	}
-}
+// 	Authuser := auth.GetUserFromReqContext(r)
+// 	if Authuser.Address == settings.Walletaddr {
+// 		database.Connector.Create(&settings)
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.WriteHeader(http.StatusCreated)
+// 		json.NewEncoder(w).Encode(settings)
+// 	} else {
+// 		w.WriteHeader(http.StatusForbidden)
+// 	}
+// }
 
 // UpdateSettings godoc
-// @Summary Settings hold a user address and the public key used for encryption.
-// @Description Currently this only updates the public key, could be expanded as needed.
+// @Summary Settings hold a user address and the email address for notifications if they opt-in
+// @Description Currently this only updates email address field
 // @Tags Common
 // @Accept  json
 // @Produce  json
 // @Security BearerAuth
 // @Param message body entity.Settings true "update struct"
 // @Success 200 {array} entity.Settings
-// @Router /v1/update_settings [put]
+// @Router /v1/update_settings [POST]
 func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settings entity.Settings
+	json.Unmarshal(requestBody, &settings)
+	settings.Walletaddr = strings.ToLower(settings.Walletaddr)
 
 	Authuser := auth.GetUserFromReqContext(r)
 	if Authuser.Address == settings.Walletaddr {
-		json.Unmarshal(requestBody, &settings)
-		database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("publickey", settings.Publickey)
+		var dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
 
+		if dbResults.RowsAffected == 0 {
+			database.Connector.Create(&settings)
+			w.WriteHeader(http.StatusCreated)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(settings)
 	} else {
+		fmt.Println("UpdateSettings - JWT Address: ", Authuser.Address)
+		fmt.Println("UpdateSettings - POST Address: ", settings.Walletaddr)
 		w.WriteHeader(http.StatusForbidden)
 	}
 }

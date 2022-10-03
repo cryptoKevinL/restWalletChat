@@ -13,7 +13,10 @@ require (
 	github.com/swaggo/swag v1.8.5
 )
 
-require github.com/0xsequence/ethkit v1.14.1 // indirect
+require (
+	github.com/0xsequence/ethkit v1.14.1 // indirect
+	github.com/sendgrid/rest v2.6.9+incompatible // indirect
+)
 
 require (
 	github.com/0xsequence/go-sequence v0.12.8
@@ -28,6 +31,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
+	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 	golang.org/x/crypto v0.0.0-20220826181053-bd7e27e6170d // indirect
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d // indirect

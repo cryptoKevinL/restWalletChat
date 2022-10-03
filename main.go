@@ -51,6 +51,23 @@ import (
 // @BasePath
 func main() {
 	godotenv.Load(".env")
+
+	// from := mail.NewEmail("NF3 Notifications", "contact@walletchat.fun")
+	// subject := "Message Waiting In WalletChat"
+	// to := mail.NewEmail("xrpMaxi", "savemynft@gmail.com")
+	// plainTextContent := "You have message from vitalik.eth waiting in WalletChat, please login via the app direct to read!"
+	// htmlContent := "<strong>You have message from vitalik.eth waiting in WalletChat, please login via the app direct to read!</strong>"
+	// message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+	// client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+	// response, err := client.Send(message)
+	// if err != nil {
+	// 	log.Println(err)
+	// } else {
+	// 	fmt.Println(response.StatusCode)
+	// 	fmt.Println(response.Body)
+	// 	fmt.Println(response.Headers)
+	// }
+
 	initDB()
 	log.Println("Starting the HTTP server on port 8080")
 
@@ -137,8 +154,8 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/image/{name}", controllers.GetImageItem).Methods("GET")
 
 	//settings items - currently this is the public key added upon first login for encryption/signing without MM
-	router.HandleFunc("/create_settings", controllers.CreateSettings).Methods("POST")
-	router.HandleFunc("/update_settings", controllers.UpdateSettings).Methods("PUT")
+	//router.HandleFunc("/create_settings", controllers.CreateSettings).Methods("POST")
+	router.HandleFunc("/update_settings", controllers.UpdateSettings).Methods("POST")
 	router.HandleFunc("/get_settings/{address}", controllers.GetSettings).Methods("GET")
 	router.HandleFunc("/delete_settings/{address}", controllers.DeleteSettings).Methods("DELETE")
 
