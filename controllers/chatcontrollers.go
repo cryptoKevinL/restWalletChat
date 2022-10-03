@@ -156,7 +156,7 @@ func GetInboxByOwner(w http.ResponseWriter, r *http.Request) {
 				returnItem.Contexttype = entity.Nft
 				returnItem.Chain = bookmarks[idx].Chain
 			}
-			if strings.HasPrefix(returnItem.Nftaddr, "paop_") {
+			if strings.HasPrefix(returnItem.Nftaddr, "poap_") {
 				returnItem.Contexttype = entity.Nft
 				returnItem.Chain = bookmarks[idx].Chain
 			}
@@ -828,25 +828,27 @@ func CreateChatitem(w http.ResponseWriter, r *http.Request) {
 			var settings entity.Settings
 			var dbResult = database.Connector.Where("walletaddr = ?", chat.Toaddr).Find(&settings)
 			if dbResult.RowsAffected > 0 {
-				var fromAddrname entity.Addrnameitem
-				database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
-				var toAddrname entity.Addrnameitem
-				database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
+				if strings.Contains(settings.Email, "@") {
+					var fromAddrname entity.Addrnameitem
+					database.Connector.Where("address = ?", chat.Fromaddr).Find(&fromAddrname)
+					var toAddrname entity.Addrnameitem
+					database.Connector.Where("address = ?", chat.Toaddr).Find(&toAddrname)
 
-				from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
-				subject := "Message Waiting In WalletChat"
-				to := mail.NewEmail(toAddrname.Name, settings.Email)
-				plainTextContent := "You have message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!"
-				htmlContent := "<strong>You have message from " + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!</strong>"
-				message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-				client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-				response, err := client.Send(message)
-				if err != nil {
-					log.Println(err)
-				} else {
-					fmt.Println(response.StatusCode)
-					fmt.Println(response.Body)
-					fmt.Println(response.Headers)
+					from := mail.NewEmail("WalletChat Notifications", "contact@walletchat.fun")
+					subject := "Message Waiting In WalletChat"
+					to := mail.NewEmail(toAddrname.Name, settings.Email)
+					plainTextContent := "You have message from" + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!"
+					htmlContent := "<strong>You have message from " + fromAddrname.Name + " waiting in WalletChat, please login via the app direct to read!</strong>"
+					message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+					client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+					response, err := client.Send(message)
+					if err != nil {
+						log.Println(err)
+					} else {
+						fmt.Println(response.StatusCode)
+						fmt.Println(response.Body)
+						fmt.Println(response.Headers)
+					}
 				}
 			}
 		}
@@ -1405,6 +1407,7 @@ func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
+	chat.Toaddr = strings.ToLower(chat.Toaddr)
 
 	json.Unmarshal(requestBody, &chat)
 	Authuser := auth.GetUserFromReqContext(r)
