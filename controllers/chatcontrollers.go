@@ -1262,10 +1262,10 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {array} entity.Addrnameitem
 // @Router /v1/name/{name} [get]
 func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
-	Authuser := auth.GetUserFromReqContext(r)
-	address := Authuser.Address
-	//address := vars["address"]
-	//vars := mux.Vars(r)
+	//Authuser := auth.GetUserFromReqContext(r)
+	//address := Authuser.Address
+	vars := mux.Vars(r)
+	address := vars["address"]
 
 	var addrname []entity.Addrnameitem
 
