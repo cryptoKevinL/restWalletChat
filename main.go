@@ -126,7 +126,7 @@ func initDB() {
 			User:       "doadmin",
 			Password:   os.Getenv("DB_PASSWORD"),
 			ServerName: os.Getenv("DB_URL"),
-			DB:         "walletchat",
+			DB:         "walletchat_ipfs",
 		}
 		// database.Config{
 		// 	User:       "root",
