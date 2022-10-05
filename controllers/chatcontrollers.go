@@ -621,7 +621,7 @@ func GetNftChatFromAddress(w http.ResponseWriter, r *http.Request) {
 // @Param from path string true "FROM: Wallet Address"
 // @Success 200 {array} entity.Chatitem
 // @Router /v1/getall_chatitems/{fromaddr}/{toaddr} [get]
-func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
+func GetAllChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//from := vars["fromaddr"]
 	to := vars["toaddr"]
@@ -633,6 +633,67 @@ func GetChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 
 	var chat2 []entity.Chatitem
 	database.Connector.Where("fromaddr = ?", to).Where("toaddr = ?", from).Find(&chat2)
+
+	for _, chatmember := range chat2 {
+		currTime := chatmember.Timestamp_dtm
+		found := false
+		//both lists are already sorted, so we can use the assumption here
+		for i := 0; i < len(chat); i++ {
+			ret_time := chat[i].Timestamp_dtm
+			if currTime.Before(ret_time) {
+				chat = append(chat[:i+1], chat[i:]...)
+				chat[i] = chatmember
+				found = true
+				break
+			}
+		}
+		if !found {
+			chat = append(chat, chatmember)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
+// GetChatFromAddressToAddr godoc
+// @Summary Get Chat Data Between Two Addresses
+// @Description Get chat data between the given two addresses, TO and FROM and interchangable here
+// @Tags DMs
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param toaddr path string true "TO: Wallet Address"
+// @Param from path string true "FROM: Wallet Address"
+// @Param time path string true "Load only messages after this time"
+// @Success 200 {array} entity.Chatitem
+// @Router /v1/getall_chatitems/{fromaddr}/{toaddr}/${time} [get]
+func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	//from := vars["fromaddr"]
+	to := vars["toaddr"]
+	timeStamp := vars["time"]
+	Authuser := auth.GetUserFromReqContext(r)
+	from := Authuser.Address
+
+	formattedDTM, err := time.Parse(time.Now().String(), timeStamp)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var chat []entity.Chatitem
+	database.Connector.
+		Where("fromaddr = ?", from).
+		Where("toaddr = ?", to).
+		Where("timestamp_dtm > ?", formattedDTM).
+		Find(&chat)
+
+	var chat2 []entity.Chatitem
+	database.Connector.
+		Where("fromaddr = ?", to).
+		Where("toaddr = ?", from).
+		Where("timestamp_dtm > ?", formattedDTM).
+		Find(&chat2)
 
 	for _, chatmember := range chat2 {
 		currTime := chatmember.Timestamp_dtm
