@@ -679,19 +679,23 @@ func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 
 	decodedStr, err := url.QueryUnescape(timeStamp)
 	if err != nil {
-		fmt.Printf("Error decoding the string %v", err)
+		fmt.Printf("Error decoding the string %v\r\n", err)
 	}
+	fmt.Printf("Input Timestamp: %v", decodedStr)
+
 	layout := "2006-01-02T15:04:05.000Z"
 	formattedTime, err := time.Parse(layout, decodedStr)
 	if err != nil {
 		log.Println(err)
 	}
+	fmt.Printf("Formatted Timestamp: %v", formattedTime.Add(time.Second))
 
+	//add a second to timestamp sent in, because conversion rounds up sometimes
 	var chat []entity.Chatitem
 	database.Connector.
 		Where("fromaddr = ?", from).
 		Where("toaddr = ?", to).
-		Where("timestamp_dtm > ?", formattedTime).
+		Where("timestamp_dtm > ?", formattedTime.Add(time.Second)).
 		Find(&chat)
 
 	var chat2 []entity.Chatitem
