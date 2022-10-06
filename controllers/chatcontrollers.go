@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"rest-go-demo/auth"
 	"rest-go-demo/database"
@@ -676,7 +677,11 @@ func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	from := Authuser.Address
 
-	formattedDTM, err := time.Parse(time.Now().String(), timeStamp)
+	decodedStr, err := url.QueryUnescape(timeStamp)
+	if err != nil {
+		fmt.Printf("Error decoding the string %v", err)
+	}
+	formattedDTM, err := time.Parse(time.Now().String(), decodedStr)
 	if err != nil {
 		log.Println(err)
 	}
