@@ -681,7 +681,8 @@ func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Printf("Error decoding the string %v", err)
 	}
-	formattedDTM, err := time.Parse(time.Now().String(), decodedStr)
+	layout := "2006-01-02T15:04:05.000Z"
+	formattedTime, err := time.Parse(layout, decodedStr)
 	if err != nil {
 		log.Println(err)
 	}
@@ -690,14 +691,14 @@ func GetNewChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	database.Connector.
 		Where("fromaddr = ?", from).
 		Where("toaddr = ?", to).
-		Where("timestamp_dtm > ?", formattedDTM).
+		Where("timestamp_dtm > ?", formattedTime).
 		Find(&chat)
 
 	var chat2 []entity.Chatitem
 	database.Connector.
 		Where("fromaddr = ?", to).
 		Where("toaddr = ?", from).
-		Where("timestamp_dtm > ?", formattedDTM).
+		Where("timestamp_dtm > ?", formattedTime).
 		Find(&chat2)
 
 	for _, chatmember := range chat2 {
