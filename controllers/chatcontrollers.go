@@ -2320,6 +2320,7 @@ func GetPoapsByAddr(w http.ResponseWriter, r *http.Request) {
 
 //internal use only
 func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
+	var result []POAPInfoByAddress
 	url := "https://api.poap.tech/actions/scan/" + walletAddr
 
 	// Create a new request using http
@@ -2331,17 +2332,17 @@ func getPoapInfoByAddress(walletAddr string) []POAPInfoByAddress {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println("Error on response.\n[ERROR] -", err)
-	}
-	defer resp.Body.Close()
+	} else {
+		defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Error while reading the response bytes:", err)
-	}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error while reading the response bytes:", err)
+		}
 
-	var result []POAPInfoByAddress
-	if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
-		fmt.Println("Can not unmarshal JSON")
+		if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to the go struct pointer
+			fmt.Println("Can not unmarshal JSON")
+		}
 	}
 
 	//fmt.Printf("returning: %#v\n", result)
