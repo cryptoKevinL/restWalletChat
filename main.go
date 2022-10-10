@@ -110,6 +110,7 @@ func initaliseHandlers(router *mux.Router) {
 	router.HandleFunc("/get_unread_cnt_nft/{address}", controllers.GetUnreadMsgCntNftAllByAddr).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{address}", controllers.GetChatFromAddress).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{fromaddr}/{toaddr}", controllers.GetAllChatFromAddressToAddr).Methods("GET")
+	router.HandleFunc("/getread_chatitems/{fromaddr}/{toaddr}", controllers.GetReadChatFromAddressToAddr).Methods("GET")
 	router.HandleFunc("/getall_chatitems/{fromaddr}/{toaddr}/{time}", controllers.GetNewChatFromAddressToAddr).Methods("GET")
 	router.HandleFunc("/getnft_chatitems/{fromaddr}/{toaddr}/{nftaddr}/{nftid}", controllers.GetChatNftAllItemsFromAddrAndNFT).Methods("GET")
 	router.HandleFunc("/getnft_chatitems/{address}/{nftaddr}/{nftid}", controllers.GetChatNftAllItemsFromAddr).Methods("GET")

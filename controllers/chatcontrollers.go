@@ -657,6 +657,35 @@ func GetAllChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(chat)
 }
 
+// GetReadChatFromAddressToAddr godoc
+// @Summary Get Recently Read Messages
+// @Description Get newly read messages to update READ status for lazy loading
+// @Tags DMs
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param toaddr path string true "TO: Wallet Address"
+// @Param from path string true "FROM: Wallet Address"
+// @Success 200 {array} entity.Chatitem
+// @Router /v1/getread_chatitems/{fromaddr}/{toaddr} [get]
+func GetReadChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
+	//we only want to return values here once (don't repeatedly report newly read messages)
+	//need to keep track of current prev messages and detect changes
+
+	vars := mux.Vars(r)
+	//from := vars["fromaddr"]
+	to := vars["toaddr"]
+
+	Authuser := auth.GetUserFromReqContext(r)
+	from := Authuser.Address
+
+	var chat []entity.Chatitem
+	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Where("msgread != ?", true).Find(&chat)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(chat)
+}
+
 // GetChatFromAddressToAddr godoc
 // @Summary Get Chat Data Between Two Addresses
 // @Description Get chat data between the given two addresses, TO and FROM and interchangable here
