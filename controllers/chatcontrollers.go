@@ -679,11 +679,11 @@ func GetReadChatFromAddressToAddr(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	from := Authuser.Address
 
-	var chat []entity.Chatitem
-	database.Connector.Where("fromaddr = ?", from).Where("toaddr = ?", to).Where("msgread != ?", true).Find(&chat)
+	var readIDs []int
+	database.Connector.Model(&entity.Chatitem{}).Where("fromaddr = ?", from).Where("toaddr = ?", to).Where("msgread = ?", true).Pluck("id", &readIDs)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chat)
+	json.NewEncoder(w).Encode(readIDs)
 }
 
 // GetChatFromAddressToAddr godoc
