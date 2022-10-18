@@ -267,7 +267,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 		address := strings.ToLower(p.Address)
-		Authuser, err := Authenticate(address, p.Msg, p.Sig)
+		Authuser, err := Authenticate(address, p.Nonce, p.Msg, p.Sig)
 		switch err {
 		case nil:
 		case ErrAuthError:
@@ -396,13 +396,13 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 	return isValid
 }
 
-func Authenticate(address string, message string, sigHex string) (Authuser, error) {
+func Authenticate(address string, nonce string, message string, sigHex string) (Authuser, error) {
 	fmt.Println("Authenticate: " + address + "\r\n msg: " + message + " sig: " + sigHex)
 	Authuser, err := Get(address)
 	if err != nil {
 		return Authuser, err
 	}
-	if Authuser.Nonce != message {
+	if Authuser.Nonce != nonce {
 		return Authuser, ErrAuthError
 	}
 
@@ -447,7 +447,7 @@ func Authenticate(address string, message string, sigHex string) (Authuser, erro
 	}
 
 	// update the nonce here so that the signature cannot be resused
-	nonce, err := GetNonce()
+	nonce, err = GetNonce()
 	if err != nil {
 		return Authuser, err
 	}
