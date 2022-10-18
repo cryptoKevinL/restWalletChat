@@ -267,7 +267,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 		address := strings.ToLower(p.Address)
-		Authuser, err := Authenticate(address, p.Nonce, p.Msg, p.Sig)
+		Authuser, err := Authenticate(address, p.Msg, p.Sig)
 		switch err {
 		case nil:
 		case ErrAuthError:
@@ -396,8 +396,8 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 	return isValid
 }
 
-func Authenticate(address string, nonce string, message string, sigHex string) (Authuser, error) {
-	fmt.Println("Authenticate: " + address + " nonce: " + message + " sig: " + sigHex)
+func Authenticate(address string, message string, sigHex string) (Authuser, error) {
+	fmt.Println("Authenticate: " + address + "\r\n msg: " + message + " sig: " + sigHex)
 	Authuser, err := Get(address)
 	if err != nil {
 		return Authuser, err
@@ -420,10 +420,23 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 		sig := hexutil.MustDecode(sigHex)
 		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
 		// check here why I am subtracting 27 from the last byte
-		sig[crypto.RecoveryIDOffset] -= 27
+		//sig[crypto.RecoveryIDOffset] -= 27
 		msg := accounts.TextHash([]byte(message))
 		recovered, err := crypto.SigToPub(msg, sig)
 		if err != nil {
+			fmt.Println("failed to recover signature 1")
+			//return Authuser, err
+		}
+
+		sig[crypto.RecoveryIDOffset] -= 27
+		msg = accounts.TextHash([]byte(message))
+		recovered, err = crypto.SigToPub(msg, sig)
+		if err != nil {
+			fmt.Println("failed to recover signature 2")
+			//return Authuser, err
+		}
+		if err != nil {
+			//fmt.Println("failed to recover signature 2")
 			return Authuser, err
 		}
 		recoveredAddr = strings.ToLower(crypto.PubkeyToAddress(*recovered).Hex())
@@ -434,7 +447,7 @@ func Authenticate(address string, nonce string, message string, sigHex string) (
 	}
 
 	// update the nonce here so that the signature cannot be resused
-	nonce, err = GetNonce()
+	nonce, err := GetNonce()
 	if err != nil {
 		return Authuser, err
 	}
