@@ -3,6 +3,8 @@ definitions:
     properties:
       address:
         type: string
+      msg:
+        type: string
       nonce:
         type: string
       sig:
@@ -280,7 +282,8 @@ paths:
         Upon request we can change the timeout to greater than 24 hours, or setup an addtional dedicated API for
         an agreed upon development and maintenance cost
       parameters:
-      - description: json input containing signed nonce
+      - description: json input containing signed message and append nonce for easy
+          processing
         in: body
         name: message
         required: true
@@ -1031,6 +1034,42 @@ paths:
       summary: Get Chat Data Between Two Addresses
       tags:
       - DMs
+  /v1/getall_chatitems/{fromaddr}/{toaddr}/${time}:
+    get:
+      consumes:
+      - application/json
+      description: Get chat data between the given two addresses, TO and FROM and
+        interchangable here
+      parameters:
+      - description: 'TO: Wallet Address'
+        in: path
+        name: toaddr
+        required: true
+        type: string
+      - description: 'FROM: Wallet Address'
+        in: path
+        name: from
+        required: true
+        type: string
+      - description: Load only messages after this time
+        in: path
+        name: time
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Chat Data Between Two Addresses
+      tags:
+      - DMs
   /v1/getnft_chatitems/{address}:
     get:
       consumes:
@@ -1165,6 +1204,36 @@ paths:
       summary: Get NFT Related Chat Items For Given NFT Contract and ID
       tags:
       - Unused/Legacy
+  /v1/getread_chatitems/{fromaddr}/{toaddr}:
+    get:
+      consumes:
+      - application/json
+      description: Get newly read messages to update READ status for lazy loading
+      parameters:
+      - description: 'TO: Wallet Address'
+        in: path
+        name: toaddr
+        required: true
+        type: string
+      - description: 'FROM: Wallet Address'
+        in: path
+        name: from
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Chatitem'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get Recently Read Messages
+      tags:
+      - DMs
   /v1/image:
     post:
       consumes:

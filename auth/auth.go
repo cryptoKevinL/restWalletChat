@@ -224,6 +224,7 @@ type SigninPayload struct {
 	Address string `json:"address"`
 	Nonce   string `json:"nonce"`
 	Sig     string `json:"sig"`
+	Msg     string `json:"msg"`
 }
 
 func (s SigninPayload) Validate() error {
@@ -247,7 +248,7 @@ func (s SigninPayload) Validate() error {
 // @Tags Auth
 // @Accept  json
 // @Produce json
-// @Param message body SigninPayload true "json input containing signed nonce"
+// @Param message body SigninPayload true "json input containing signed message and append nonce for easy processing"
 // @Success 200 {integer} int
 // @Router /signin [post]
 func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
@@ -266,7 +267,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			return
 		}
 		address := strings.ToLower(p.Address)
-		Authuser, err := Authenticate(address, p.Nonce, p.Sig)
+		Authuser, err := Authenticate(address, p.Nonce, p.Msg, p.Sig)
 		switch err {
 		case nil:
 		case ErrAuthError:
@@ -395,19 +396,20 @@ func ValidateMessageSignatureSequenceWallet(chainID string, walletAddress string
 	return isValid
 }
 
-func Authenticate(address string, nonce string, sigHex string) (Authuser, error) {
+func Authenticate(address string, nonce string, message string, sigHex string) (Authuser, error) {
+	fmt.Println("Authenticate: " + address + " nonce: " + message + " sig: " + sigHex)
 	Authuser, err := Get(address)
 	if err != nil {
 		return Authuser, err
 	}
-	if Authuser.Nonce != nonce {
+	if Authuser.Nonce != message {
 		return Authuser, ErrAuthError
 	}
 
 	recoveredAddr := " "
 	if len(sigHex) > 590 { //594 without the 0x to be exact, but we can clean this up
 		fmt.Println("Using Sequence Wallet Signature")
-		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("mainnet", address, sigHex, nonce)
+		isValidSequenceWalletSig := ValidateMessageSignatureSequenceWallet("mainnet", address, sigHex, message)
 
 		if isValidSequenceWalletSig {
 			recoveredAddr = address
@@ -419,7 +421,7 @@ func Authenticate(address string, nonce string, sigHex string) (Authuser, error)
 		// https://github.com/ethereum/go-ethereum/blob/master/internal/ethapi/api.go#L516
 		// check here why I am subtracting 27 from the last byte
 		sig[crypto.RecoveryIDOffset] -= 27
-		msg := accounts.TextHash([]byte(nonce))
+		msg := accounts.TextHash([]byte(message))
 		recovered, err := crypto.SigToPub(msg, sig)
 		if err != nil {
 			return Authuser, err

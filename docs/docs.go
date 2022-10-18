@@ -34,7 +34,7 @@ const docTemplate = `{
                 "summary": "Sign In with signed nonce value, currently JWT token returned should be valid for 24 hours",
                 "parameters": [
                     {
-                        "description": "json input containing signed nonce",
+                        "description": "json input containing signed message and append nonce for easy processing",
                         "name": "message",
                         "in": "body",
                         "required": true,
@@ -1174,6 +1174,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/getall_chatitems/{fromaddr}/{toaddr}/${time}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get chat data between the given two addresses, TO and FROM and interchangable here",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DMs"
+                ],
+                "summary": "Get Chat Data Between Two Addresses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "TO: Wallet Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "FROM: Wallet Address",
+                        "name": "from",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Load only messages after this time",
+                        "name": "time",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/getnft_chatitems/{address}": {
             "get": {
                 "security": [
@@ -1359,6 +1413,53 @@ const docTemplate = `{
                         "type": "string",
                         "description": "NFT ID",
                         "name": "nftid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Chatitem"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/getread_chatitems/{fromaddr}/{toaddr}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get newly read messages to update READ status for lazy loading",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DMs"
+                ],
+                "summary": "Get Recently Read Messages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "TO: Wallet Address",
+                        "name": "toaddr",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "FROM: Wallet Address",
+                        "name": "from",
                         "in": "path",
                         "required": true
                     }
@@ -1794,6 +1895,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "msg": {
                     "type": "string"
                 },
                 "nonce": {
