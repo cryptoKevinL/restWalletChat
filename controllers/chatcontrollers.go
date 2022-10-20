@@ -17,6 +17,9 @@ import (
 
 	_ "rest-go-demo/docs"
 
+	"github.com/ethereum/go-ethereum/ethclient"
+	ens "github.com/wealdtech/go-ens/v3"
+
 	"github.com/gorilla/mux"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -1316,8 +1319,6 @@ func GetImageItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
 
-	//TODO: need to confirm address is JWT for user
-
 	var imgname []entity.Imageitem
 
 	database.Connector.Where("name = ?", name).Find(&imgname)
@@ -1393,6 +1394,27 @@ func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 
 	Authuser := auth.GetUserFromReqContext(r)
 	if Authuser.Address == addrname.Address {
+		//ensure if user is trying to use .eth that they own it
+		if strings.HasSuffix(addrname.Name, ".eth") {
+			client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			// Resolve a name to an address.
+			address, err := ens.Resolve(client, addrname.Name)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Printf("Address of %s is %s\n", addrname.Name, address.Hex())
+
+			if strings.ToLower(address.Hex()) != strings.ToLower(addrname.Address) {
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
+		}
+		//end ensuring .eth name is owned by sender
+
 		var result = database.Connector.Model(&entity.Addrnameitem{}).
 			Where("address = ?", addrname.Address).
 			Update("name", addrname.Name)
