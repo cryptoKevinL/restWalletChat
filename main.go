@@ -71,8 +71,8 @@ func main() {
 	log.Println("Starting the HTTP server on port 8080")
 
 	jwtProvider := auth.NewJwtHmacProvider(
-		"read something from env here maybe",
-		"awesome-metamask-login",
+		os.Getenv("JWT_HMAC_SECRET"),
+		"https://walletchat.fun",
 		time.Minute*60*24*30,
 	)
 
