@@ -1264,7 +1264,7 @@ func CreateImageItem(w http.ResponseWriter, r *http.Request) {
 	//Authuser := auth.GetUserFromReqContext(r)
 	//TODO: get address to name mapping or send it in
 
-	//if Authuser.Address == imgname. {
+	//if strings.EqualFold(Authuser.Address, imgname) {
 	database.Connector.Create(&imgname)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -1356,7 +1356,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Printf("Address of %s is %s\n", addrname.Name, address.Hex())
 
-		if strings.ToLower(address.Hex()) != strings.ToLower(addrname.Address) {
+		if strings.EqualFold(address.Hex(), addrname.Address) {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -1364,7 +1364,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	//end ensuring .eth name is owned by sender
 
 	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == addrname.Address {
+	if strings.EqualFold(Authuser.Address, addrname.Address) {
 		//create or update in one function is easier
 		var dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&addrname)
 
@@ -1417,7 +1417,7 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 // 	json.Unmarshal(requestBody, &addrname)
 
 // 	Authuser := auth.GetUserFromReqContext(r)
-// 	if Authuser.Address == addrname.Address {
+// 	if strings.EqualFold(Authuser.Address, addrname.Address) {
 // 		//ensure if user is trying to use .eth that they own it
 // 		if strings.HasSuffix(addrname.Name, ".eth") {
 // 			client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
@@ -1554,11 +1554,10 @@ func GetGroupChatItemsByAddrLen(w http.ResponseWriter, r *http.Request) {
 func UpdateChatitemByOwner(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var chat entity.Chatitem
-	chat.Toaddr = strings.ToLower(chat.Toaddr)
 
 	json.Unmarshal(requestBody, &chat)
 	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == chat.Toaddr {
+	if strings.EqualFold(Authuser.Address, chat.Toaddr) {
 		//for now only support updating the read status
 		//we would need to re-encrypt the data on message update (not hard just need to add it)
 		// database.Connector.Model(&entity.Chatitem{}).
@@ -1610,7 +1609,7 @@ func DeleteAllChatitemsToAddressByOwner(w http.ResponseWriter, r *http.Request) 
 // 	json.Unmarshal(requestBody, &settings)
 
 // 	Authuser := auth.GetUserFromReqContext(r)
-// 	if Authuser.Address == settings.Walletaddr {
+// 	if strings.EqualFold(Authuser.Address, settings.Walletaddr) {
 // 		database.Connector.Create(&settings)
 // 		w.Header().Set("Content-Type", "application/json")
 // 		w.WriteHeader(http.StatusCreated)
@@ -1634,10 +1633,9 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	requestBody, _ := ioutil.ReadAll(r.Body)
 	var settings entity.Settings
 	json.Unmarshal(requestBody, &settings)
-	settings.Walletaddr = strings.ToLower(settings.Walletaddr)
 
 	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == settings.Walletaddr {
+	if strings.EqualFold(Authuser.Address, settings.Walletaddr) {
 		var dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
 
 		if dbResults.RowsAffected == 0 {
@@ -1715,7 +1713,7 @@ func CreateComments(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(requestBody, &comment)
 
 	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == comment.Fromaddr {
+	if strings.EqualFold(Authuser.Address, comment.Fromaddr) {
 		database.Connector.Create(&comment)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
