@@ -1370,31 +1370,6 @@ paths:
       summary: give a common name to a user address, or NFT collection
       tags:
       - Common
-    put:
-      consumes:
-      - application/json
-      description: Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
-      parameters:
-      - description: Address and Name to map together
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/entity.Addrnameitem'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/entity.Bookmarkitem'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: give a common name to a user address, or NFT collection (update exiting)
-      tags:
-      - Common
   /v1/name/{name}:
     get:
       consumes:

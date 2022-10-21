@@ -1638,46 +1638,6 @@
             }
         },
         "/v1/name": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Give a common name (Kevin.eth, BillyTheKid, etc) to an Address",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Common"
-                ],
-                "summary": "give a common name to a user address, or NFT collection (update exiting)",
-                "parameters": [
-                    {
-                        "description": "Address and Name to map together",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.Addrnameitem"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entity.Bookmarkitem"
-                            }
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {

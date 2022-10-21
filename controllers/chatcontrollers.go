@@ -1363,15 +1363,28 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	}
 	//end ensuring .eth name is owned by sender
 
-	//Authuser := auth.GetUserFromReqContext(r)
-	//if Authuser.Address == addrname.Address {
-	database.Connector.Create(&addrname)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(addrname)
-	// } else {
-	// 	w.WriteHeader(http.StatusForbidden)
-	// }
+	Authuser := auth.GetUserFromReqContext(r)
+	if Authuser.Address == addrname.Address {
+		//create or update in one function is easier
+		var dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&addrname)
+
+		var affectedRows = 0
+		if dbQuery.RowsAffected == 0 {
+			var result = database.Connector.Create(&addrname)
+			affectedRows = int(result.RowsAffected)
+		} else {
+			var result = database.Connector.Model(&entity.Addrnameitem{}).
+				Where("address = ?", addrname.Address).
+				Update("name", addrname.Name)
+			affectedRows = int(result.RowsAffected)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(affectedRows)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+	}
 }
 
 // GetAddrNameItem godoc
@@ -1398,60 +1411,50 @@ func GetAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(addrname)
 }
 
-// CreateAddrNameItem godoc
-// @Summary give a common name to a user address, or NFT collection (update exiting)
-// @Description Give a common name (Kevin.eth, BillyTheKid, etc) to an Address
-// @Tags Common
-// @Accept  json
-// @Produce  json
-// @Security BearerAuth
-// @Param message body entity.Addrnameitem true "Address and Name to map together"
-// @Success 200 {array} entity.Bookmarkitem
-// @Router /v1/name [put]
-func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
-	requestBody, _ := ioutil.ReadAll(r.Body)
-	var addrname entity.Addrnameitem
-	json.Unmarshal(requestBody, &addrname)
+// func UpdateAddrNameItem(w http.ResponseWriter, r *http.Request) {
+// 	requestBody, _ := ioutil.ReadAll(r.Body)
+// 	var addrname entity.Addrnameitem
+// 	json.Unmarshal(requestBody, &addrname)
 
-	Authuser := auth.GetUserFromReqContext(r)
-	if Authuser.Address == addrname.Address {
-		//ensure if user is trying to use .eth that they own it
-		if strings.HasSuffix(addrname.Name, ".eth") {
-			client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
-			if err != nil {
-				fmt.Println(err)
-			}
+// 	Authuser := auth.GetUserFromReqContext(r)
+// 	if Authuser.Address == addrname.Address {
+// 		//ensure if user is trying to use .eth that they own it
+// 		if strings.HasSuffix(addrname.Name, ".eth") {
+// 			client, err := ethclient.Dial("https://mainnet.infura.io/v3/" + os.Getenv("INFURA_V3"))
+// 			if err != nil {
+// 				fmt.Println(err)
+// 			}
 
-			// Resolve a name to an address.
-			address, err := ens.Resolve(client, addrname.Name)
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Printf("Address of %s is %s\n", addrname.Name, address.Hex())
+// 			// Resolve a name to an address.
+// 			address, err := ens.Resolve(client, addrname.Name)
+// 			if err != nil {
+// 				fmt.Println(err)
+// 			}
+// 			fmt.Printf("Address of %s is %s\n", addrname.Name, address.Hex())
 
-			if strings.ToLower(address.Hex()) != strings.ToLower(addrname.Address) {
-				w.WriteHeader(http.StatusForbidden)
-				return
-			}
-		}
-		//end ensuring .eth name is owned by sender
+// 			if strings.ToLower(address.Hex()) != strings.ToLower(addrname.Address) {
+// 				w.WriteHeader(http.StatusForbidden)
+// 				return
+// 			}
+// 		}
+// 		//end ensuring .eth name is owned by sender
 
-		var result = database.Connector.Model(&entity.Addrnameitem{}).
-			Where("address = ?", addrname.Address).
-			Update("name", addrname.Name)
+// 		var result = database.Connector.Model(&entity.Addrnameitem{}).
+// 			Where("address = ?", addrname.Address).
+// 			Update("name", addrname.Name)
 
-		var returnval bool
-		if result.RowsAffected > 0 {
-			returnval = true
-		}
+// 		var returnval bool
+// 		if result.RowsAffected > 0 {
+// 			returnval = true
+// 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(returnval)
-	} else {
-		w.WriteHeader(http.StatusForbidden)
-	}
-}
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.WriteHeader(http.StatusCreated)
+// 		json.NewEncoder(w).Encode(returnval)
+// 	} else {
+// 		w.WriteHeader(http.StatusForbidden)
+// 	}
+// }
 
 // GetGroupChatItemsByAddr godoc
 // @Summary Get group chat items, given a wallt FROM address and NFT Contract Address

@@ -146,7 +146,7 @@ func initaliseHandlers(router *mux.Router) {
 
 	//naming addresses (users or NFT collections)
 	router.HandleFunc("/name", controllers.CreateAddrNameItem).Methods("POST")
-	router.HandleFunc("/name", controllers.UpdateAddrNameItem).Methods("PUT")
+	//router.HandleFunc("/name", controllers.UpdateAddrNameItem).Methods("PUT")
 	router.HandleFunc("/name/{address}", controllers.GetAddrNameItem).Methods("GET")
 
 	//Logos / Images stored in base64
