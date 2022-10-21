@@ -1367,7 +1367,8 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 	Authuser := auth.GetUserFromReqContext(r)
 	if strings.EqualFold(Authuser.Address, addrname.Address) {
 		//create or update in one function is easier
-		var dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&addrname)
+		var addrnameDB entity.Addrnameitem
+		var dbQuery = database.Connector.Where("address = ?", addrname.Address).Find(&addrnameDB)
 
 		var affectedRows = 0
 		if dbQuery.RowsAffected == 0 {
