@@ -1357,6 +1357,7 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Address of %s is %s\n", addrname.Name, address.Hex())
 
 		if strings.EqualFold(address.Hex(), addrname.Address) {
+			fmt.Printf("Addresses do not match! %s is %s\n", addrname.Name, address.Hex())
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
