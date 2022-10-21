@@ -1373,11 +1373,13 @@ func CreateAddrNameItem(w http.ResponseWriter, r *http.Request) {
 		if dbQuery.RowsAffected == 0 {
 			var result = database.Connector.Create(&addrname)
 			affectedRows = int(result.RowsAffected)
+			fmt.Printf("creating addr->name item: %s <-> %s\n", addrname.Address, addrname.Name)
 		} else {
 			var result = database.Connector.Model(&entity.Addrnameitem{}).
 				Where("address = ?", addrname.Address).
 				Update("name", addrname.Name)
 			affectedRows = int(result.RowsAffected)
+			fmt.Printf("updating addr->name item: %s <-> %s\n", addrname.Address, addrname.Name)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
