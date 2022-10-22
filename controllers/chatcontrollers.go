@@ -1643,13 +1643,13 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		var dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
 
 		if dbResults.RowsAffected == 0 {
-			database.Connector.Create(&settings)
+			dbResults = database.Connector.Create(&settings)
 			w.WriteHeader(http.StatusCreated)
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(settings)
+		json.NewEncoder(w).Encode(dbResults.RowsAffected)
 	} else {
 		fmt.Println("UpdateSettings - JWT Address: ", Authuser.Address)
 		fmt.Println("UpdateSettings - POST Address: ", settings.Walletaddr)
