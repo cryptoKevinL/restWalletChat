@@ -1640,14 +1640,14 @@ func UpdateSettings(w http.ResponseWriter, r *http.Request) {
 
 	Authuser := auth.GetUserFromReqContext(r)
 	if strings.EqualFold(Authuser.Address, settings.Walletaddr) {
-		var dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
+		var dbResults = database.Connector.Where("walletaddr = ?", settings.Walletaddr).Find(&settings)
 
 		if dbResults.RowsAffected == 0 {
 			dbResults = database.Connector.Create(&settings)
-			w.WriteHeader(http.StatusCreated)
 		} else {
-			w.WriteHeader(http.StatusOK)
+			dbResults = database.Connector.Model(&entity.Settings{}).Where("walletaddr = ?", settings.Walletaddr).Update("email", settings.Email)
 		}
+		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(dbResults.RowsAffected)
 	} else {
