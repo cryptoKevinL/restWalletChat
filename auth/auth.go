@@ -285,13 +285,25 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			Value: signedToken,
 			// true means no scripts, http requests only. This has
 			// nothing to do with https vs http
+			Expires:  time.Now().Add(time.Minute*60*24),
 			HttpOnly: true,
+			Secure: true,
 			SameSite: http.SameSiteNoneMode,
 		})
+		// http.SetCookie(w, &http.Cookie{
+		// 	Name:  "TEST",
+		// 	Value: "TEST",
+		// 	// true means no scripts, http requests only. This has
+		// 	// nothing to do with https vs http
+		// 	Expires:  time.Now().Add(time.Minute*60*24),
+		// 	HttpOnly: false,
+		// 	Secure: true,
+		// 	SameSite: http.SameSiteNoneMode,
+		// })
 		resp := struct {
 			AccessToken string `json:"access"`
 		}{
-			AccessToken: signedToken,
+			AccessToken: "bluff",
 		}
 		renderJson(r, w, http.StatusOK, resp)
 		// renderJsonWithCookie(r, w, http.StatusOK, http.Cookie{
