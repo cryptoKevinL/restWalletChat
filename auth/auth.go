@@ -286,6 +286,7 @@ func SigninHandler(jwtProvider *JwtHmacProvider) http.HandlerFunc {
 			// true means no scripts, http requests only. This has
 			// nothing to do with https vs http
 			HttpOnly: true,
+			SameSite: http.SameSiteNoneMode,
 		})
 		resp := struct {
 			AccessToken string `json:"access"`
@@ -327,6 +328,9 @@ func getUserFromReqContext(r *http.Request) Authuser {
 func AuthMiddleware(jwtProvider *JwtHmacProvider) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println("Host: " + r.Host)
+			fmt.Println("RemoteAddr: " + r.RemoteAddr)
+			fmt.Println("RequestURI: " + r.RequestURI)
 			headerValue := r.Header.Get("Authorization")
 			if len(headerValue) > 0 { 
 				const prefix = "Bearer "
